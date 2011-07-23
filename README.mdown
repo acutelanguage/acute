@@ -1,0 +1,70 @@
+# Acute Programming Language
+
+The Acute programming language is an implementation of the [Io Programming Language](http://iolanguage.com/). It is built around
+a few underlying core principals:
+
+1. Provide a nice implementation written in itself so users of the language can easily make changes and contribute
+2. Semantic compatibility with the Io reference implementation where appropriate
+
+Complete bootstrapping is critical to providing an implementation which, at all levels, is approachable by all users of this language.
+Let's face it, any language worth its weight in NAND gates is self hosting.
+
+Important for adoption is semantic compatibility with the reference Io. While I do believe that the standard library could be improved,
+a short term goal will be API compatiblity with the mainline, before opening up the discussion as to changes we can make to the language,
+adopted in our implementation first most probably. Suffice to say, objects like `Sequence` contain over 200 slots. Many of those can be
+abstracted away into several smaller objects where their state and behaviour has more relevance. Unification is a nice principal, in
+theory, but it makes a mess of things sometimes. That's an unstated goal of this project.
+
+## Phases
+
+The first phase will output LLVM IR, and the build system will then turn that IR into a binary for your operating system. You may not
+even see anything other than the build system turning that IR into a binary, since we won't assume users have an existing Io
+impelementation on their system. The code for this will be stored the `bootstrap` directory.
+
+The second phase will just take the source for the first phase, and parse it using the first phase to generate the second phase. That is
+to say, the code that generated the LLVM IR used in the first phase, will be recompiled using the generated first phase. This step will
+produce another binary, independent of the first phase, which is entirely equivalent to the first phase. This is an important step in
+determining whether or not our implementation is proper.
+
+The third phase will be the language proper. This will contain the full object model, message manipulation, standard library, etc.
+This will also yield a binary suitable to run on your operating system, and will be akin to the `io` binary in the reference Io
+implementation.
+
+## License
+
+Copyright (c) 2011, Jeremy Tregunna, All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Contributing
+
+I'd love to see many people inteterested in helping build this programming language up, and contribute to it ongoing. From documentation
+to code and even whole subsystems, whatever you can and want to offer, by all means, please let us know.
+
+There are a few things we'd like you to respect though:
+
+1. Develop your feature in a separate branch that I can pull into my repo. Don't clobber the `master` branch. It's the stable branch;
+2. We want to keep a uniform license. As such, by contributing code to us, you are granting us license to distribute your changes under
+the terms of the MIT license, as found above; and
+3. If your code isn't completely done yet, it's ok to open a pull request. Just be sure to clearly note that it is incomplete and
+shouldn't be merged into the mainline. I test these things out beforehand, but still; be respectful of others who may want your feature
+now.
+4. Please include tests. Included is [a fork](https://github.com/jeremytregunna/iospec2) of [Jonathan Wright's iospec2](https://github.com/quag/iospec2)
+It's not the most complete BDD tool out there, but I'll make it better as needed, please do the same.
