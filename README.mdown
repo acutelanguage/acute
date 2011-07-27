@@ -4,16 +4,18 @@ The Acute programming language is an implementation of the [Io Programming Langu
 a few underlying core principals:
 
 1. Provide a nice implementation written in itself so users of the language can easily make changes and contribute
-2. Semantic compatibility with the Io reference implementation where appropriate
+2. Experiment with any and all things we can to make Io run faster without sacrificing the flexibility of the language
 
 Complete bootstrapping is critical to providing an implementation which, at all levels, is approachable by all users of this language.
 Let's face it, any language worth its weight in NAND gates is self hosting.
 
-Important for adoption is semantic compatibility with the reference Io. While I do believe that the standard library could be improved,
-a short term goal will be API compatiblity with the mainline, before opening up the discussion as to changes we can make to the language,
-adopted in our implementation first most probably. Suffice to say, objects like `Sequence` contain over 200 slots. Many of those can be
-abstracted away into several smaller objects where their state and behaviour has more relevance. Unification is a nice principal, in
-theory, but it makes a mess of things sometimes. That's an unstated goal of this project.
+There are many things that may improve speed in Io. Notably, getting rid of a separate argument list and locals, unifying them.
+Additionally, we may be able to benefit from object versioning in terms of cheap allocations and other benefits related. Perhaps we can
+even make the system more lazy, or more implement a better concurrency model (where better means something that takes advantage of
+multiple processors, but is still friendly to use). The point is, there's lots of neat ideas out there, let's try some!
+
+One other area I'd like to focus some serious time on is designing a standard library which is consistent. But this is a lesser
+priority at this stage of development.
 
 ## Phases
 
