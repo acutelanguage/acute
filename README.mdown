@@ -19,18 +19,12 @@ priority at this stage of development.
 
 ## Phases
 
-The first phase will output LLVM IR, and the build system will then turn that IR into a binary for your operating system. You may not
-even see anything other than the build system turning that IR into a binary, since we won't assume users have an existing Io
-impelementation on their system. The code for this will be stored the `bootstrap` directory.
+Acute will be (but presently is not) self hosting. A small bootstrap is being built which will provide a basic object model, some basic
+types and of course, emit LLVM IR so we can produce a binary. We do this, so we can build our full vm, which will, in turn, compile
+itself and emit LLVM IR to replace the bootstrap. So long as this version is able to compile itself, and we can generate the LLVM IR,
+then we have all we need to produce an executable. Of course, the final vm will have to be able to compile itself first.
 
-The second phase will just take the source for the first phase, and parse it using the first phase to generate the second phase. That is
-to say, the code that generated the LLVM IR used in the first phase, will be recompiled using the generated first phase. This step will
-produce another binary, independent of the first phase, which is entirely equivalent to the first phase. This is an important step in
-determining whether or not our implementation is proper.
-
-The third phase will be the language proper. This will contain the full object model, message manipulation, standard library, etc.
-This will also yield a binary suitable to run on your operating system, and will be akin to the `io` binary in the reference Io
-implementation.
+More information about the bootstrap can be found in the bootstrap directory, including source code.
 
 ## License
 
