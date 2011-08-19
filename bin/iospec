@@ -38,15 +38,8 @@ BodyContext := Object clone do(
 	)
 
 	describe := method(
-		if(call argCount == 2,
-			stateSlotName := nil
-			describedState := call evalArgAt(0)
-			bodyMessage := call argAt(1)
-		,
-			stateSlotName := call argAt(0) name
-			describedState := call evalArgAt(1)
-			bodyMessage := call argAt(2)
-		)
+		describedState := call evalArgAt(0)
+		bodyMessage := call argAt(1)
 
 		if(describedState type != "Sequence",
 			describedState = describedState type
@@ -59,30 +52,28 @@ BodyContext := Object clone do(
 			bodyContext setBodyContextName(describedState)
 		)
 
-		if(stateSlotName,
-			bodyContext setSlot(stateSlotName,
-				method(shouldName,
-					Lobby exampleCount = exampleCount + 1
+		bodyContext setSlot("it",
+			method(shouldName,
+				Lobby exampleCount = exampleCount + 1
 
-					testContext := Object clone
-					e := try(
-						describeContext := self
-						describeContexts := list
-						while(describeContext != nil,
-							describeContexts prepend(describeContext)
-							describeContext = describeContext parent
-						)
+				testContext := Object clone
+				e := try(
+					describeContext := self
+					describeContexts := list
+					while(describeContext != nil,
+						describeContexts prepend(describeContext)
+						describeContext = describeContext parent
+					)
 
-						describeContexts foreach(setupMessage doInContext(testContext))
-						call argAt(1) doInContext(testContext)
-						describeContexts foreach(teardownMessage doInContext(testContext))
-					)
-					if(e,
-						failureErrors append(e)
-						writeln(" - ", shouldName, " [Error ", failureErrors size, "]")
-					,
-						writeln(" - ", shouldName)
-					)
+					describeContexts foreach(setupMessage doInContext(testContext))
+					call argAt(1) doInContext(testContext)
+					describeContexts foreach(teardownMessage doInContext(testContext))
+				)
+				if(e,
+					failureErrors append(e)
+					writeln(" - ", shouldName, " [Error ", failureErrors size, "]")
+				,
+					writeln(" - ", shouldName)
 				)
 			)
 		)
@@ -90,7 +81,7 @@ BodyContext := Object clone do(
 		hasTests := false
 		m := bodyMessage
 		while(m != nil,
-			if(m name == stateSlotName,
+			if(m name == "it",
 				hasTests = true
 				break
 			)

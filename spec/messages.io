@@ -1,5 +1,5 @@
 
-describe(it, Message,
+describe(Message,
   it("can create a new message",
     Message clone isNil verify(not)
   )
