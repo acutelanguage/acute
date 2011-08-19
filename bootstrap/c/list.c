@@ -37,6 +37,19 @@ list_t* list_new(list_node_t* node)
 	return list;
 }
 
+void list_free(list_t* list)
+{
+	list_node_t* node = NULL;
+	for(node = list->head; node != NULL;)
+	{
+		list_node_t* tmp = list->head;
+		list->head = node->next;
+		free(tmp);
+	}
+	free(list);
+	list = NULL;
+}
+
 void list_prepend_node(list_t* list, list_node_t* node)
 {
 	node->next = list->head;

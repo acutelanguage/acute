@@ -30,7 +30,9 @@ typedef struct list_s
 
 /* Creates a new list, setting the head to the supplied node.
    Node can be NULL. */
-extern list_t* list_new(list_node_t*, dispatch_queue_t);
+extern list_t* list_new(list_node_t*);
+/* Free the list */
+extern void list_free(list_t*);
 
 /* Add an item to the beginning of list. */
 extern void list_prepend(list_t*, void*);
