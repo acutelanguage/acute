@@ -1,0 +1,1366 @@
+\documentclass[a4paper,12pt]{article} %no more twocolumn
+\usepackage{times}
+\usepackage{hevea}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\title{QISH introduction \\ }
+
+
+\author{Basile STARYNKEVITCH \\
+\mailto{basile@starynkevitch.net} \\
+\url{http://www.starynkevitch.net/Basile/} \\
+\small{8, rue de la Faïencerie, 92340 Bourg La Reine, France}
+}
+
+\newcommand{\qishallocate}{\tt \verb+qish_allocate+}
+
+\begin{document}
+\def\UrlFont{\tt\footnotesize}
+
+\maketitle
+
+{\small \tt
+\begin{verbatim}
+$Id: qishintro.tex 19 2005-05-08 17:35:50Z basile $
+\end{verbatim}
+}
+\newpage
+\tableofcontents
+\newpage
+
+Please be nice to send me an email if you use this information and
+this Qish software.
+
+Qish is available from 
+% $Format:"\\mbox{\\url{http://www.starynkevitch.net/Basile/qish-$ReleaseVersion$.tar.gz}}"$
+\mbox{\url{http://www.starynkevitch.net/Basile/qish-1.0pre1.tar.gz}} 
+%
+(as a gnuzipped source tarball) 
+and the latest snapshot is on \mbox{\url{http://www.starynkevitch.net/Basile/qish-snapshot.tar.gz}} 
+and this document is on
+\mbox{\url{http://www.starynkevitch.net/Basile/qishintro.html}}. See also my
+home page on \url{http://www.starynkevitch.net/Basile/} or Qish page
+\url{http://freshmeat.net/projects/qish/} on Freshmeat for
+announcement of newer versions.
+
+Documentation should be rewritten. Multithreading is not fully working
+yet in version 0.9. Stay tuned.
+
+A mailing list (not yet archived) is available as
+{\mailto{qish@lists.apinc.org}} send an email to
+{\mailto{qish-subscribe@lists.apinc.org}} or to me at
+{\mailto{basile@starynkevitch.net}} for subscription.
+
+Qish is developed on a PC/x86 running Linux. It could be portable to
+other Unixes machines\footnote{On some machines you'll need to flush
+the register stack in {\tt qish\_garbagecollect} - for example,
+Sparc machines might need {\tt ta 3} to flush registers}. Qish could
+be ported to x86 under Windows, but I don't want to do that.
+
+To compile Qish on a strictly conforming ISO C 1999 compiler use the
+{\tt -DSTRICT\_C99} compile flag\footnote{With this flag, Qish compiles
+  without warnings both on GNU {\tt gcc-3.2} with {\tt -pedantic
+    -std=c99} and on {\tt tcc} - see \url{http://tinycc.org/}}.  But
+Qish requires that successful pointer arguments are located
+consecutively (upwards or downwards) in memory (which is not
+guaranteed or even meaningful in general for ISO C 1999 compilers.).
+
+The machine dependent parts of Qish are carefully coded, but not
+tested elsewhere. If you have access to other machine architecture,
+please tell me if you succeeded in compiling, porting, and running
+this software. Qish requires that successive pointer arguments and
+pointer fields are consecutive in memory.
+
+Boehm's conservative garbage collector on
+\url{http://www.hpl.hp.com/personal/Hans_Boehm/gc/} should be easier
+to use\footnote{Boehm's GC has an interface compatible with {\tt
+malloc}, is compatible with threads and finalization, and is used in
+GCC-3 for the Java runtime}, but does not compact memory, as any
+copying GC (like Qish) does. See the section \ref{sec:bench} for a
+small (and not very significant) benchmark running both Boehm's and
+Qish GC (and explicit malloc and free).
+
+
+This GC is not mostly copying\footnote{Unlike Bartlett's GC -1990- US
+patent 4,907,151 - thanks to Gerd Moellmann for the reference}.  It
+copies every movable object (even if it is on the call stack - in that
+case the variable or argument should be known to our GC thru the {\tt
+BEGIN\_LOCAL\_FRAME} or equivalent macro), and mark fixed objects
+(which have finalizers).
+
+This GC uses classical algorithms {\small (inspired by some A.Appel's
+papers and R.Lins \& R.Jones' book)}. But I know of no other
+(classical) copying generational GC, usable for C, which can be
+customized to arbitrary data structures (while following stringent
+coding rules). This GC is probably best suited for generated C code,
+since the generator could be designed to follow every required coding
+rules. A code generator might use \verb+C--+ (and \verb+QuickC--+ see
+\url{http://www.cminusminus.org/}) when it will be available.
+
+This GC is a {\em copying precise} (or exact) garbage collector. This
+means that pointers are changed by the GC (which may be called at
+every allocation point). The GC may change any (GC-managed) pointer on
+the call stack and in the heap. So you have to particularily be
+careful to tell the GC where are each pointer on the
+stack\footnote{You tell the GC where are the stack pointers with the
+  {\tt BEGIN\_LOCAL\_FRAME} or equivalent macro, which tells the GC
+  the number of local pointers, the first of them, and the number of
+  argument pointers and the first such argument.} and inside each
+object in the heap\footnote{You tell the GC where are pointers inside
+  heap objects by explicitly providing {\em mandatory routines} (see
+  section \ref{sbsec:mandatory}) to scan and copy such heap objects.},
+and the GC might change any of them (to the address of a fresh copy of
+the pointed object). And the compiler should not
+optimize\footnote{This is why the {\tt \bf volatile} keyword is
+  required for arguments and for the {\tt \_locals\_} structure.}  too
+much (eg by putting a local variable only in a register where the GC
+can't change it). 
+
+Qish should be portable to any Unix, provided that the C compiler
+understands the {\tt\bf volatile} keyword as meaning that the declared
+volatile pointer may be changed by the GC. Purists says that Qish does
+not target the full C language\footnote{But every GC, even
+  conservative, for C requires some coding style, usually much less
+  restrictive than for Qish...}, but only a subset; this is true in the
+sense that specific coding style is required, and that the compiler
+should understand the {\tt\bf volatile} keyword as above.
+
+ An alternative compiler on Linux
+is {\tt tcc}\footnote{Tcc don't optimise much and ignores the {\tt \bf
+    volatile} keyword. The generated code is about 30\% slower than
+  GCC with optimisation, but the compilation time is sometimes ten
+  times faster than with {\tt gcc}.} on \url{http://tinycc.org} which
+compiles extremely quickly (and is very suitable for dynamically
+generated C code using Qish and following Qish coding conventions).
+Copying collectors {\bf condemn} a region of memory then push all
+objects out of this region by copying them, forwarding the pointer to
+them, and changing all pointers to the new copy.
+
+
+This GC is a {\em generational} garbage collector. This means that the
+garbage collector focus work on newer objects, assuming that they are
+mostly temporary and will die soon. This suggests or favors a
+programming style with lots of (usually temporary) object
+allocations. So object allocation is quite fast on the average. But
+the garbage collector has to notice and scan explicitly any old object
+which has been updated by the application to point to a newer
+object. This require a write barrier, i.e. the notification of object
+updates thru {\tt qish\_write\_notify}.
+
+Any precise garbage collector requires some coding conventions in C
+(to know about pointers on the call stack, or for the write
+barrier,...): examples include the Ocaml runtime primitives coding
+conventions (see
+\url{http://caml.inria.fr/ocaml/htmlman/manual032.html} section 18.5)
+or the Xemacs primitives coding conventions (see
+\url{http://www.xemacs.org/Documentation/21.5/html/internals_12.html}).
+
+\newpage
+\section{Short overview}
+
+Qish contains a reusable (i.e. rather generic) generational copying
+garbage collector usable from C. This garbage collector requires a
+particular (and low-level) coding style.
+
+
+If this stuff is useful to you, be nice to send me an email to
+\mailto{basile@starynkevitch.net}. The license of this software is the
+GNU Lesser General Public License \footnote{it used to be GPL only.}
+(i.e. LGPL - see the COPYING file); so this is a free or opensource
+software.{\scriptsize (if this license annoys you, send me an email)}.
+
+
+Why the name Qish? Qish was the father of Saül, see 1 Samuel, chap 9
+(the Bible). I'm bored of finding useful acronyms (especially pleasant
+in several European languages), so I am using names from the Holy
+Bible. At least I hope that Qish is not offensive\footnote{In the past
+I experimented on a reflexive system that I also named Qish - they have
+no much in common except the name and the author}.
+
+
+\section{Requirements}
+
+To use this package, you need the following stuff:
+
+\begin{itemize}
+
+\item Ruby (for scripting) see \url{http://www.ruby-lang.org/}. I
+  don't know much Perl and prefer Ruby for scripting tasks
+
+
+\item a Glibc system such as GNU/Linux, etc... I am using a Linux
+  Debian/Sid system with a 2.4.22 kernel.
+
+\item The GNU make utility, since I depend upon GNU make extensions -
+  see \url{http://www.gnu.org/software/make/}. I am using make 3.80.
+  
+\item The GNU GCC compiler version 3.3 or later (I recommend against
+  using 3.2, 3.1, 3.0 or 2.x versions) - see
+  \url{http://www.gnu.org/software/gcc/}.
+  
+\item the Tiny CC compiler (by Fabrice Bellard) on
+  \url{http://tinycc.org} is very useful to compile (perhaps
+  generated) C code using Qish (but you may compile the runtime with
+  GCC using optimisations). {\tt tcc 0.9.14} compiles very quickly
+  (sometimes 10 times faster than gcc 3.2) while producing code no
+  more than 30\% slower than {\tt gcc -O3}.
+
+\item This documentation is processed with LaTeX and HeVeA. HeVeA is a good
+  LaTeX to HTML translator. See \url
+  {http://para.inria.fr/~maranget/hevea/} It is written in Ocaml. See
+  \url{http://www.ocaml.org/} 
+
+\item I am using PRCS for version control. See
+  \url{http://prcs.sourceforge.net/}. But it is only needed in the
+  {\tt \verb+scripts/qish_snap+} Ruby script. You should not need it
+  otherwise.
+
+\end{itemize}
+
+
+\section{The garbage collector}
+
+A garbage collector (or GC) manage resources (mostly memory). If you
+are not familiar with garbage collection, see R.Jones's GC page on
+\url{http://www.cs.ukc.ac.uk/people/staff/rej/gc.html} and also
+\url{http://www.memorymanagement.org}. In this
+document, an object is just a memory zone managed by the GC; it may be
+or not an object visible to your application. All pointers to this
+object points to the start of the object and are managed by the GC. A
+word may contain a pointer or some kind of integer. On x86, words are
+4 byte long.
+
+A {\em copying} GC moves objects. The advantage of moving objects is
+that freeing dead objects is easy; alive objects are moved outside a
+big zone, and then this big zone is freed at once. So dead objects are
+not reclaimed one by one. Also, a copying GC do compact the used
+memory (but need temporarily twice as much as memory), thus avoiding
+fragmentation. So, {\em pointers are changed} by the copying
+GC. Therefore, all object pointers are {\tt volatile} for the C
+compiler, and the garbage collector needs to know {\em about every
+(garbage collected) pointer}.
+
+A {\em generational} GC favors young objects. It separate objects in
+old and new regions, and do two kinds of garbage collections (minor
+and full). Objects are linearly allocated in a birth zone. When this
+zone is full, a {\em minor garbage collection} is trigerred, which
+copy alive born object into the {\em old} region. Once in a while a
+{\em full garbage collection} is done, by condemning the previous old
+region and copying alive old objects into a fresher old region (and
+also working on the birth zone like the minor GC does). Care should be
+taken about pointers from object in the old region to the new birth
+one.  So every object modification (when a pointer field in an object
+is changed) should be explicitly notified to the GC. Allocation in our
+GC is much faster (in the usual case, when no garbage collection is
+needed) than a cheap call to a {\tt malloc} like routine.
+
+Our GC also provides {\em finalized fixed objects}. Such objects are
+not moved, and are explicitly destroyed (one by one) by the GC, which
+calls a finalization routine. Finalized objects are more costly than
+copied ones. They are intended to manage external system resources
+like files or windows. The finalization routine should not use or
+change garbage collected pointers or fields (except by clearing
+them). Our finalized objects are not like Java's in that respect: the
+finalizer routine cannot allocate any GC-ed object!
+
+Our GC also supports tagged integers. Any pointer word ending with a
+set LSB bit is assumed to be such an integer. Use the {\tt
+\verb+qish_is_tagged_int+} inlined function to test if a pointer is such a
+tagged integer. If it is one, you can convert it to {\tt int} or {\tt
+long} with the {\tt \verb+QISH_TAGGED2INT+} and {\tt
+\verb+QISH_TAGGED2LONG+} macros. To make a tagged integer (ie to encode integers in a GC-ed pointer) use the {\tt \verb+QISH_INT2TAGGED+}
+or {\tt \verb+QISH_LONG2TAGGED+} macros.
+
+Qish provides global constant pointers (up to 65536 pointers). Use
+{\tt QISH\_GLOBCONST({\it N})} to get the {\it N}-th constant, and
+{\tt QISH\_SET\_GLOBCONST({\it N,V})} to set the {\it N}-th constant
+to the pointer value {\it V}.
+
+Qish also provides module constant garbage collected pointers (one
+pointer per module).
+
+
+\subsection{Introductory examples}
+
+Notice: examples talk about Ruko which is obsolete. 
+
+To give a concrete feeling about Qish runtime, here are some
+illustrative examples from Ruko. Ruko provides (among other types)
+vectors and tuples, which are sequences of garbage-collected object
+pointers. Vectors are mutable (the components {\tt vect->tab} can be
+changed) but tuples are immutable (the components are set at creation
+time and then are read-only).
+
+The file {\tt ruko/ruko.h} declare the following structure (common to
+vectors and tuples):
+
+\begin{quote}
+{\tt% 
+struct ktuple\_t \{ \\
+  unsigned header; // {\it first word is a common discriminating header}\\
+  void* tab[0]; // {\it next words are GC-ed object pointers}\\
+\};
+}
+\end{quote}
+
+The {\tt header} word encodes both a kind (which is {\tt KIND\_TUPLE}
+for a tuple and {\tt KIND\_VECTOR} for a vector) and a size - which
+for vectors and tuples is the number of components, i.e. the real
+length of the {\tt vect->tab} field. But other uses of Qish have their
+first word containing a garbage-collected {\em non-null} pointer to a
+class object.
+
+Here is the commented code (from file {\tt ruko/ruko.c}) of the {\tt
+ruk\_dup\_vector} function, which duplicate a source tuple or vector
+as a fresh newly allocated vector, initialized with the same
+components as those of the source.  This function returns a garbage
+collected pointer:
+
+\begin{quote}
+{\tt%
+struct ktuple\_t*\\
+ruk\_dup\_vector(struct ktuple\_t* volatile vec) \{ // {\it {\bf volatile} arguments!}
+}
+\end{quote}
+
+It is mandatory that all garbage collected argument pointers should be
+declared volatile as above, because the GC may move (i.e. change) such
+pointers. Also, all garbage collected argument pointers should be
+consecutive.
+
+\begin{quote}
+{\tt%
+  struct ktuple\_t* volatile tup=0; \\
+// {\it local variable {\tt tup} is also {\bf  volatile}}\\
+  int kd=0; int len=0; int i=0; }
+\end{quote}
+
+We have one single local garbage collected pointer {\tt tup} (which
+will hold the result of the function). Since it is alone we just
+declare it volatile and initialize it to 0. If we had several local
+GC-ed pointers (or even one of them) we would pack them inside a
+volatile structure, conventionally named {\tt \_locals\_} and also
+initialized to all 0. It is important that all local GC-ed pointers
+variables are volatile, consecutive, and initialized to 0 (or a valid
+GC-ed pointer). It is a good habit to initialize every local
+variables, even the plain {\tt int} ones.
+
+\begin{quote}
+{\tt%
+// {\it mandatory start of  GC-ed frame}\\
+  BEGIN\_SIMPLE\_FRAME(1, vec, 1, tup); \\
+  // {\it we have 1 garbage collected argument starting at} vec\\
+  // {\it we have 1 GC-ed local pointer starting at} tup\\
+}
+\end{quote}
+
+The call to the (deprecated {\tt BEGIN\_SIMPLE\_FRAME} macro, or)  {\tt
+BEGIN\_LOCAL\_FRAME} when using the {\tt \_locals\_} structure) is
+mandatory. It indicates to the GC the number of garbage collected
+pointer arguments, and the first such argument, and the number of
+garbage collected local pointers, and the first such pointer. The
+expanded C code registers a GC frame (in a linked-list of frames
+handled by the GC) and executes in a small constant time. The {\tt
+BEGIN\_SIMPLE\_FRAME} macro call should be the first executable
+statement (after initialization of variables to constants such as
+pointer 0) of the body of any function using the GC.
+
+
+Actually it is strongly suggested to always use a {\tt \_locals\_}
+structure declared {\tt volatile struct} for local garbage collected
+pointers. Actually do not use the deprecated {\tt
+  BEGIN\_SIMPLE\_FRAME} macro but only use the recommended {\tt
+  BEGIN\_LOCAL\_FRAME} (when you have pointers both in arguments and
+in {\tt \_locals\_}), or  {\tt \verb+BEGIN_LOCAL_FRAME_WITHOUT_ARGS+}
+(when you have pointers only in  {\tt \_locals\_}) or
+{\tt\verb+BEGIN_FRAME_WITHOUT_LOCALS+} (when you have only pointers in
+arguments).
+
+
+Then we compute the kind of the source vector. We only duplicate
+vectors and tuples.  To duplicate, we compute the length of the source
+(taken from its header).
+
+\begin{quote}
+{\tt%
+  kd = ruk\_kind(vec);\\
+  if (kd == KIND\_VECTOR || kd == KIND\_TUPLE) \{\\
+    len = HEADERSIZE(vec->header);
+}%
+\end{quote}
+
+Once the length is computed, we allocate the resulting {\tt tup} with
+a call to {\tt qish\_allocate}. This call may trigger a garbage
+collection, which may change (by moving them) some or even all garbage
+collected pointers, including the current frame local pointers or
+argument pointers. With compilers without inlining, you might
+consider using the {\tt QISH\_ALLOCATE} macro (invoke it without any
+side-effects in arguments, eg {\tt\verb!QISH_ALLOCATE(--p,sz++);!} is
+incorrect). 
+
+More generally, you inhibit all small inline functions by
+compiling your application with the {\tt\verb+-DNO_QISH_INLINE+}
+flag. But then you have to use macros instead of functions.
+
+\begin{quote}
+{\tt%
+    tup = qish\_allocate(sizeof(*tup) + len*sizeof(void*));\\
+    //{\it a garbage collection may occur above, changing many pointers}
+}%
+\end{quote}
+
+The {\tt qish\_allocate} function returns a zeroed chunk of memory. We
+have to initialize it by filling all relevant fields:
+
+\begin{quote}
+{\tt%
+    tup->header = MAKEHEADER(KIND\_VECTOR, len);\\
+    for (i=0; i<len; i++) tup->tab[i] = vec->tab[i];\\
+  \} // end if kind is KIND\_VECTOR or KIND\_TUPLE
+}%
+\end{quote}
+
+Each function should end with the macro call to {\tt EXIT\_FRAME},
+which pops the frame registered by (the deprecated {\tt BEGIN\_SIMPLE\_FRAME}) or {\tt
+BEGIN\_LOCAL\_FRAME}. This macro should only be followed by a simple
+{\tt return} statement, which returns a constant or a simple variable:
+
+\begin{quote}
+{\tt%
+  EXIT\_FRAME();\\
+  return tup;\\
+\} // end of ruk\_dup\_vector
+}%
+\end{quote}
+
+The preferred coding style is to have a {\tt \_locals\_} structure, which
+should be {\bf volatile} and initially cleared!
+
+\begin{quote}
+\tt {\it // preferred coding}\\
+void* foo(struct ktuple\_t* volatile tup, \\
+   \hspace*{2.5cm} void* volatile val) \{\\
+{\it // declare and clear a volatile \_locals\_ structure for local pointers}\\
+ volatile struct \{ void* ptr; void* res; \} \_locals\_ = \{0,0\};\\
+ BEGIN\_LOCAL\_FRAME(2,tup);\\
+ {\it //... use \_locals\_ fields as the only GC pointer local variables}\\
+ if (some\_condition(tup)) \\
+   \_locals\_.res = val;\\
+ {\it //...}\\
+ EXIT\_FRAME();\\
+ return \_locals\_.res;\\
+\}
+\end{quote}
+
+This idiom is so common that a tiny Ruby script {\tt scripts/gen\_locals}
+exist to generate macro definitions like 
+\begin{quote}
+\tt%
+{\it // generated by gen\_locals script} \\
+{\#}define l\_res \_locals\_.res
+\end{quote}
+
+The script generate such definitions for every different occurrence of
+{\tt l\_*} names in the source. So just code {\tt l\_res}, run the
+script (with the {\tt .c} source as first argument and the generated
+{\tt .h} as second argument), and include its output near the start of
+your file.
+
+\smallskip
+
+A function which changes a garbage collected object by updating a
+pointer field in it should notify the garbage collector, for example:
+
+\begin{quote}
+{\tt%
+// {\it this function set the component of a vector returning its previous value}\\
+void*\\
+ruk\_vector\_set(struct ktuple\_t* volatile tup, void* volatile val, int rk) \{\\
+  int sz=0;\\
+  void* oldval=0;\\
+  BEGIN\_SIMPLE\_FRAME (2, tup, 1, oldval);\\
+  if (ruk\_kind(tup) != KIND\_VECTOR) goto end;\\
+  sz = HEADERSIZE(tup->header);\\
+  if (rk<0 || rk>=sz) goto end;\\
+  oldval = tup->tab[rk];\\
+  tup->tab[rk] = val;\\
+  qish\_write\_notify(tup); // {\it {\bf notification} of a changed object}\\
+ end:\\
+  EXIT\_FRAME();\\
+  return oldval;\\
+\} 
+}
+\end{quote}
+
+Note that every function which may use directly or indirectly the GC
+should follow the same coding rules (detailed below). Using the GC
+means either allocating new objects or calling functions which may use
+the GC. Following these rules is ok even for other functions, when in
+doubt always follow them.
+
+The macro {\tt\verb+QISH_WRITE_NOTIFY+} is equivalent to the {\tt
+  qish\_write\_notify} function, provided this macro is invoked
+  without side-effects.
+
+
+The application has to follow some (very liberal) rules regarding data
+structures.
+
+\subsection{Data structure of objects}
+\label{sec:datastruct}
+
+Moved objects should all start with a common prefix (i.e. a
+word). {\em Their first word should never be zero}\footnote{A zeroed first
+word indicates forwarded objects to the GC}, so it can be a non-nil
+pointer \footnote{The pointer could be some kind of descriptor, or
+even a C++ vtable pointer, if you have a tree of classes sharing a
+common root class, with only single inheritance, and virtual methods.}
+(garbage collected or not) or a header word.  All objects should be at
+least two words long. The GC do not need any additional word for moved
+objects.
+
+
+Objects should know their size (the GC do not manage by itself the
+objects' size) and their data type.
+
+For example, one could start every object with an {\tt unsigned
+header} whose topmost byte is a non-zero kind number and whost 3
+lower bytes encode some sizing information (dependent on the kind).
+
+Your application has to define all its objects types and data
+representations, provided they start with a never-zero word or pointer.
+
+As a simple toy example (nearly meaningless, only for illustrative
+purposes), suppose you are coding an integer calculator with formal
+variables. Then each object can start with two half-words, a kind and
+a size or code. Objects can be binary-operations, or variables (or
+tagged integer).
+
+\begin{verbatim}
+enum {
+  KIND_NONE=0 /*unused*/,
+  KIND_BINOP,
+  KIND_VARIABLE
+};
+\end{verbatim}
+
+
+Binary operations in your calculator will be represented like:
+
+\begin{verbatim}
+  enum { OP_NONE, OP_ADD, OP_SUB, OP_MULT, OP_DIV };
+
+  struct binop_st {
+    short kind; /*always KIND_BINOP*/
+    short opcode;
+    void* left;
+    void* right;
+  };
+\end{verbatim}
+
+
+Variables have a value (either a tagged integer or an binary
+operation) and a name; the size is the length of the name, and
+variables are objects of various size.
+
+\begin{verbatim} 
+  struct variable_st {
+    short kind; /*always KIND_VARIABLE*/
+    short namelen; /*length of name*/
+    void* value; /*value of variable*/
+    char name[1]; /*actually [namelen] bytes + final '\0' */
+  };
+\end{verbatim}
+
+
+\subsection{required coding practices}
+
+Our GC is not conservative\footnote{Conservative GCs [e.g. Boehm's]
+are much easier to use, but they might leak, may be slower on some
+applications, and do not compact memory. But Boehm's GC is not
+disruptive like Qish, and has an API compatible with (or similar to)
+{\tt malloc}.}, but exact. It has to know about every garbage
+collected pointer, and usually modify them (when copying alive
+objects).
+
+
+\subsubsection{No interior pointers}
+
+It is not allowed to have pointers to the inside of any garbage
+collected object. Every pointer should point to the start of such
+objects. {\small (therefore, your C++ application cannot have multiple
+inheritance)}
+
+\subsubsection{No multi-threading}
+
+Our GC does not support threading. If you dare use Posix threads, be
+careful that only one thread should use the GC.
+
+\subsubsection{Limited global data}
+
+You should have almost no global pointers (I believe having lots of
+global data is a bad practice). The only permissible exceptions are:
+
+\begin{enumerate}
+
+\item you can use the small (fixed size) 
+%
+\footnote{
+  The global roots is an array of {\tt QISH\_NB\_ROOTS}
+  pointers defined as 64 in {\tt qish.h}. You could if needed change it
+  to a rather small value (at most a few hundreds): at every garbage
+  collection, the whole roots array is scanned and updated, so having
+  lots (e.g. thousands) of such roots will not be reasonable.
+}
+%
+array of global pointers {\tt \verb+qish_roots+} as you wish, reading
+and writing in it any pointer to a GC-ed object (or the nil pointer,
+or a tagged integer).
+
+\item Each module is described by an entry in {\tt
+  \verb+qish_moduletab+}. Each such entry contain a rather constant
+  pointer. You can set or change the constant of module $î$ to pointer
+  $p$ by calling {\tt \verb+qish_changeconstant+($i$, $p$)}, and you
+  can get this constant by {\tt \verb+qish_constant+($i$)} or even accessing
+  directly the {\tt \verb+km_constant+} field in the entry of {\tt
+  \verb+qish_moduletab+}. In practice, you could make this constant
+  point to a structure of GC-ed pointers. 
+
+\end{enumerate}
+
+\subsubsection{Pointers are volatile}
+
+All pointers are volatile (because the GC silently moves them), in
+particular arguments should be volatile. You should compile with the
+{\tt -fvolatile} and {\tt -fvolatile-global} flags to the {\tt gcc} compiler.
+Most importantly, you should explicitly declare volatile your
+formal arguments. So the following is incorrect
+
+\begin{verbatim}
+#error formal argument not declared volatile
+void* foo(struct variable_st* var) { /*body*/ }
+\end{verbatim}
+
+You should definitely code instead like this - notice that the {\tt
+  volatile} qualifier goes {\em after} the \verb+*+ indicating a pointer):
+
+\begin{verbatim}
+/* explicit volatile argument */
+void* foo(struct variable_st* volatile var) { /*body*/ }
+\end{verbatim}
+
+Omitting the {\tt volatile} qualifier does produce hard to find bugs.
+
+\subsubsection{Indicate arguments and locals to the GC}
+
+Each function body
+\footnote{At least each function using directly or
+  not the GC, i.e. either allocating memory with {\tt qish\_allocate}
+  or calling -directly or indirectly- any function which itself does
+  allocation} 
+%
+should start with a prologue and end with an epilogue. The prologue
+ mark the current call frame (remembering the first argument, the
+ first local pointer, and the number of arguments and of local
+ pointers), and the epilogue reset the previous call frame.  The
+ prologue is \\
+ {\tt\verb+BEGIN_SIMPLE_FRAME+($nbparam$,$firstparam$,$nblocal$,$firstlocal$)};\\
+ the epilogue is {\tt \verb+EXIT_FRAME+();}. The cpu time cost of the
+ prologue or epilogue small, nearly constant, and independent of the
+ numbers of locals or arguments. Actually, this
+ {\tt\verb+BEGIN_SIMPLE_FRAME+} macro is deprecated. Use the
+ {\tt\verb+BEGIN_LOCAL_FRAME+} macro (when you have parameters and a
+ {\tt \verb+_local_+} struct), or
+ {\tt\verb+BEGIN_FRAME_WITHOUT_LOCALS+} macro (when you have
+ parameters but no local pointer), or
+ {\tt\verb+BEGIN_LOCAL_FRAME_WITHOUT_ARGS+} macro (when you have a
+ {\tt \verb+_local_+} struct without any pointer parameters).
+
+
+All local pointers should be explicitly initialized to 0 (or a simple
+value).
+
+It is not permissible to return from a function without going thru
+{\tt \verb+EXIT_FRAME+(); } the suggested coding convention is the
+have one single exit point, ie a single {\tt \verb+EXIT_FRAME+(); } at
+the end followed by a {\tt return} statement. If a function returns a
+garbage-collected value, it should be a local pointer.
+
+
+For convenience, there is also a
+{\tt\verb+BEGIN_LOCAL_FRAME+($nbparam$,$firstparam$)} macro, which
+assumes that a local variable named {\tt \_locals\_} is defined as
+a structure containing only garbage-collected pointers. A {\it Ruby}
+script {\tt gen\_locals} is provided to generate (in a separate file
+to be included) for each variable named like {\tt l\_*}, e.g. {\tt
+l\_foo} a macro {\tt \verb+#define l_foo _locals_.foo+}; in practice,
+local GC-ed pointers eg {\tt bar} should be declared as a pointer
+field in {\tt \_locals\_} and referred as {\tt l\_bar}.
+
+For convenience, there is a 
+{\tt\verb+BEGIN_FRAME_WITHOUT_LOCALS+($nbparam$,$firstparam$)} macro
+to be used when you don't have any local garbage-collected pointer
+(but only parameters). Symetrically, a 
+{\tt\verb+BEGIN_LOCAL_FRAME_WITHOUT_ARGS()+} macro is provided, when
+you only have local garbage collected pointers inside your usual {\tt
+  \_locals\_} structure.
+
+
+If a frame (therefore a function body) have no local pointers (or no
+pointer arguments) it can pass {\tt qish\_nil} (or any unused adress)
+as the appropriate argument to the {\tt BEGIN\_SIMPLE\_FRAME} or {\tt
+  BEGIN\_LOCAL\_FRAME} macro. For example, a function without
+arguments and with {\tt \_locals\_} encapsulated pointer variable
+should start with a {\tt BEGIN\_LOCAL\_FRAME(0,
+  qish\_nil)}. Internally {\tt qish\_nil} is a pseudo-data whose
+address is the nil pointer.
+
+Every local GC pointer should be explicitly initialized to a simple
+value (usually the null pointer). It is best to clear any pointers
+heavily used in a loop when exiting out of the loop.
+
+You cannot use {\tt longjmp} without special measures. If you want exceptions,
+use the {\tt BEGIN\_EXCEPT\_BLOCK CATCH\_EXCEPT\_BLOCK  END\_EXCEPT\_BLOCK
+  THROW\_EXCEPTION} macros from file {\tt qish.h}
+
+
+\subsubsection{No composition of function calls}
+
+Since each pointer should be known to the GC (either as a argument or
+a local explicited thru {\tt\verb+BEGIN_SIMPLE_FRAME+} or
+{\tt\verb+BEGIN_LOCAL_FRAME+}, or as a global root or constant, or as
+a field in a garbage collected object) it is not permissible to call
+several functions, e.g.
+
+\begin{verbatim}
+#error no function composition
+l_res = f(g(y),l_z->ptrfield);
+\end{verbatim}
+
+but you should code thru a temporary value
+\begin{verbatim}
+/* use a temporary variable */
+l_tmp = g(y);
+l_res = f(l_tmp, l_z->ptrfield);
+}
+\end{verbatim}
+
+\subsubsection{Complete allocation}
+
+Every allocation of a garbage collected object is done thru a call to
+one of the following functions (which may trigger a garbage
+collection): 
+
+\begin{itemize}
+
+\item {\tt qish\_allocate($bytesize$)} to allocate an ordinary (movable)
+  object with a natural (word) alignement. This is the most often used
+  allocation function; usually the $bytesize$ is some {\tt sizeof(type)}.
+
+\item {\tt qish\_allocate\_aligned($bytesize$,$alignment$)} to allocate
+  a movable object with an explicit $alignment$ expressed in bytes
+  (which must be a small power of 2 in words).
+
+\item {\tt qish\_fixed\_alloc($bytesize$,$finalizer$)} to allocate a
+  fixed finalized object (aligned to at least the {\tt
+  sizeof(double)}), with an optional finalising routine (called by the
+  GC with the adress of the fixed object).
+
+\end{itemize}
+
+Once an object is allocated it can be (and should be) filled. The
+allocated object should be filled to become valid (for marking and
+scanning routines) before the next allocation. Memory provided by the
+above allocation routines is cleared to all-zero bytes.
+
+It should be noted that in the usual case {\tt qish\_allocate} and
+{\tt \_allocate\_aligned} are very quick and inlined routines
+(basically a pointer increment and a compare to the birth region
+limit) which occasionally triggers a garbage collection. Adventurous
+expert users could even allocate several object at one with a single
+call to {\tt qish\_allocate}, giving it the cumulated total size of
+all allocated objects.
+
+Since object allocation is very quick (much faster than a call to {\tt
+malloc}) it is expected that the application makes frequent
+allocation to short lived objects.
+
+The macro {\tt \verb+QISH_ALLOCATE+} does the same as {\tt
+  qish\_allocate} provided its invocation has no side-effects.
+
+\subsubsection{Notification of updates (write barrier)}
+
+Since the garbage collector has to track pointers from old to new
+generation, it should be aware of any updates of allocated
+objects. This is done by calling {\tt qish\_write\_notify($objptr$)}
+after changing the GC-ed pointers in the object $objptr$ and before
+any further allocation or call.
+
+It is not required to notify the GC after any non-pointer updates
+(e.g. adding bytes into a garbage collected string). It is better to
+code some useless calls to {\tt qish\_write\_notify} than to forgot
+one. 
+
+A garbage collection can be triggered at each {\tt
+qish\_write\_notify} points.
+
+
+Explicit update notification favors a functional programming style
+(where updates are rare).
+
+Assignement to local GC pointers, to arguments, and root variables do
+not require any notification. 
+
+\subsubsection{Optional explicit garbage collection}
+
+The garbage collector can be explicitly called by the application with
+\\ {\tt qish\_garbagecollect($size$,$fullflag$)} where the $size$ is
+an estimation (which can be left as 0) of the needed size -in bytes-
+of future objects and the $fullflag$ is non-zero to force a full
+garbage collection (otherwise, a minor collection will be done, unless
+the old generation has grown significantly).
+
+To be sure that at least $size$ bytes are allocatable without GC, you
+can call {\tt qish\_reserve($size$)} which calls the garbage collector
+unless $size$ bytes are available in the birth zone. This is
+particularily useful in applications having garbage-collected type
+descriptors, which have to bootstrap and fill the type descriptors'
+descriptor without any garbage collection.
+
+It could be interesting to trigger an explicit garbage collection once
+in a while in an idle loop, or before an important processing
+requiring lots of allocation or recursion. This is always an
+optimisation, and the GC will work without a single explicit call to
+{\tt qish\_garbagecollect} in the application code.
+ 
+
+\subsubsection{Exception handling}
+
+Exception handling has to cooperate with the GC, because of the frame
+linking mechanism. You cannot simply call {\tt longjmp} or throw C++
+exceptions\footnote{If you use C++ exceptions, ensure (by coding
+  tricky appropriate constructors and destructors) that the {\tt
+    EXIT\_FRAME} is called on exceptional frame unwinding. You are on
+  your own.}. Instead you have first to declare (in your application)
+one (or very few) {\tt void*} global (or static) pointer variable e.g.
+{\tt exv}. You also need a local integer variable {\tt cod} holding a
+non-zero error or exception code (usable as you want, but never 0 if
+exception thrown, it is the result of {\tt setjmp}) and a local
+pointer {\tt\verb+_locals_.exobj+} holding any exception
+(garbage-collected) object. 
+
+Then you surround any potentially exception-raising code
+(after the usual {\tt BEGIN\_LOCAL\_FRAME}... or similar macro)
+with:
+
+\begin{quote}
+\tt\verb+BEGIN_EXCEPT_BLOCK(exv);+\\
+\it // your code here may directly or indirectly throw ``exceptions''
+\end{quote}
+
+Then you code as usual, you can call some other routines which do
+allocation and may indirectly throw an ``exception'' (using the
+{\tt\verb+THROW_EXCEPTION+} macro detailed below). The {\tt exv}
+argument to the {\tt\verb+BEGIN_EXCEPT_BLOCK(exv);+} macro (vaguely
+similar to the {\tt try} keyword of Java or Ocaml) holds the
+adress of the exception-catching frame, and this
+{\tt\verb+BEGIN_EXCEPT_BLOCK(exv);+} opens a brace (so starts a C code
+block). Then you catch exceptions with 
+
+\begin{quote}
+\tt\verb+CATCH_EXCEPT_BLOCK(cod,_locals_.exobj);+\\
+\it // your code handle here exception of error {\tt cod} ...\\
+\it // ... with {\tt\verb+_locals_.exobj+} set to the exception object
+\end{quote}
+
+So this {\tt\verb+CATCH_EXCEPT_BLOCK+} is vaguely similar to the {\tt
+  with} keyword of Java or Ocaml exception handlers. At last you have
+  to end the exception hanling code with
+\begin{quote}
+\it // this ends the exception handling code\\
+\tt\verb+END_EXCEPT_BLOCK(exv);+
+\end{quote}
+
+The {\tt void*} variable argument to
+{\tt\verb+END_EXCEPT_BLOCK(exv);+} should always be the same as the
+argument of the matching previous
+{\tt\verb+BEGIN_EXCEPT_BLOCK(exv);+}.
+
+Inside the normal block enclosed with {\tt\verb+BEGIN_EXCEPT_BLOCK+}
+and {\tt\verb+CATCH_EXCEPT_BLOCK+} you can call functions (or even
+directly) which throws (directly or indirectly) an ``exception'' with
+{\tt\verb+THROW_EXCEPTION(exv,+}$Cod$ {\tt ,} $Exob$ {\tt )}. The
+$Cod$ should be a non-zero integer (an error code, passed as the
+second argument to {\tt longjmp}) and the $Exob$ is the
+(garbage-collected) error object. If this ``exception'' throwing
+happens, control jumps to the {\tt\verb+CATCH_EXCEPT_BLOCK+}.
+
+Of course, the {\tt\verb+BEGIN_EXCEPT_BLOCK+},
+{\tt\verb+CATCH_EXCEPT_BLOCK+} and {\tt\verb+END_EXCEPT_BLOCK+} have
+to be in the same C code block (so the same function).
+
+
+\subsubsection{Utility routines}
+\label{sbsec:utility}
+
+The Qish runtime provide some utility functions, in particular:
+
+\begin{itemize}
+
+\item {\tt qish\_strhash($string$,$length$)} compute an hashcode of a
+  given $string$ with an explicit $length$; if this length is
+  negative, the $string$ is supposed null-terminated, as if $length ==
+  strlen(string)$ 
+
+\item{\tt qish\_sigexecvp($file$,$argv$)} spawn a process to execute
+  $file$ with the given program $argv$ null-terminated arguments and
+  wait for its completion.
+
+\item {\tt qish\_prime\_after($i$)} returns a prime number bigger than
+  $i$ provided that $0 < i < 10000000 = 10^7$ which can be useful for
+  hashtables, etc.
+
+\item {\tt qish\_parameter($name$)} retrieves the string-value of a
+  runtime parameter of a given $name$.
+
+\item {\tt qish\_put\_parameter($name$,$val$)} put into the runtime
+  paramter named $name$ the string value $val$
+
+\item {\tt qish\_parse\_configfile($filename$)} parse a simple
+  configuration file and set parameters appropriately
+
+\item{\tt qishgc\_init();} should be called once to initialize the
+  garbage collector, before any allocation!
+
+\item{\tt qish\_load\_module($modulename$,$rank$)} loads (with {\tt
+  dlopen}) a shared object module at a given rank. It returns 0 iff
+  ok. A previous module at the same rank is closed latter with {\tt
+  qish\_postponed\_dlclose}
+
+\item{\tt qish\_get\_symbol($name$,$modrank$)} gets the address of the
+  symbol of given $name$ in a module of given $modrank$ or in any
+  modules if $modrank < 0$
+
+\item{\tt qish\_postponed\_dlclose()} close any previous module with
+  {\tt dlclose} and should be called when the call stack is very low
+  (i.e. in your event loop)
+
+\item{\tt qish\_panic} is a printf-like macro which aborts after
+  displaying a panic message.
+
+\end{itemize}
+
+\subsection{Mandatory routines to the GC}
+\label{sbsec:mandatory}
+
+Your application should provide four mandatory routines to the GC and
+store their address in global function pointer variables before any GC
+call. All such functions should be provided (give a dummy function if
+not needed). Since these functions are called by the GC, they should
+not follow the above coding guidelines (no {\tt BEGIN\_SIMPLE\_FRAME}
+etc...) and should of course never allocate objects or call the GC.
+
+
+\subsubsection{Copying function {\tt qish\_gc\_copy\_p}}
+
+The function pointer {\tt qish\_gc\_copy\_p} should be set by your
+application to a routine which copy an object (into an address provided
+by the GC). Its prototype is {\tt void* $gc_{copy}$ (void**padr, void* dst, const
+void* src)}. \\
+It should set {\tt *padr} to the new adress of the copy
+(usually {\tt dst} or some aligned word after) and should return the
+first word after the copied object.
+
+For simple cases (word aligned structures) the copy routine can be as
+simple as e.g. a switch of cases like
+
+\begin{verbatim}
+/*after determining the dynamic object type*/
+*((object_type*)dst) = *((object_type*)src); 
+ return ((object_type*)dst)+1; 
+\end{verbatim}
+
+after having determined the dynamic object type (e.g. thru its header).
+
+The first word of the copied object should not be zero.
+
+\subsubsection{Minor scan of a movable object \tt  qish\_minor\_scan\_p}
+
+The function pointer {\tt qish\_minor\_scan\_p} should be set by your
+application to a routine which scans for the minor garbage collection
+and object by updating each of its pointer fields with the {\tt
+QISHGC\_MINOR\_UPDATE} macro (called with the pointer field). This
+routine should return the next word after the scanned object. Its
+prototype is {\tt void* $minor_{scan}$ (void*ptr);} and it should return the
+first word after the scanned object at address {\tt ptr}.
+
+
+For simple cases (word aligned structures) the minor scan routine can be as
+simple as e.g. a switch of cases like
+
+\begin{verbatim}
+/*after determining the dynamic object type*/
+QISHGC_MINOR_UPDATE(((object_type*)src)->ptrfield1);
+QISHGC_MINOR_UPDATE(((object_type*)src)->ptrfield2);
+/* etc for every field*/
+ return ((object_type*)src)+1; 
+\end{verbatim}
+
+after having determined the dynamic object type (e.g. thru its header).
+
+When you are sure that the pointer is a true pointer (ie is never a
+tagged integer) you can use {\tt QISHGC\_MINOR\_PTR\_UPDATE} instead
+of {\tt QISHGC\_MINOR\_UPDATE}. 
+
+Qish accepts not only null pointers, but also any address inside the
+first page of address space (so on x86 any address below 0x1000). For
+instance you could mark emptied slots in hashtable specially by such
+an address (eg {\tt (void*)16}).
+
+\subsubsection{Full scan of a movable object \tt  qish\_full\_scan\_p}
+
+The function pointer {\tt qish\_full\_scan\_p} should be set by your
+application to a routine which scans for the full garbage collection
+and object by updating each of its pointer fields with the {\tt
+QISHGC\_FULL\_UPDATE} macro (called with the pointer field). This
+routine should return the next word after the scanned object. Its
+prototype is {\tt void* $full_{scan}$ (void*ptr);} and it should return the
+first word after the scanned object at address {\tt ptr}.
+
+
+For simple cases (word aligned structures) the full scan routine can be as
+simple as e.g. a switch of cases like
+
+\begin{verbatim}
+/*after determining the dynamic object type*/
+QISHGC_FULL_UPDATE(((object_type*)src)->ptrfield1);
+QISHGC_FULL_UPDATE(((object_type*)src)->ptrfield2);
+/* etc for every field*/
+ return ((object_type*)src)+1; 
+\end{verbatim}
+
+after having determined the dynamic object type (e.g. thru its
+header).
+
+When you are sure that the pointer is a true pointer (ie is never a
+tagged integer) you can use {\tt QISHGC\_FULL\_PTR\_UPDATE} instead
+of {\tt QISHGC\_FULL\_UPDATE}.
+
+Usually the full scanner has the same code as the minor scanner,
+except for the update macros {\tt QISHGC\_FULL\_UPDATE} instead of
+{\tt QISHGC\_MINOR\_UPDATE}.
+
+If the first word of your object is not a header but a garbage
+collected pointer -for instance the class pointer in a ObjVlisp-like
+object language (i.e. single inheritance language with classes reified
+as objects)-, be careful in your scanning GC routines to
+check that it is a pointer (you could use the
+{\tt\verb+QISH_IS_MOVING_PTR+(}$ptr${\tt )} macro), then update the
+pointer first (with {\tt QISHGC\_FULL\_UPDATE} or {\tt
+  QISHGC\_MINOR\_UPDATE}), then use it appropriately (your reified
+class could contain a description of its fields, or scanning routine
+pointers, ...).
+
+
+\subsubsection{Full scan of a fixed object \tt  qish\_fixed\_scan\_p}
+
+The function pointer {\tt qish\_fixed\_scan\_p} should be set by your
+application to a routine which scans for the full garbage collection
+and object by updating each of its pointer fields with the {\tt
+QISHGC\_FULL\_UPDATE} macro (called with the pointer field). This
+routine returns void and knows about the fixed object size. Its
+prototype is {\tt void $fixed_{scan}$ (void*ptr, int size);} where
+{\tt ptr} is the address of the object and {\tt size} is its size in
+bytes.
+
+
+For simple cases (word aligned structures) the fixed scan routine can be as
+simple as e.g. a switch of cases like
+
+\begin{verbatim}
+/*after determining the dynamic object type*/
+QISHGC_FULL_UPDATE(((object_type*)src)->ptrfield1);
+QISHGC_FULL_UPDATE(((object_type*)src)->ptrfield2);
+/* etc for every field*/
+ return;
+\end{verbatim}
+
+after having determined the dynamic object type (e.g. thru its
+header).
+
+Even an application with only moving objects (and no finalized, fixed
+objects) should provide a dummy fixed scanner.
+
+For the simple examples in section \ref{sec:datastruct}, the routines
+could be:
+
+\begin{verbatim}
+void* gc_copy(void**padr, void* dst, const void* src) {
+  switch (*(short*)src) {
+  case KIND_BINOP:
+    *((struct binop_st*)dst) = *((struct binop_st*)src);
+    return ((struct binop_st*)dst)+1;
+  case KIND_VARIABLE:
+    {  struct variable_st* srcvar = src;
+       int srcnamlen = srcvar->namelen;
+       memcpy(dst, src, sizeof(struct variable_st)+srcnamlen);
+       if (srcnamlen & (sizeof(void*)-1)) {
+         /*round up name length to word*/
+         srcnamlen |= (sizeof(void*)-1); srcnamelen++;
+       }
+       return ((struct variable_st*)dst)->name + srcnamlen;
+    }
+  }
+}
+
+void* minor_scan(void*ptr) {
+  switch (*(short*)ptr) {
+  case KIND_BINOP: 
+    QISHGC_MINOR_UPDATE(((struct binop_st*)ptr)->left);
+    QISHGC_MINOR_UPDATE(((struct binop_st*)ptr)->right);
+    return ((struct binop_st*)ptr)+1;
+  case KIND_VARIABLE:    
+    {  struct variable_st* var = ptr;
+       int namlen = var->namelen;
+       QISHGC_MINOR_UPDATE(var->value);
+       if (namlen & (sizeof(void*)-1)) {
+         /*round up name length to word*/
+         namlen |= (sizeof(void*)-1); namelen++;
+       }
+       return var->name + srcnamlen;
+    }
+  }
+} 
+
+\end{verbatim}
+
+The {\tt full\_scan} routine would be similar (using {\tt QISHGC\_FULL\_UPDATE}).
+
+Since there are no fixed object you have to provide a dummy fixed
+scanning routine which just calls {\tt abort}
+
+\subsection{Using Qish in C++ code}
+
+I just give very few hints on using Qish in C++ code:
+
+\begin{enumerate}
+
+\item no implicit or explicit use of {\tt this}. Since it is not
+  possible to declare the argument {\tt this} to be a volatile
+  pointer, you should not use it (either explicitly as in {\tt
+    this->method(foo)} or {\tt this->\_field} or implicitly as in {\tt
+  method(foo)} or {\tt \_field}). Instead, copy {\tt this} to a local
+  pointer, using it explicitly. This stylistical constraint is
+  annoying.
+
+\item no multiple inheritance. Since Qish does not support interior
+  pointer, you cannot use multiple inheritance.
+
+\item Have a tree and not a forest of classes by defining a common
+  superclass to all your GC-ed objects. The virtual table pointer is
+  usually the first word of such objects.
+
+\end{enumerate}
+
+I would suggest to avoid using C++ with Qish on new code. Instead
+consider using other programming languages like Ocaml, CommonLisp,
+Java.
+
+\subsection{Advanced application explicit forwarding.}
+
+Advanced applications using Qish (and understanding quite well its
+internal processing) may explicitly forward pointers in the
+application code. Use this (experimental) feature with caution. 
+
+Explicit forwarding could be useful when you want every pointer to a
+(garbage-collected and allocated) address $\alpha$ to be replaced by a
+fixed $\beta$. A typical application could be to grow existing values,
+dynamically change the class (hence the size) of an object, etc...
+
+An application can for such an explicit forwarding with the macro call
+{\tt QISH\_EXPLICIT\_FORWARD($alpha$,$beta$)}. Then the garbage
+collector will replace any\footnote{So all occurrences are replaced
+  only after a major full garbage collection; after a minor collection
+  only some pointers are replaced!} pointer to $alpha$ than its scans with
+$beta$.
+
+If an application use this explicit forwarding, it has to follow
+(explicitly in application code) any potential such pointer with the
+{\tt QISH\_FOLLOW\_FORWARD} macro which should be applied to every
+pointer (either argument, or local after assignment). If the pointer
+is never a tagged integer, you may call {\tt
+  QISH\_FOLLOW\_FORWARD\_PTR} directly. If you statically know that
+only some pointers may have been explicitly forwarded by {\tt
+  QISH\_EXPLICIT\_FORWARD} you mayy (at your own risk) call {\tt
+  QISH\_FOLLOW\_FORWARD} only for such pointers.
+
+Refer to the {\tt include/qish.h} file for definitions of these
+macros.
+
+{\em Explicit application forwarding is an experimental untested
+feature}. Use it at your own risk! If you happens to use it, be kind
+enough to explain me why.
+
+
+\section{A tiny benchmark}
+\label{sec:bench}
+
+A tiny benchmark (adapted from the GCbench.c by H.Boehm, J.Ellics,
+P.Kovac, W.Clinger, et al) is ported to qish. 
+
+
+\subsection{benchmark results}
+It is the file {\tt
+GCBench.c} (where we changed the allocate sized to 4 times the
+original) in our {\tt lib/} subdirectory (where you can run all 3
+benches with {\tt make OPTIMFLAGS='-O2 -DNDEBUG' clean lib bench}. The
+same file {\tt GCBench.c} compiles with Qish GC, with Boehm's GC, and
+with manual malloc and free according to the setting of preprocessor
+flags {\tt QISH} for Qish, {\tt GC} for Boehm, and no flags for malloc
+and free. (Times have been measured with release 0.3 of Qish).
+
+\begin{itemize}
+
+\item Qish GC (standard birth size of 8Mbytes): CPU 9.160 user + 4.510
+system = 13.670 total time (sec); done 131 minor and 16 full garbage
+collections
+
+\item Boehm's GC: CPU 18.570 user + 0.310 system = 18.880 total time
+  (sec); Completed 42 collections
+
+\item explicit malloc and free:  CPU 24.810 user + 2.810 system =
+  27.620 total time (sec)
+
+\item Qish GC with the birth size reduced to 4 Mbytes made with {\tt
+  make OPTIMFLAGS='-O2 -DNDEBUG -DMIN\_BIRTH\_SIZE=4194304' clean lib
+  benchqish}: CPU 13.810 user + 6.350 system = 20.160 total time
+  (sec); Qish done 257 minor and 39 full garbage collections
+
+\item Qish GC with the birth size increased to 16Mbytes: 
+ CPU 6.900 user + 4.350 system = 11.250 total time (sec)
+Qish done 67 minor and 6 full garbage collections
+
+\item Qish GC with the birth size increased to 32Mbytes (probably not
+  significant, since it is similar to the live object size): CPU 5.920
+  user + 3.700 system = 9.620 total time (sec) Qish done 34 minor and
+  2 full garbage collections
+
+\item Boehm's GC with holes {\tt make OPTIMFLAGS='-O2 -DNDEBUG
+  -DHOLES' clean lib bench}, so for every used node allocated, an
+  extra useless (dead) node is also allocated: CPU 43.220 user + 0.380
+  system = 43.600 total time (sec) Completed 72 collections
+
+\item Qish GC with holes (and standard birth size of 8Mbytes): 
+ CPU 12.490 user + 7.380 system = 19.870 total time (sec)
+Qish done 197 minor and 23 full garbage collections
+
+\item Qish GC with holes and increased birth size of 16Mbytes:
+ CPU 9.560 user + 6.460 system = 16.020 total time (sec)
+Qish done 99 minor and 10 full garbage collections
+
+\item Qish GC with holes and small birth size of 4Mbytes: CPU 17.530
+user + 8.500 system = 26.030 total time (sec) Qish done 389 minor and
+52 full garbage collections
+
+\end{itemize}
+
+Obviously, this small benchmark does not prove much. But Qish is not
+too bad, even w.r.t. the famous Boehm's (et al.) conservative (and
+quite mature) garbage collector.
+
+Explicit bug-prone manual memory management with the infamous {\tt
+  free} routine is not only harder to code, but seems even slower than
+  all the other automatic memory management techniques.
+
+Qish is highly sensitive to the birth size. This is expected (since a
+GC is trigerred only when the birth region is full). Qish requires lot
+of system calls, because it does {\tt mmap}-ing at every GC. Perhaps
+we could improve it by caching memory zones... (but the GC requires
+zero-ed memory). Qish tuning can be done by carefully changing some
+compile-time constants (notably {\tt MIN\_BIRTH\_SIZE MAX\_BIRTH\_SIZE
+FULL\_GC\_PERIOD}) at the start of file {\tt lib/qigc.c}.
+
+Qish works well with holes (because it compact them) and is designed
+with allocation of small short lived temporary objects in mind (which
+may favor some ``functional'' style of coding).
+
+
+It would be very interesting to port Qish to an existing major GC-ed
+application (like guile, some application using Boehm's GC, or even
+emacs) but I have not enough time for this. I am willing to help any
+person which wants to do so.
+
+Qish is designed to be used for C code generators.
+
+\subsection{Tuning Qish}
+
+To optimize Qish for your needs you could :
+
+\begin{itemize}
+
+\item use the usual trick of allocating several objects simultanously
+  (in one single {\tt qish\_allocate} for all of them). 
+  
+\item explicitly invoke {\tt qish\_garbagecollect} when needed
+  (e.g. at start of a topmost loop...).
+
+\item set the number {\tt QISH\_NB\_ROOTS} of variable roots (ie the
+  size of the {\tt qish\_roots} global array) in {\tt include/qish.h}
+  to your needs. Leave it at most to a few hundred or dozen.
+  
+\item change the {\tt MIN\_BIRTH\_SIZE} and {\tt MAX\_BIRTH\_SIZE} and
+  {\tt FULL\_GC\_THRESHOLD} in {\tt lib/qigc.c}. The minimal birth
+  size is a sensitive number (8 megabytes by default). I believe it
+  should be at least half a megabyte (and at most a fraction, e.g. the
+  tenth, of your available RAM). The maximal birth size limits the
+  maximal size of allocated objects.
+
+\item change the {\tt QISH\_MAXNBCONST} number (65536) to a power of
+  two (at least 1024). It is the maximal number of global constant
+  pointers (for {\tt QISH\_GLOBCONST})
+
+\item if your plateform has enough registers (this is false for x86 with 6
+  usable registers only) you could (with GCC) reserve global registers for
+  {\tt\verb+qishgc_birth_cur+} and {\tt\verb+qishgc_birth_storeptr+}
+  global variables (in {\tt include/qish.h}).
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{ToDo list (multi-threading?)}
+
+Some people expressed the wish of making Qish multi-threaded (using
+Posix threads ie {\tt <pthread.h>}), in the sense of having a few
+threads\footnote{If you need multi-threaded capable garbage
+  collection, I suggest using Hans Boehm's collector.}  concurrently
+allocating garbage collected objects. This could be doable with a
+``stop the world'' strategy: when a thread requires a (major)
+collection it has to stop all other threads, but minor collections
+eremains local to threads (and sending objects between threads
+requiring some special precautions). This approach works only for a
+few (at most a dozen) threads.
+
+The problem with this approach is that the current allocation pointer
+{\tt qishgc\_birth\_cur} has to become a thread-local variable. And
+there is no standard mechanism providing them very quickly: I believe
+that the standard {\tt pthread\_getspecific} function (which would
+have to be called at each allocation with {\tt qish\_allocate} - even
+those which do not trigger any collection) would significantly slow up
+this runtime.
+
+I am not very fluent with multi-threading applications, and I don't
+have any biprocessor machine at home yet (experimentally a biprocessor
+machine is almost required to test multithreading applications).
+
+People having access to 64 bits machines could try to compile Qish on
+these. Contributions are welcome!
+
+Comments on this are welcome.
+
+
+\end{document}
+%eof $Id: qishintro.tex 19 2005-05-08 17:35:50Z basile $
