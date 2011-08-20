@@ -28,6 +28,11 @@ typedef struct list_s
 	list_node_t** tailp;
 } list_t;
 
+/* Create a new list node with a value. */
+extern list_node_t* list_node_new(void*);
+/* Release a node */
+extern void list_node_free(list_node_t*);
+
 /* Creates a new list, setting the head to the supplied node.
    Node can be NULL. */
 extern list_t* list_new(list_node_t*);

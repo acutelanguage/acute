@@ -24,6 +24,21 @@ struct list_node_s
 	void* data;
 };
 
+list_node_t* list_node_new(void* value)
+{
+	list_node_t* r = malloc(sizeof(*r));
+	r->data = value;
+	r->next = NULL;
+	r->prev = NULL;
+	return r;
+}
+
+void list_node_free(list_node_t* node)
+{
+	free(node);
+	node = NULL;
+}
+
 list_t* list_new(list_node_t* node)
 {
 	list_t* list = malloc(sizeof(*list));
