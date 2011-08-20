@@ -55,4 +55,7 @@ void obj_register_slot(obj_t self, char* str, slot_t slot)
 	BEGIN_SIMPLE_FRAME(1, self, 0, qish_nil);
 	i = judy_cell(self->slots, (unsigned char*)str, strlen((char*)str));
 	i = (judyslot*)slot;
+	qish_write_notify(self);
+
+	EXIT_FRAME();
 }
