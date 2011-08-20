@@ -14,21 +14,19 @@
  * Description: Slot management and data structures
  ******************************************************************/
 
-#ifndef __ACUTE__SLOTS_H__
-#define __ACUTE__SLOTS_H__
+#include <stdio.h>
+#include "slots.h"
+#include "object.h"
 
-struct object_s;
-
-typedef struct slot_s* slot_t;
-struct slot_s
+slot_t slot_new(struct object_s* volatile data, unsigned activatable)
 {
-	struct object_s* data;
-	unsigned         activatable:1;
-};
+	slot_t r = NULL;
+	BEGIN_SIMPLE_FRAME(1, data, 1, r);
 
-/* Create a new slot. This slot must have some data associated with it, and currently only accepts the value which will
-   be used for the data pointer in the data union. Also takes a function which can release the data, and a flag to indicate
-   whether we're activatable. */
-extern slot_t slot_new(struct object_s* volatile, unsigned);
+	r = qish_allocate(sizeof(*r));
+	r->data = data;
 
-#endif /* !__ACUTE__SLOTS_H__ */
+	EXIT_FRAME();
+	return r;
+}
+
