@@ -29,5 +29,7 @@ closure_t closure_new(obj_closure_t* func)
 	
 	closure = qish_allocate(sizeof(*closure));
 	closure->call = func;
+
+	EXIT_FRAME();
 	return closure;
 }
