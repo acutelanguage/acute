@@ -44,4 +44,10 @@ extern void obj_release(obj_t*);
 /* Register a new slot with the object. */
 extern void obj_register_slot(obj_t*, char*, slot_t*);
 
+/* Default slot lookup mechanism. May be replaced at runtime. */
+extern slot_t* obj_lookup_slot(obj_t*, char*);
+
+/* Evaluate the value in the slot. Either by returning it outright, or lookup up its activate slot and calling it. */
+extern obj_t* obj_perform(obj_t*, slot_t*);
+
 #endif /* !__ACUTE__OBJECT_H__ */

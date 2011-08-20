@@ -20,6 +20,7 @@
 #include <string.h>
 #include "object.h"
 #include "judy64d.h"
+#include "closure.h"
 
 #define INITIAL_LEVELS 4
 
@@ -53,4 +54,27 @@ void obj_register_slot(obj_t* self, char* str, slot_t* slot)
 {
 	judyslot* i = judy_cell(self->slots, (unsigned char*)str, strlen((char*)str));
 	i = (judyslot*)slot;
+}
+
+slot_t* obj_lookup_slot(obj_t* self, char* name)
+{
+	slot_t* slot = (slot_t*)judy_slot(self->slots, (unsigned char*)name, 4);
+	return slot;
+}
+
+obj_t* obj_perform(obj_t* self, slot_t* slot)
+{
+	if(slot->activatable)
+	{
+		closure_t* func = (closure_t*)slot->data;
+		func->receiver = self;
+		closure_t* activate = (closure_t*)obj_lookup_slot(slot->data, "activate");
+		if(activate)
+		{
+			activate->receiver = self;
+			// Create an activation record including scope and all that jazz
+			return activate->call(func);
+		}
+	}
+	return slot->data;
 }
