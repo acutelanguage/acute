@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <qish.h>
 #include "object.h"
 #include "judy64d.h"
 

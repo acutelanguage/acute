@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <qish.h>
 #include "obj.h"
 
 /* Closures are implemented naively for two reasons. First, this is a bootstrap and it'll be thrown away once our full VM is able to
