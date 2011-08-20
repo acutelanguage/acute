@@ -19,19 +19,18 @@
 
 #include "slots.h"
 
-typedef struct object_s* volatile obj_t;
-struct object_s
+typedef struct object_s
 {
-	void* slots; // Backed by a Judy array, see judy64d.c
-};
+	void* slots;     // Backed by a Judy array, see judy64d.c
+} obj_t;
 
 /* Create a new empty object. This object descends from nobody, has no slots. */
-extern obj_t obj_new_empty(void);
+extern obj_t* obj_new_empty(void);
 
 /* Create a new object descended from a parent. This parent is installed into the newly created slot table. */
-extern obj_t obj_new(obj_t);
+extern obj_t* obj_new(obj_t*);
 
 /* Register a new slot with the object. */
-extern void obj_register_slot(obj_t, char*, slot_t);
+extern void obj_register_slot(obj_t*, char*, slot_t*);
 
 #endif /* !__ACUTE__OBJECT_H__ */

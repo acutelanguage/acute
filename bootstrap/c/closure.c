@@ -16,21 +16,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <qish.h>
-#include "obj.h"
+#include "object.h"
+#include "closure.h"
 
 /* Closures are implemented naively for two reasons. First, this is a bootstrap and it'll be thrown away once our full VM is able to
    compile itself. Secondly, because more and more platforms are adding W^X protection (including my own dev platform), mucking about
    with building closures using thunks didn't suit my fancy. */
 
-closure_t closure_new(obj_closure_t* func)
+closure_t* closure_new(obj_closure_t func)
 {
-	closure_t closure = NULL;
-	BEGIN_SIMPLE_FRAME(0, qish_nil, 1, closure);
-	
-	closure = qish_allocate(sizeof(*closure));
+	closure_t* closure = malloc(sizeof(*closure));
 	closure->call = func;
-
-	EXIT_FRAME();
 	return closure;
 }

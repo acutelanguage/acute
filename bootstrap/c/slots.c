@@ -15,19 +15,14 @@
  ******************************************************************/
 
 #include <stdio.h>
-#include <qish.h>
+#include <stdlib.h>
 #include "slots.h"
 #include "object.h"
 
-slot_t slot_new(struct object_s* volatile data, unsigned activatable)
+slot_t* slot_new(struct object_s* data, unsigned activatable)
 {
-	slot_t r = NULL;
-	BEGIN_SIMPLE_FRAME(1, data, 0, qish_nil);
-
-	r = qish_allocate(sizeof(*r));
+	slot_t* r = malloc(sizeof(*r));
 	r->data = data;
-
-	EXIT_FRAME();
 	return r;
 }
 
