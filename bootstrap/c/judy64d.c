@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <memory.h>
+#include "judy64d.h"
 
 #ifdef linux
 	#include <endian.h>
