@@ -35,6 +35,9 @@ extern obj_t* obj_new_empty(void);
 /* Create a new object descended from a parent. This parent is installed into the newly created slot table. */
 extern obj_t* obj_new(obj_t*);
 
+/* Destroy an object and all its slots. */
+extern void obj_release(obj_t*);
+
 /* Register a new slot with the object. */
 extern void obj_register_slot(obj_t*, char*, slot_t*);
 

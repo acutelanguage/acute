@@ -37,6 +37,13 @@ obj_t* obj_new(obj_t* parent)
 	return r;
 }
 
+void obj_release(obj_t* obj)
+{
+	judy_close(obj->slots);
+	free(obj);
+	obj = NULL;
+}
+
 void obj_register_slot(obj_t* self, char* str, slot_t* slot)
 {
 	judyslot* i = judy_cell(self->slots, (unsigned char*)str, strlen((char*)str));
