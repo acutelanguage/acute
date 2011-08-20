@@ -42,7 +42,13 @@ extern void list_prepend_node(list_t*, list_node_t*);
 extern void list_append(list_t*, void*);
 extern void list_append_node(list_t*, list_node_t*);
 
+/* Push an item onto the list. Useful when you want a stack. */
+#define list_push(l, o) list_append((l), (o))
+
 /* Remove a node from the list. */
 extern void list_remove(list_t*, list_node_t*);
+
+/* Remove the last node inserted into the list. Useful when you want a stack. */
+extern void* list_pop(list_t*);
 
 #endif /* !__ACUTE__LIST_H__ */

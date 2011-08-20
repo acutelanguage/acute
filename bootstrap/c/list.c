@@ -20,6 +20,7 @@
 struct list_node_s
 {
 	list_node_t* next;
+	list_node_t* prev;
 	void* data;
 };
 
@@ -31,7 +32,6 @@ list_t* list_new(list_node_t* node)
 	{
 		list->head = node;
 		list->tailp = &list->head;
-		list->queue = q;
 	}
 
 	return list;
@@ -52,7 +52,10 @@ void list_free(list_t* list)
 
 void list_prepend_node(list_t* list, list_node_t* node)
 {
-	node->next = list->head;
+	list_node_t* head = list->head;
+	node->prev = NULL;
+	node->next = head;
+	head->prev = node;
 	list->head = node;
 	if(list->tailp == &list->head)
 		list->tailp = &node->next;
@@ -67,6 +70,7 @@ void list_prepend(list_t* list, void* item)
 
 void list_append_node(list_t* list, list_node_t* node)
 {
+	node->prev = *list->tailp;
 	*list->tailp = node;
 	list->tailp = &node->next;
 }
@@ -96,4 +100,12 @@ void list_remove(list_t* list, list_node_t* node)
 		}
 		pnp = &current->next;
 	}
+}
+
+void* list_pop(list_t* list)
+{
+	list_node_t* last = *list->tailp;
+	*list->tailp = last->prev;
+	list->tailp = &last->prev;
+	return last;
 }
