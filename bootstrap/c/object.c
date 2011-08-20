@@ -23,16 +23,21 @@
 
 #define INITIAL_LEVELS 4
 
-obj_t* obj_new_empty(void)
+obj_t* obj_new_empty(size_t size)
 {
-	obj_t* r = malloc(sizeof(*r));
+	if(size == 0)
+		size = sizeof(struct object_s);
+
+	obj_t* r = malloc(size);
 	r->slots = judy_open(INITIAL_LEVELS);
+	r->marked = 0;
+	r->object_size = size;
 	return r;
 }
 
-obj_t* obj_new(obj_t* parent)
+obj_t* obj_new(size_t size, obj_t* parent)
 {
-	obj_t* r = obj_new_empty();
+	obj_t* r = obj_new_empty(size);
 	obj_register_slot(r, "parent", slot_new(parent, 0));
 	return r;
 }
