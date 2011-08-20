@@ -25,7 +25,7 @@
 
 closure_t* closure_new(obj_closure_t func)
 {
-	closure_t* closure = malloc(sizeof(*closure));
+	closure_t* closure = obj_new_empty(sizeof(*closure));
 	closure->call = func;
 	return closure;
 }
