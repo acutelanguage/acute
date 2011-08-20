@@ -124,3 +124,40 @@ void* list_pop(list_t* list)
 	list->tailp = &last->prev;
 	return last;
 }
+
+void _list_iterate_forward(list_t* list, void* ctx, list_foreach_f foreach)
+{
+	list_node_t* current;
+	list_node_t** pnp = &list->head;
+
+	while((current = *pnp) != NULL)
+	{
+		foreach(current->data, ctx);
+		*pnp = current->next;
+	}
+}
+
+void _list_iterate_reverse(list_t* list, void* ctx, list_foreach_f foreach)
+{
+	list_node_t* current;
+	list_node_t** pnp = list->tailp;
+
+	while((current = *pnp) != NULL)
+	{
+		foreach(current->data, ctx);
+		*pnp = current->prev;
+	}
+}
+
+void list_foreach(list_t* list, list_direction_t direction, void* ctx, list_foreach_f foreach)
+{
+	switch(direction)
+	{
+		case kListIterateDirectionForward:
+			_list_iterate_forward(list, ctx, foreach);
+			break;
+		case kListIterateDirectionReverse:
+			_list_iterate_reverse(list, ctx, foreach);
+			break;
+	}
+}

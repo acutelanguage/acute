@@ -21,6 +21,16 @@
    Use the convenience functions for manipulating the structure. */
 typedef struct list_node_s list_node_t;
 
+/* Function pointer used for iteration. I'd use clang's blocks, but what if someone wants to build using Visual Studio?
+   Takes two parameters: First is the value of the current node, the second is some user supplied context. */
+typedef void (*list_foreach_f)(void*, void*);
+
+typedef enum
+{
+	kListIterateDirectionForward = 0,
+	kListIterateDirectionReverse
+} list_direction_t;
+
 /* The base list type. */
 typedef struct list_s
 {
@@ -55,5 +65,8 @@ extern void list_remove(list_t*, list_node_t*);
 
 /* Remove the last node inserted into the list. Useful when you want a stack. */
 extern void* list_pop(list_t*);
+
+/* Iterate over each node in the list. */
+extern void list_foreach(list_t*, list_direction_t, void*, list_foreach_f);
 
 #endif /* !__ACUTE__LIST_H__ */
