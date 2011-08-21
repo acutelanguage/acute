@@ -57,8 +57,9 @@ void list_free(list_t* list)
 	list_node_t* node = NULL;
 	for(node = list->head; node != NULL;)
 	{
-		list_node_t* tmp = list->head;
+		list_node_t* tmp = node;
 		list->head = node->next;
+		node = node->next;
 		free(tmp);
 	}
 	free(list);
@@ -131,13 +132,14 @@ void list_remove(list_t* list, list_node_t* node)
 
 void* list_pop(list_t* list)
 {
-	list_node_t* last = *list->tailp;
-	if(last)
+	if(list->tailp)
 	{
+		list_node_t* last = *list->tailp;
 		*list->tailp = last->prev;
 		list->tailp = &last->prev;
+		return last;
 	}
-	return last;
+	return NULL;
 }
 
 void _list_iterate_forward(list_t* list, void* ctx, list_foreach_f foreach)
