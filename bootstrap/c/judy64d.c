@@ -11,7 +11,7 @@
 
 //	STANDALONE is defined to compile into a string sorter.
 
-#define STANDALONE
+//#define STANDALONE
 
 //	functions:
 //	judy_open:	open a new judy array returning a judy object.
