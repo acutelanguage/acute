@@ -23,34 +23,38 @@
 #include "list.h"
 #include "judy64d.h"
 
-void gc_collect(gc_t* gc)
+struct gc_s
 {
-	gc_mark_heap(gc);
-	gc_sweep(gc);
-}
+	size_t  max_heap_size;
+	size_t  current_heap_size;
+	list_t* mark_stack;
+	list_t* roots;
+	list_t* free_list;
+};
 
-void _gc_mark_stack_foreach(void* r, void* ctx)
+static gc_t* __acute_collector = NULL;
+
+static void _gc_mark_stack_foreach(void* r, void* ctx)
 {
-	obj_t* root = (obj_t*)r;
-	gc_t* gc = (gc_t*)ctx;
-	for(obj_t* m = (obj_t*)judy_strt(root->slots, (unsigned char*)"", 0); m != NULL; m = (obj_t*)judy_nxt(root->slots))
+	gcable_t* root = (gcable_t*)r;
+	gcable_t* m = NULL;
+	for(m = (gcable_t*)judy_strt(root->slots, (unsigned char*)"", 0); m != NULL; m = (gcable_t*)judy_nxt(root->slots))
 	{
 		if(m->marked == 0)
 			m->marked = 1;
-		list_push(gc->mark_stack, m);
+		list_push(__acute_collector->mark_stack, m);
 	}
 }
 
-void _gc_roots_foreach(void* r, void* ctx)
+static void _gc_roots_foreach(void* r, void* ctx)
 {
-	obj_t* root = (obj_t*)r;
-	gc_t* gc = (gc_t*)ctx;
+	gcable_t* root = (gcable_t*)r;
 	root->marked = 1;
-	list_push(gc->mark_stack, root);
-	list_foreach(gc->mark_stack, kListIterateDirectionReverse, gc, _gc_mark_stack_foreach);
+	list_push(__acute_collector->mark_stack, root);
+	list_foreach(__acute_collector->mark_stack, kListIterateDirectionReverse, NULL, _gc_mark_stack_foreach);
 }
 
-void gc_mark_heap(gc_t* gc)
+static void gc_mark_heap(gc_t* gc)
 {
 	list_node_t* head = list_node_new(NULL); // Sentinel, because while my list is efficient, it doesn't like to be empty.
 	if(gc->mark_stack)
@@ -60,18 +64,68 @@ void gc_mark_heap(gc_t* gc)
 	list_foreach(gc->roots, kListIterateDirectionReverse, gc, _gc_roots_foreach);
 }
 
-void _gc_sweep_foreach(void* o, void* ctx)
+static void _gc_sweep_foreach(void* o, void* ctx)
 {
-	obj_t* obj = (obj_t*)o;
+	gcable_t* obj = (gcable_t*)o;
 	gc_t* gc = (gc_t*)ctx;
 
 	if(obj->marked)
 		obj->marked = 0;
 	else
-		obj_release(obj); // Could use a free list here, not going to though.
+		list_append(gc->free_list, obj);
 }
 
-void gc_sweep(gc_t* gc)
+static void gc_sweep(gc_t* gc)
 {
 	list_foreach(gc->mark_stack, kListIterateDirectionReverse, gc, _gc_sweep_foreach);
+}
+
+void gc_initialize(size_t max_heap_size)
+{
+	if(__acute_collector == NULL)
+		__acute_collector = malloc(sizeof(__acute_collector));
+	__acute_collector->max_heap_size = max_heap_size;
+	__acute_collector->current_heap_size = 0;
+}
+
+void gc_destroy(void)
+{
+	list_free(__acute_collector->mark_stack);
+	list_free(__acute_collector->roots);
+	free(__acute_collector);
+	__acute_collector = NULL;
+}
+
+void* gc_alloc(size_t size)
+{
+	struct gcable_s* ptr = NULL;
+
+	if(size >= (2 ^ 28)) // Hard limit of object sizes: 256 MB
+		return NULL;
+
+	if(__acute_collector->current_heap_size + size >= __acute_collector->max_heap_size)
+		gc_collect();
+
+	ptr = list_pop(__acute_collector->free_list);
+	if(!ptr)
+		ptr = malloc(sizeof(size));
+	if(ptr)
+	{
+		__acute_collector->current_heap_size += size;
+		ptr->object_size = size;
+		ptr->marked = 0;
+	}
+
+	return (void*)ptr;
+}
+
+void gc_collect(void)
+{
+	gc_mark_heap(__acute_collector);
+	gc_sweep(__acute_collector);
+}
+
+void gc_add_root(void* root)
+{
+	list_append(__acute_collector->roots, root);
 }

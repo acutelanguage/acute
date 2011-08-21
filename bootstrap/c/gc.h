@@ -19,17 +19,30 @@
 #ifndef __ACUTE__GC_H__
 #define __ACUTE__GC_H__
 
+#include <sys/types.h>
 #include "list.h"
 
-typedef struct gc_s
+typedef struct gcable_s
 {
-	list_t* mark_stack;
-	list_t* roots;
-} gc_t;
+	unsigned object_size:28; // How big is our object? (Max size: 256 MB)
+	unsigned reserved:3;
+	unsigned marked:1;       // Has this object been marked by the GC?
+	void*    slots;          // Backed by a Judy array, see judy64d.c
+} gcable_t;
 
-extern void gc_collect(gc_t*);
-extern void gc_mark_heap(gc_t*);
-extern void gc_mark(gc_t*);
-extern void gc_sweep(gc_t*);
+typedef struct gc_s gc_t;
+
+/* Initialize the garbage collector. Must pass in a maximum heap size as an argument. */
+extern void gc_initialize(size_t);
+/* Destroy the garbage collector. Once this function is called, the GC is dead. It must be re-initialized. All bookkeeping info will be
+   lost. */
+extern void gc_destroy(void);
+
+/* Forces a garbage collection. */
+extern void gc_collect(void);
+
+/* The GC can keep track of objects through this mechanism in addition to gc_alloc above. If you do not allocate an object through the
+   gc_alloc function, then you must explicitly add its root via this function. Otherwise, the GC will know nothing about it. */
+extern void gc_add_root(void*);
 
 #endif /* !__ACUTE__GC_H__ */

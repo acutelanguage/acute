@@ -29,10 +29,8 @@ obj_t* obj_new_empty(size_t size)
 	if(size == 0)
 		size = sizeof(struct object_s);
 
-	obj_t* r = malloc(size);
+	obj_t* r = (obj_t*)gc_alloc(size);
 	r->slots = judy_open(INITIAL_LEVELS);
-	r->marked = 0;
-	r->object_size = size;
 	return r;
 }
 
