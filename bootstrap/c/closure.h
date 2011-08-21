@@ -31,7 +31,10 @@ typedef obj_t* (*obj_closure_t)(closure_env_t*);
 
 typedef struct closure_s
 {
-	obj_closure_t call;
+	unsigned       object_size:28; // How big is our object? (Max size: 256 MB)
+	unsigned       reserved:3;
+	unsigned       marked:1;       // Has this object been marked by the GC?
+	obj_closure_t  call;
 	closure_env_t* env;
 } closure_t;
 

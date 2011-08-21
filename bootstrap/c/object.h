@@ -22,7 +22,7 @@ typedef struct object_s
 	unsigned object_size:28; // How big is our object? (Max size: 256 MB)
 	unsigned reserved:3;
 	unsigned marked:1;       // Has this object been marked by the GC?
-	void* slots;             // Backed by a Judy array, see judy64d.c
+	void*    slots;          // Backed by a Judy array, see judy64d.c
 } obj_t;
 
 #include "slots.h"
