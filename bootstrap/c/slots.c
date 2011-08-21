@@ -21,7 +21,7 @@
 
 slot_t* slot_new(struct object_s* data, unsigned activatable)
 {
-	slot_t* r = malloc(sizeof(*r));
+	slot_t* r = (slot_t*)obj_new_empty(sizeof(*r));
 	r->data = data;
 	return r;
 }
