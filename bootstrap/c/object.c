@@ -56,24 +56,59 @@ void obj_register_slot(obj_t* self, char* str, slot_t* slot)
 	i = (judyslot*)slot;
 }
 
-slot_t* obj_lookup_slot(obj_t* self, char* name)
+slot_t* obj_lookup_slot_locally(obj_t* self, char* name)
 {
 	slot_t* slot = (slot_t*)judy_slot(self->slots, (unsigned char*)name, 4);
 	return slot;
 }
 
-obj_t* obj_perform(obj_t* self, slot_t* slot)
+slot_t* obj_lookup_slot(obj_t* self, char* name)
+{
+	closure_t* lookup = (closure_t*)obj_lookup_slot_locally(self, "lookup");
+	slot_t* slot = NULL;
+	slot_t* parent_slot = NULL;
+
+	// Need to construct a message type here, pass arguments, all that stuff.
+	closure_env_t env;
+	env.receiver = self;
+	env.locals = self; // This is wrong, need an additional parameter.
+	// Create a message here to lookup, pass along the arguments we need to.
+	slot = obj_lookup_slot_locally(self, "lookup");
+	if(slot)
+	{
+		slot_t* other = (slot_t*)obj_perform(self, slot, &env);
+		return (slot_t*)obj_perform(self, other, &env);
+	}
+	else
+	{
+		slot = obj_lookup_slot_locally(self, name);
+		if(slot)
+			return slot;
+
+		while((parent_slot = obj_lookup_slot_locally(self, "parent")) != NULL)
+		{
+			// FIXME: Prevent loops
+			slot = obj_lookup_slot_locally(parent_slot->data, name);
+			if(slot)
+				return slot;
+		}
+	}
+
+	// We should raise an exception here instead, but no exceptions yet.
+	return NULL;
+}
+
+obj_t* obj_perform(obj_t* self, slot_t* slot, closure_env_t* env)
 {
 	if(slot->activatable)
 	{
 		closure_t* func = (closure_t*)slot->data;
-		func->receiver = self;
+		func->env = env;
 		closure_t* activate = (closure_t*)obj_lookup_slot(slot->data, "activate");
 		if(activate)
 		{
-			activate->receiver = self;
-			// Create an activation record including scope and all that jazz
-			return activate->call(func);
+			// Create an activation record including scope and all that jazz and set it in the env
+			return activate->call(env);
 		}
 	}
 	return slot->data;

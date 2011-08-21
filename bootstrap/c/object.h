@@ -17,8 +17,6 @@
 #ifndef __ACUTE__OBJECT_H__
 #define __ACUTE__OBJECT_H__
 
-#include "slots.h"
-
 typedef struct object_s
 {
 	unsigned object_size:28; // How big is our object? (Max size: 256 MB)
@@ -26,6 +24,9 @@ typedef struct object_s
 	unsigned marked:1;       // Has this object been marked by the GC?
 	void* slots;             // Backed by a Judy array, see judy64d.c
 } obj_t;
+
+#include "slots.h"
+#include "closure.h"
 
 /* Create a new empty object. This object descends from nobody, has no slots. This should probably be private, as it doesn't make
    sense in the language, it only makes sense to set up the catch-22 linkage issue between the Object object, and the Lobby object.
@@ -48,6 +49,6 @@ extern void obj_register_slot(obj_t*, char*, slot_t*);
 extern slot_t* obj_lookup_slot(obj_t*, char*);
 
 /* Evaluate the value in the slot. Either by returning it outright, or lookup up its activate slot and calling it. */
-extern obj_t* obj_perform(obj_t*, slot_t*);
+extern obj_t* obj_perform(obj_t*, slot_t*, closure_env_t*);
 
 #endif /* !__ACUTE__OBJECT_H__ */

@@ -17,20 +17,28 @@
 #ifndef __ACUTE__CLOSURE_H__
 #define __ACUTE__CLOSURE_H__
 
-struct closure_s;
-typedef obj_t* (*obj_closure_t)(struct closure_s*);
+#include "object.h"
+
+typedef struct closure_env_s
+{
+	obj_t* receiver;
+	obj_t* locals;
+	void* message;
+	void* activation;
+} closure_env_t;
+
+typedef obj_t* (*obj_closure_t)(closure_env_t*);
 
 typedef struct closure_s
 {
 	obj_closure_t call;
-	obj_t* receiver;
-	void* message;
-	void* activation;
+	closure_env_t* env;
 } closure_t;
 
-/* Creates a closure. Must supply a pointer to the function to be executed. Not elegant, but to require clang as a compiler is probably
-   not a wise move for some people, as much as I'd like to. So since we have no portable closures baked into C, we have to build our
-   own. */
+/* Creates a closure. Must supply a pointer to the function to be executed. Must set the env field of the closure_t returned before
+   it's called, on the caller side. This should be the environment you're capturing. Not elegant, but to require clang as a compiler is
+   probably not a wise move for some people, as much as I'd like to. So since we have no portable closures baked into C, we have to
+   build our own. */
 extern closure_t* closure_new(obj_closure_t);
 
 #endif /* !__ACUTE__CLOSURE_H__ */
