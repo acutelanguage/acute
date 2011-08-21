@@ -38,6 +38,9 @@ extern void gc_initialize(size_t);
    lost. */
 extern void gc_destroy(void);
 
+/* Allocate some memory and register the returned pointer with the GC. */
+extern gcable_t* gc_alloc(size_t);
+
 /* Forces a garbage collection. */
 extern void gc_collect(void);
 

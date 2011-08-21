@@ -82,23 +82,27 @@ static void gc_sweep(gc_t* gc)
 
 void gc_initialize(size_t max_heap_size)
 {
+	void* garbage = malloc(sizeof(gcable_t));
 	if(__acute_collector == NULL)
 		__acute_collector = malloc(sizeof(__acute_collector));
 	__acute_collector->max_heap_size = max_heap_size;
 	__acute_collector->current_heap_size = 0;
+	__acute_collector->free_list = list_new(list_node_new(garbage));
 }
 
 void gc_destroy(void)
 {
-	list_free(__acute_collector->mark_stack);
-	list_free(__acute_collector->roots);
+	if(__acute_collector->mark_stack)
+		list_free(__acute_collector->mark_stack);
+	if(__acute_collector->roots)
+		list_free(__acute_collector->roots);
 	free(__acute_collector);
 	__acute_collector = NULL;
 }
 
-void* gc_alloc(size_t size)
+gcable_t* gc_alloc(size_t size)
 {
-	struct gcable_s* ptr = NULL;
+	gcable_t* ptr = NULL;
 
 	if(size >= (2 ^ 28)) // Hard limit of object sizes: 256 MB
 		return NULL;
@@ -107,16 +111,17 @@ void* gc_alloc(size_t size)
 		gc_collect();
 
 	ptr = list_pop(__acute_collector->free_list);
-	if(!ptr)
+	if(ptr == NULL || ptr->object_size != size)
 		ptr = malloc(sizeof(size));
 	if(ptr)
 	{
 		__acute_collector->current_heap_size += size;
 		ptr->object_size = size;
 		ptr->marked = 0;
+		gc_add_root(ptr);
 	}
 
-	return (void*)ptr;
+	return ptr;
 }
 
 void gc_collect(void)
@@ -127,5 +132,8 @@ void gc_collect(void)
 
 void gc_add_root(void* root)
 {
-	list_append(__acute_collector->roots, root);
+	if(__acute_collector->roots == NULL)
+		__acute_collector->roots = list_new(list_node_new(root));
+	else
+		list_append(__acute_collector->roots, root);
 }
