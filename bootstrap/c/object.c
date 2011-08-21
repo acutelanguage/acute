@@ -21,6 +21,7 @@
 #include "object.h"
 #include "judy64d.h"
 #include "closure.h"
+#include "gc.h"
 
 #define INITIAL_LEVELS 4
 
