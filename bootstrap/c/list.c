@@ -65,6 +65,18 @@ void list_free(list_t* list)
 	list = NULL;
 }
 
+static inline void _list_copy_item(void* item, void* list)
+{
+	list_append((list_t*)list, item);
+}
+
+list_t* list_copy(list_t* first)
+{
+	list_t* second = malloc(sizeof(*first));
+	list_foreach(first, kListIterateDirectionForward, second, _list_copy_item);
+	return second;
+}
+
 void list_prepend_node(list_t* list, list_node_t* node)
 {
 	list_node_t* head = list->head;
@@ -120,8 +132,11 @@ void list_remove(list_t* list, list_node_t* node)
 void* list_pop(list_t* list)
 {
 	list_node_t* last = *list->tailp;
-	*list->tailp = last->prev;
-	list->tailp = &last->prev;
+	if(last)
+	{
+		*list->tailp = last->prev;
+		list->tailp = &last->prev;
+	}
 	return last;
 }
 

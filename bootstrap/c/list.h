@@ -49,6 +49,9 @@ extern list_t* list_new(list_node_t*);
 /* Free the list */
 extern void list_free(list_t*);
 
+/* Copy a list */
+extern list_t* list_copy(list_t*);
+
 /* Add an item to the beginning of list. */
 extern void list_prepend(list_t*, void*);
 extern void list_prepend_node(list_t*, list_node_t*);
