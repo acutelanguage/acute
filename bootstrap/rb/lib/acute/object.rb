@@ -36,7 +36,3 @@ module Acute
     end
   end
 end
-
-require 'slot'
-require 'message'
-require 'closure'

@@ -2,8 +2,6 @@
 # Copyright © 2011, Jeremy Tregunna, All Rights Reserved.
 #
 
-require 'object'
-
 module Acute
   class Slot < ::Acute::Object
     attr_accessor :activatable, :data

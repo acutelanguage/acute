@@ -17,6 +17,5 @@ module Acute
       end)
       @slots[:activate] = activate_slot
     end
-
   end
 end
