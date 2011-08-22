@@ -1,0 +1,7 @@
+source :rubygems
+
+gem 'ruby-llvm', '~> 2.9.1'
+
+group :development, :test do
+  gem 'rspec'
+end
