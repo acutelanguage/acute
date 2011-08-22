@@ -4,7 +4,7 @@
 
 module Acute
   class Message < ::Acute::Object
-    attr_accessor :name, :arguments, :next
+    attr_accessor :name, :arguments, :next, :cached_result
 
     def initialize(name, arguments = [])
       @name = name
@@ -20,6 +20,8 @@ module Acute
       end while n = n.next
       s.strip
     end
+
+    alias :cached_result? :cached_result
 
     protected
 

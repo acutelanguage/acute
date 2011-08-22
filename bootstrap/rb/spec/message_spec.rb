@@ -38,4 +38,19 @@ describe ::Acute::Message do
     m1.next = m2
     m1.to_s.should.eql? "testing stuff"
   end
+
+  it "sets a cached result" do
+    m = ::Acute::Message.new("testing")
+    m.cached_result = 42
+    m.cached_result.should be 42
+  end
+
+  it "returns the cached result in perform" do
+    obj = ::Acute::Object.new
+    other = ::Acute::Object.new
+    obj.register("object", obj)
+    m = ::Acute::Message.new("object")
+    m.cached_result = other
+    obj.perform(obj, :msg => m).should be other
+  end
 end
