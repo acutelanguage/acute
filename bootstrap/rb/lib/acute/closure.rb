@@ -18,5 +18,9 @@ module Acute
       activate_slot.activatable = true
       @slots[:activate] = activate_slot
     end
+
+    def call(env, *args)
+      func.call(env, *args)
+    end
   end
 end
