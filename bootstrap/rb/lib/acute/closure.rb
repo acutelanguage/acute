@@ -11,10 +11,11 @@ module Acute
       super()
       @env = env
       @func = blk
-      activate_slot = Slot.new(true, lambda do |env|
+      activate_slot = Slot.new(lambda do |env|
         blk_slot = env[:sender].lookup(env[:msg].name)
         blk_slot.data.func.call(env, *env[:msg].arguments) if blk_slot
       end)
+      activate_slot.activatable = true
       @slots[:activate] = activate_slot
     end
   end

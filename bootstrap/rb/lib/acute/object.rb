@@ -30,7 +30,7 @@ module Acute
     end
 
     def register(name, obj, options = {})
-      slot = Slot.new(options[:activatable] || false, obj)
+      slot = Slot.new(obj, options)
       slots[name.to_sym] = slot
       slot
     end

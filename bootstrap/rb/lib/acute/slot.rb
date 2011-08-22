@@ -6,9 +6,9 @@ module Acute
   class Slot < ::Acute::Object
     attr_accessor :activatable, :data
 
-    def initialize(activatable = false, data)
+    def initialize(data, options = { :activatable => false })
       super()
-      @activatable = activatable
+      @activatable = options[:activatable]
       @data = data
     end
 
