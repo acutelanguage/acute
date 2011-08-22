@@ -28,7 +28,13 @@ describe ::Acute::Object do
     slot.data.func.should be_an_instance_of(Proc)
   end
 
-  it "performs a message" do
+  it "performs a message that will return the value in the slot" do
+    @obj.register("fortyTwo", 42)
+    msg = ::Acute::Message.new("fortyTwo")
+    @obj.perform(@obj, :msg => msg).should be 42
+  end
+
+  it "performs a message that will activate a closure" do
     @obj.register("add", ::Acute::Closure.new { |env, a, b| a + b }, :activatable => true)
     msg = ::Acute::Message.new("add", [1, 2])
     @obj.perform(@obj, :msg => msg).should be 3
