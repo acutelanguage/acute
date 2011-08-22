@@ -1,0 +1,29 @@
+## Ruby bootstrap
+
+So you're brave. Brave enough to venture into trying to build this monstrocity. The initial bootstrap, the one you're looking at right
+now, is written in Ruby. Why Ruby? Why not? It has recent LLVM bindings, which are something we need, base types that I'd otherwise have
+to implement myself, and all these goodies. It's a "get up off the ground quickly" language for me, and for Acute.
+
+This code will no longer be used at some point in the future. When that happens, there will be LLVM IR in another dir under the main
+bootstrap dir, which will be used instead. This IR will be pre-generated from this very bootstrap, or perhaps, the full vm itself. Either
+way, the future bootstrap involves LLVM IR and not Ruby. I will however, leave the Ruby bootstrap, in all its wonderous glory, in the
+tree forever and ever, amen. Think of it as a donation for those who may want to understand how one little language was initially
+bootstrapped. Or a high level implementation of an IoVM. Either way, we'll leave it for science.
+
+### Building
+
+To build the Ruby bootstrap, we need to have installed, Ruby 1.9.2 (tested with -p180, other versions may work). We also need to have
+LLVM 2.9 built with the shared library (compile with --enable-shared). Go ahead, do that first; I'll wait.
+
+...
+
+Next you'll want to install bundler if you haven't already, it can be installed by running:
+
+    $ gem install bundler
+
+Next, we ask bundler to install our dependencies:
+
+    $ bundle install
+
+That's it, you're almost done. The next part hasn't been written yet, since we're only at the phase when I write this where the object
+model is being built up. The model is done, and tested, but no front-end exists yet. Stay tuned.
