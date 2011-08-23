@@ -7,4 +7,5 @@ module Acute
   autoload :Message, 'acute/message'
   autoload :Closure, 'acute/closure'
   autoload :Slot, 'acute/slot'
+  autoload :Number, 'acute/number'
 end
