@@ -27,11 +27,5 @@ module Acute
     def to_i
       value.to_i
     end
-
-    private
-
-    def method(name, &blk)
-      @slots[name.to_sym] = ::Acute::Slot.new(::Acute::Closure.new(&blk), :activatable => true)
-    end
   end
 end

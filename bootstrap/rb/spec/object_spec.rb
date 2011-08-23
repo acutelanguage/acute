@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ::Acute::Object do
   before(:each) do
-    @obj = ::Acute::Object.new
+    @obj = ::Acute::Object.new(true)
   end
 
   it "is a valid object" do
@@ -38,5 +38,14 @@ describe ::Acute::Object do
     @obj.register("add", ::Acute::Closure.new { |env, a, b| a + b }, :activatable => true)
     msg = ::Acute::Message.new("add", [1, 2])
     @obj.perform(@obj, :msg => msg).should be 3
+  end
+
+  it "can clone itself" do
+    @obj.perform(@obj, :msg => ::Acute::Message.new("clone")).should_not be_nil
+  end
+
+  it "has a parent" do
+    new_obj = @obj.perform(@obj, :msg => ::Acute::Message.new("clone"))
+    new_obj.lookup("parent").data.should_not be_nil
   end
 end

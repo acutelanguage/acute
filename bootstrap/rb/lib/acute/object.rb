@@ -6,23 +6,35 @@ module Acute
   class Object
     attr_reader :slots
 
-    def initialize
+    def initialize(init_mt = false)
       @slots = {}
+      method_table if init_mt
+    end
+
+    def method_table
+      method(:clone) do |env|
+        o = Object.new
+        o.register(:parent, self)
+        o.register(:init, ::Acute::Closure.new { |env| env[:self] })
+        o.perform(env[:sender], :msg => ::Acute::Message.new("init"))
+        o
+      end
     end
 
     def lookup(sym)
       lookup_func = slots[:lookup]
       lookup_func ||= lambda { |s| slots[s.to_sym] }
-      lookup_func.call sym.to_sym
+      return lookup_func.call sym.to_sym if lookup_func
+      raise RuntimeError, "Could not find slot '#{sym}'."
     end
 
     def perform(sender, env = {})
       env.merge!(:sender => sender)
       return env[:msg].cached_result if env[:msg] and env[:msg].cached_result?
       slot = lookup env[:msg].name
-      if slot.activatable?
+      if slot and slot.activatable?
         func = slot.data
-        func.env = env
+        func.env = env.merge(:self => self)
         activate = func.lookup(:activate)
         return activate.data.call env if activate
         raise RuntimeError, "Activatable object cannot activate. Could not find 'activate' method." unless activate
@@ -34,6 +46,12 @@ module Acute
       slot = Slot.new(obj, options)
       slots[name.to_sym] = slot
       slot
+    end
+
+    private
+
+    def method(name, &blk)
+      @slots[name.to_sym] = ::Acute::Slot.new(::Acute::Closure.new(&blk), :activatable => true)
     end
   end
 end
