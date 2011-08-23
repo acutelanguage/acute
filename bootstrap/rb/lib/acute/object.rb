@@ -18,8 +18,8 @@ module Acute
 
     def perform(sender, env = {})
       env.merge!(:sender => sender)
-      slot = lookup env[:msg].name
       return env[:msg].cached_result if env[:msg] and env[:msg].cached_result?
+      slot = lookup env[:msg].name
       if slot.activatable?
         func = slot.data
         func.env = env
