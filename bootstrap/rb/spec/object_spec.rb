@@ -48,4 +48,8 @@ describe ::Acute::Object do
     new_obj = @obj.perform(@obj, :msg => ::Acute::Message.new("clone"))
     new_obj.lookup("parent").data.should_not be_nil
   end
+
+  it "displays the correct slot table" do
+    @obj.perform(@obj, :msg => ::Acute::Message.new("slotNames")).value.should == ['clone', 'slotNames']
+  end
 end

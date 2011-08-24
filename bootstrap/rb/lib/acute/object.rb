@@ -12,15 +12,8 @@ module Acute
     end
 
     def method_table
-      method(:clone) do |env|
-        o = Object.new
-        o.register(:parent, self)
-        o.register(:init, ::Acute::Closure.new { |env| env[:self] })
-        o.perform(env[:sender], :msg => ::Acute::Message.new("init"))
-        o
-      end
-
-      method(:slotNames) { |env| ::Acute::List.new(slots.keys) }
+      method(:clone, &clone_method)
+      method(:slotNames) { |env| ::Acute::List.new(*slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
     end
 
     def lookup(sym)
@@ -48,6 +41,16 @@ module Acute
       slot = Slot.new(obj, options)
       slots[name.to_sym] = slot
       slot
+    end
+
+    def clone_method
+      lambda do |env|
+        o = Object.new
+        o.register(:parent, self)
+        o.register(:init, ::Acute::Closure.new { |env| env[:self] })
+        o.perform(env[:sender], :msg => ::Acute::Message.new("init"))
+        o
+      end
     end
 
     private

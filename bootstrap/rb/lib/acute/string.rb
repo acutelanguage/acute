@@ -19,6 +19,10 @@ module Acute
       method(:prepend)   { |env, s| @value = s.value + value; self }
     end
 
+    def to_s
+      value.to_s
+    end
+
     def with_method
       lambda do |env, s|
         o = env[:self].perform(env[:sender], :msg => ::Acute::Message.new("clone"))
