@@ -8,4 +8,5 @@ module Acute
   autoload :Closure, 'acute/closure'
   autoload :Slot, 'acute/slot'
   autoload :Number, 'acute/number'
+  autoload :List, 'acute/list'
 end

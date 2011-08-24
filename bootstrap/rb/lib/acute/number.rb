@@ -24,8 +24,16 @@ module Acute
       method(:shiftRight) { |env, n| Number.new(value >> n.to_i) }
     end
 
+    def <=>(other)
+      self.value <=> other.value
+    end
+
     def to_i
       value.to_i
+    end
+
+    def to_s
+      to_i.to_s
     end
   end
 end
