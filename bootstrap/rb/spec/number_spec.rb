@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 describe ::Acute::Number do
   before(:each) do
     @num = ::Acute::Number.new(42)
@@ -83,5 +85,9 @@ describe ::Acute::Number do
     msg = ::Acute::Message.new("shiftRight")
     msg.arguments = [other]
     @num.perform(@num, :msg => msg).value.should be 10
+  end
+
+  it "converts its representation to a string" do
+    ::Acute::Number.new(42).to_s.should == "42"
   end
 end
