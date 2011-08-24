@@ -4,6 +4,7 @@
 
 module Acute
   class Number < ::Acute::Object
+    include Comparable
     attr_reader :value
 
     def initialize(num)
