@@ -1,0 +1,6 @@
+rvm:
+  - 1.9.2
+gemfile: bootstrap/rb/Gemfile
+notifications:
+  recipients:
+    - jeremy@tregunna.ca
