@@ -3,3 +3,5 @@ source :rubygems
 gem 'ruby-llvm', '~> 2.9.1'
 gem 'rake'
 gem 'rspec'
+gem 'simplecov', '>= 0.4.0', :require => false
+gem 'simplecov-rcov', :require => false
