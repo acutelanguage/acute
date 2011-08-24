@@ -1,7 +1,5 @@
 source :rubygems
 
 gem 'ruby-llvm', '~> 2.9.1'
-
-group :development, :test, :spec do
-  gem 'rspec'
-end
+gem 'rake'
+gem 'rspec'
