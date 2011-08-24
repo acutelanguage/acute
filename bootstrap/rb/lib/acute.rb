@@ -9,4 +9,5 @@ module Acute
   autoload :Slot, 'acute/slot'
   autoload :Number, 'acute/number'
   autoload :List, 'acute/list'
+  autoload :String, 'acute/string'
 end
