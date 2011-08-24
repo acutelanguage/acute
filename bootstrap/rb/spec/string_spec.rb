@@ -14,10 +14,20 @@ describe ::Acute::String do
   end
 
   it "creates a new string with the factory 'with'" do
-    str_proto = ::Acute::String.new
-    replacement = ::Acute::String.new("testing")
-    testable = str_proto.perform(str_proto, :msg => ::Acute::Message.new("setString", [replacement]))
-    testable.value.should == replacement.value
+    str = ::Acute::String.new("testing")
+    testable = str.perform(str, :msg => ::Acute::Message.new("with", [str]))
+    testable.value.should == str.value
+  end
+
+  it "compares two identical strings in ruby" do
+    str = ::Acute::String.new("foo")
+    (str <=> str).should be 0
+  end
+
+  it "compares two different strings in ruby" do
+    str = ::Acute::String.new("foo")
+    other = ::Acute::String.new("bar")
+    (str <=> other).should be 1
   end
 
   it "can append to an existing string" do

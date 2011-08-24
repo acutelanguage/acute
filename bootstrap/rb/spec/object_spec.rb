@@ -21,6 +21,10 @@ describe ::Acute::Object do
     slot.data.should be 42
   end
 
+  it "cannot find a non-existent slot" do
+    lambda { @obj.lookup(:amazingStuff) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff'.")
+  end
+
   it "stores an activatable message in the slot table" do
     @obj.register("add", ::Acute::Closure.new { |env, a, b| a + b }, :activatable => true)
     slot = @obj.lookup(:add)

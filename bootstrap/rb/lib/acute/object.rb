@@ -16,24 +16,26 @@ module Acute
       method(:slotNames) { |env| ::Acute::List.new(*slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
     end
 
-    def lookup(sym)
+    def lookup(env = {}, sym)
       lookup_func = slots[:lookup]
-      lookup_func ||= lambda { |s| slots[s.to_sym] }
-      return lookup_func.call sym.to_sym if lookup_func
-      raise RuntimeError, "Could not find slot '#{sym}'."
+      lookup_func ||= lambda { |e, s| slots[s.to_sym] }
+      slot = lookup_func.call(env, sym.to_sym) if lookup_func
+      raise RuntimeError, "Could not find slot '#{sym}'." unless slot
+      slot
     end
 
     def perform(sender, env = {})
       env.merge!(:sender => sender)
+      env.merge!(:self => self) unless env[:self]
       return env[:msg].cached_result if env[:msg] and env[:msg].cached_result?
-      slot = lookup env[:msg].name
-      if slot and slot.activatable?
+      slot = lookup env, env[:msg].name
+      if slot and slot.activatable? and slot.data.kind_of? ::Acute::Closure
         func = slot.data
         func.env = env.merge(:self => self)
-        activate = func.lookup(:activate)
+        activate = func.lookup(env, :activate)
         return activate.data.call env if activate
-        raise RuntimeError, "Activatable object cannot activate. Could not find 'activate' method." unless activate
       end
+      raise RuntimeError, "Internal Error: Could not find slot '#{env[:msg].name}'" unless slot
       slot.data
     end
 
@@ -45,15 +47,17 @@ module Acute
 
     def clone_method
       lambda do |env|
-        o = Object.new
+        o = self.class.new
+        self.slots.each { |k,v| o.register(k, v.data, :activatable => v.activatable?) }
         o.register(:parent, self)
-        o.register(:init, ::Acute::Closure.new { |env| env[:self] })
+        o.method(:init) { |env| o }
+        p env[:sender]
         o.perform(env[:sender], :msg => ::Acute::Message.new("init"))
         o
       end
     end
 
-    private
+    protected
 
     def method(name, &blk)
       @slots[name.to_sym] = ::Acute::Slot.new(::Acute::Closure.new(&blk), :activatable => true)

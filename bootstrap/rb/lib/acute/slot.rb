@@ -7,9 +7,13 @@ module Acute
     attr_accessor :activatable, :data
 
     def initialize(data, options = { :activatable => false })
-      super()
+      @slots = {}
       @activatable = options[:activatable]
       @data = data
+    end
+
+    def to_s
+      "<Slot data_type=#{data.class}#{activatable? ? ' activates' : ''}>"
     end
 
     alias :activatable? :activatable

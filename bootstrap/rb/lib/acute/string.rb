@@ -13,6 +13,7 @@ module Acute
     end
 
     def method_table
+      method(:clone, &clone_method)
       method(:with, &with_method)
       method(:setString) { |env, s| @value = s.value; self }
       method(:append)    { |env, s| @value << s.value; self }
@@ -23,9 +24,22 @@ module Acute
       value.to_s
     end
 
+    def clone_method
+      lambda do |env|
+        o = self.class.new
+        # Because we don't have inheritance
+        self.slots.each { |k,v| o.register(k.to_sym, v.data, :activatable => v.activatable?) }
+        o.register(:parent, self)
+        o.register(:init, ::Acute::Closure.new { |env| o }, :activatable => true)
+        p o.slots.keys
+        o.perform(env[:sender], :msg => ::Acute::Message.new("init"))
+        o
+      end
+    end
+
     def with_method
       lambda do |env, s|
-        o = env[:self].perform(env[:sender], :msg => ::Acute::Message.new("clone"))
+        o = self.perform(env[:sender], :msg => ::Acute::Message.new("clone"))
         o.perform(env[:sender], :msg => ::Acute::Message.new("setString", [s]))
       end
     end

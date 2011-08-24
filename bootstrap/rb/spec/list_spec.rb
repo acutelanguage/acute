@@ -10,6 +10,25 @@ describe ::Acute::List do
     @list.should be_an_instance_of(::Acute::List)
   end
 
+  it "can compare two empty lists" do
+    r = @list <=> ::Acute::List.new
+    r.should be 0
+  end
+
+  it "can compare an empty list to a populated list" do
+    r = @list <=> ::Acute::List.new(1, 2)
+    r.should be -1
+  end
+
+  it "outputs a string representation of an empty list" do
+    @list.to_s.should == "list()"
+  end
+
+  it "outputs a string representation of a populated list" do
+    @list.perform(@list, :msg => ::Acute::Message.new("append", [1])).should_not be_nil
+    @list.to_s.should == "list(1)"
+  end
+
   it "is empty" do
     @list.perform(@list, :msg => ::Acute::Message.new("isEmpty")).should be_true
   end
