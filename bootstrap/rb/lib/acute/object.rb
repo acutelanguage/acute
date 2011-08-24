@@ -19,6 +19,8 @@ module Acute
         o.perform(env[:sender], :msg => ::Acute::Message.new("init"))
         o
       end
+
+      method(:slotNames) { |env| ::Acute::List.new(slots.keys) }
     end
 
     def lookup(sym)
