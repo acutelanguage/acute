@@ -54,6 +54,6 @@ describe ::Acute::Object do
   end
 
   it "displays the correct slot table" do
-    @obj.perform(@obj, :msg => ::Acute::Message.new("slotNames")).value.should == ['clone', 'slotNames']
+    @obj.perform(@obj, :msg => ::Acute::Message.new("slotNames")).value.should == @obj.slots.keys.map(&:to_s)
   end
 end
