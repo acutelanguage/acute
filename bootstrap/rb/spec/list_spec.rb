@@ -29,6 +29,12 @@ describe ::Acute::List do
     @list.to_s.should == "list(1)"
   end
 
+  it "outputs a string representation of a populated list with multiple arguments" do
+    @list.perform(@list, :msg => ::Acute::Message.new("append", [1])).should_not be_nil
+    @list.perform(@list, :msg => ::Acute::Message.new("append", [2])).should_not be_nil
+    @list.to_s.should == "list(1, 2)"
+  end
+
   it "is empty" do
     @list.perform(@list, :msg => ::Acute::Message.new("isEmpty")).should be_true
   end

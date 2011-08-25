@@ -26,8 +26,9 @@ module Acute
 
     def to_s
       s = "list("
-      value.each do |elem|
-        s << elem.to_s
+      max_count = value.count - 1
+      value.each_with_index do |elem, i|
+        s << "#{elem.to_s}#{i != max_count ? ', ' : ''}"
       end
       s << ")"
     end
