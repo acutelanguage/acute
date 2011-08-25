@@ -50,9 +50,12 @@ module Acute
         o = self.class.new
         self.slots.each { |k,v| o.register(k, v.data, :activatable => v.activatable?) }
         o.register(:parent, self)
-        o.method(:init) { |env| o }
-        p env[:sender]
-        o.perform(env[:sender], :msg => ::Acute::Message.new("init"))
+        begin
+          slot = o.lookup "init"
+        rescue RuntimeError
+          slot = nil
+        end
+        o.perform(env[:sender], :msg => ::Acute::Message.new("init")) if slot
         o
       end
     end
