@@ -12,8 +12,7 @@ module Acute
     end
 
     def parse(code)
-      p expression.parse(code)
-      p @transformer.apply expression.parse(code)
+      @transformer.apply expression.parse(code)
     end
 
     root :expression
@@ -46,7 +45,7 @@ module Acute
     end
     
     rule :identifier do
-      (match('[a-zA-Z]') >> match('[a-zA-Z0-9_]').repeat).as(:identifier) >> space?
+      (match('[a-zA-Z_\+\-\*\/!@$%^&=\.\?:<>\|]') >> match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|]').repeat).as(:identifier) >> space?
     end
     
     rule :integer do
