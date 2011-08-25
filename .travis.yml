@@ -4,3 +4,4 @@ gemfile: bootstrap/rb/Gemfile
 notifications:
   recipients:
     - jeremy@tregunna.ca
+    - janpaulbultmann@me.com
