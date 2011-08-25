@@ -1,8 +1,11 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    blankslate (2.1.2.4)
     diff-lcs (1.1.2)
     ffi (1.0.9)
+    parslet (1.2.1)
+      blankslate (~> 2.0)
     rake (0.8.7)
     rspec (2.6.0)
       rspec-core (~> 2.6.0)
@@ -23,6 +26,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  parslet
   rake
   rspec
   ruby-llvm (~> 2.9.1)

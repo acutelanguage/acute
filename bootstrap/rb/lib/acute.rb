@@ -10,4 +10,6 @@ module Acute
   autoload :Number, 'acute/number'
   autoload :List, 'acute/list'
   autoload :String, 'acute/string'
+  autoload :Parser, 'acute/parser'
+  autoload :Transformer, 'acute/transformer'
 end
