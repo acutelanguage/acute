@@ -4,6 +4,7 @@
 
 module Acute
   class Message < ::Acute::Object
+    include Comparable
     attr_accessor :name, :arguments, :next, :cached_result
 
     def initialize(name, arguments = [], options = { cached_result: nil })
@@ -11,6 +12,10 @@ module Acute
       @arguments = arguments
       @next = nil
       @cached_result = options[:cached_result]
+    end
+
+    def <=>(other)
+      to_s <=> other.to_s
     end
 
     def to_s
