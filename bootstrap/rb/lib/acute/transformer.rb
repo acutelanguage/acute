@@ -2,6 +2,8 @@
 # Copyright © 2011, Jeremy Tregunna, All Rights Reserved.
 #
 
+require 'parslet'
+
 module Acute
   class Transformer < Parslet::Transform
     rule :expr => subtree(:expr) do
@@ -14,10 +16,6 @@ module Acute
 
     rule :string => simple(:string) do
       ::Acute::Message.new(string, [], { cached_result: ::Acute::String.new(string) })
-    end
-
-    rule :args => sequence(:args) do
-      args
     end
 
     rule :message => { :identifier => simple(:identifier) } do

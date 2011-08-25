@@ -2,6 +2,8 @@
 # Copyright © 2011, Jeremy Tregunna, All Rights Reserved.
 #
 
+require 'parslet'
+
 module Acute
   class Parser < ::Parslet::Parser
     def initialize
