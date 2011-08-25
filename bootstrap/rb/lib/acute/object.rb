@@ -14,6 +14,8 @@ module Acute
     def method_table
       method(:clone, &clone_method)
       method(:slotNames) { |env| ::Acute::List.new(*slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
+      method(:ifTrue)    { |env, msg| self.perform(env[:sender], :msg => msg) }
+      method(:ifFalse)   { |env, msg| ::Acute::Nil.instance }
     end
 
     def lookup(env = {}, sym)

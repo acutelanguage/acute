@@ -4,6 +4,7 @@
 
 module Acute
   autoload :Object, 'acute/object'
+  autoload :Nil, 'acute/nil'
   autoload :Message, 'acute/message'
   autoload :Closure, 'acute/closure'
   autoload :Slot, 'acute/slot'
