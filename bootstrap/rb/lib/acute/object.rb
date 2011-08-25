@@ -31,7 +31,7 @@ module Acute
       slot = lookup env, env[:msg].name
       if slot and slot.activatable? and slot.data.kind_of? ::Acute::Closure
         func = slot.data
-        func.env = env.merge(:self => self)
+        func.env = env
         activate = func.lookup(env, :activate)
         return activate.data.call env if activate
       end
