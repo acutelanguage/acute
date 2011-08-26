@@ -13,4 +13,5 @@ module Acute
   autoload :String, 'acute/string'
   autoload :Parser, 'acute/parser'
   autoload :Transformer, 'acute/transformer'
+  autoload :Walker, 'acute/walker'
 end

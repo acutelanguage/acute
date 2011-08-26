@@ -50,14 +50,22 @@ display = proc do |code|
   end
 
   begin
-    p tree
+    puts "Message: " + tree.to_s
+    lobby = ::Acute::Object.new
+    walker = ::Acute::Walker.new(lobby, tree)
+    walker.walk { |obj| puts "=> " + obj.to_s }
   rescue Exception => e
-    e.render
+    p e
+    #e.render
   end
 end
 
 file = ARGV.last unless repl or eval_string
-evals << File.read(file) if file
+if file
+  evals << File.read(file)
+elsif eval_string
+  evals << eval_string
+end
 
 if evals.empty?
   if $stdin.tty?
