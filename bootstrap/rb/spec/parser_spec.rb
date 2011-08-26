@@ -6,22 +6,22 @@ describe ::Acute::List do
   end
 
   it "builds a message with no arguments" do
-    @parser.parse("foo").should == [::Acute::Message.new("foo")]
+    @parser.parse("foo").should == ::Acute::Message.new("foo")
   end
 
   it "builds a message with an argument" do
-    @parser.parse("foo(1)").should == [::Acute::Message.new("foo", [::Acute::Message.new("1")])]
+    @parser.parse("foo(1)").should == ::Acute::Message.new("foo", [::Acute::Message.new("1")])
   end
 
   it "builds a message with multiple arguments" do
-    @parser.parse("foo(1, 2)").should == [::Acute::Message.new("foo", [[::Acute::Message.new("1")], [::Acute::Message.new("2")]])]
+    @parser.parse("foo(1, 2)").should == ::Acute::Message.new("foo", [[::Acute::Message.new("1"), ::Acute::Message.new("2")]])
   end
 
   it "recognizes integers" do
-    @parser.parse("1").should == [::Acute::Message.new("1")]
+    @parser.parse("1").should == ::Acute::Message.new("1")
   end
 
   it "recognizes strings" do
-    @parser.parse('"foo"').should == [::Acute::String.new("foo")]
+    @parser.parse('"foo"').should == ::Acute::String.new("foo")
   end
 end
