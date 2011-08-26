@@ -29,7 +29,7 @@ module Acute
     end
 
     rule :message => { :identifier => simple(:identifier), :args => subtree(:args) } do
-      ::Acute::Message.new(identifier, [args])
+      ::Acute::Message.new(identifier, [*args])
     end
   end
 end
