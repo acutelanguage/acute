@@ -7,7 +7,13 @@ require 'parslet'
 module Acute
   class Transformer < Parslet::Transform
     rule :expr => subtree(:expr) do
-      expr
+      t = expr.shift
+      r = t
+      expr.each do |o|
+        t.next = o
+        t = t.next
+      end
+      r
     end
 
     rule :integer => simple(:integer) do
@@ -23,7 +29,7 @@ module Acute
     end
 
     rule :message => { :identifier => simple(:identifier), :args => subtree(:args) } do
-      ::Acute::Message.new(identifier, args)
+      ::Acute::Message.new(identifier, [args])
     end
   end
 end
