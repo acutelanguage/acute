@@ -22,7 +22,7 @@ describe ::Acute::Object do
   end
 
   it "cannot find a non-existent slot" do
-    lambda { @obj.lookup(:amazingStuff) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff'.")
+    lambda { @obj.lookup(:amazingStuff) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff' on 'Acute::Object'.")
   end
 
   it "stores an activatable message in the slot table" do

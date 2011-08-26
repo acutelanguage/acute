@@ -22,13 +22,12 @@ module Acute
       lookup_func = slots[:lookup]
       lookup_func ||= lambda { |e, s| slots[s.to_sym] }
       slot = lookup_func.call(env, sym.to_sym) if lookup_func
-      raise RuntimeError, "Could not find slot '#{sym}'." unless slot
+      raise RuntimeError, "Could not find slot '#{sym}' on '#{self.class}'." unless slot
       slot
     end
 
     def perform(sender, env = {})
       env.merge!(:sender => sender)
-      env.merge!(:self => self) unless env[:self]
       return env[:msg].cached_result if env[:msg] and env[:msg].cached_result?
       slot = lookup env, env[:msg].name
       if slot and slot.activatable? and slot.data.kind_of? ::Acute::Closure
