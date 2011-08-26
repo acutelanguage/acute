@@ -17,19 +17,19 @@ module Acute
     end
 
     rule :integer => simple(:integer) do
-      ::Acute::Message.new(integer, [], { cached_result: ::Acute::Number.new(integer) })
+      ::Acute::Message.new(integer, [], { cached_result: ::Acute::Number.new(integer.to_s.to_i) })
     end
 
     rule :string => simple(:string) do
-      ::Acute::Message.new(string, [], { cached_result: ::Acute::String.new(string) })
+      ::Acute::Message.new(string, [], { cached_result: ::Acute::String.new(string.to_s) })
     end
 
     rule :message => { :identifier => simple(:identifier) } do
-      ::Acute::Message.new(identifier, [])
+      ::Acute::Message.new(identifier.to_s, [])
     end
 
     rule :message => { :identifier => simple(:identifier), :args => subtree(:args) } do
-      ::Acute::Message.new(identifier, [*args])
+      ::Acute::Message.new(identifier.to_s, [*args])
     end
   end
 end
