@@ -24,4 +24,9 @@ describe ::Acute::List do
   it "recognizes strings" do
     @parser.parse('"foo"').should == ::Acute::String.new("foo")
   end
+
+  it "has a next message" do
+    tree = @parser.parse('foo bar')
+    tree.next.should == ::Acute::Message.new("bar")
+  end
 end
