@@ -23,6 +23,7 @@ module Acute
       method(:bitwiseNot) { |env| Number.new(~value) }
       method(:shiftLeft)  { |env, n| Number.new(value << n.to_i) }
       method(:shiftRight) { |env, n| Number.new(value >> n.to_i) }
+      method(:factorial)  { |env| Number.new((1..value).reduce(1, :*)) }
     end
 
     def <=>(other)
