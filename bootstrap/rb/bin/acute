@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+begin
+  require 'rubygems'
+  require 'bundler/setup'
+rescue LoadError => e
+  e.render
+end
+
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'getoptlong'
+require 'parslet'
+require 'acute'
+require 'pp'
+
+opts = GetoptLong.new(
+  ['--eval', '-e', GetoptLong::REQUIRED_ARGUMENT],
+  ['--repl', '-i', GetoptLong::NO_ARGUMENT],
+  ['--help', '-h', GetoptLong::NO_ARGUMENT]
+)
+
+bench = false
+repl = false
+file = nil
+eval_string = nil
+evals = []
+
+opts.each do |opt, arg|
+  case opt
+    when '--help'
+      usage
+      exit 1
+    when '--repl'
+      repl = true
+    when '--eval'
+      eval_string = arg
+  end
+end
+
+display = proc do |code|
+  parser = Acute::Parser.new
+
+  if bench
+    require 'benchmark'
+    Benchmark.bmbm do |x|
+      x.report { tree = parser.parse(code) }
+    end
+  else
+    tree = parser.parse(code)
+  end
+
+  begin
+    p tree
+  rescue Exception => e
+    e.render
+  end
+end
+
+file = ARGV.last unless repl or eval_string
+evals << File.read(file) if file
+
+if evals.empty?
+  if $stdin.tty?
+    require 'readline'
+    loop do
+      code = Readline.readline "Acute> "
+      exit 0 unless code and code != "exit"
+      display[code]
+    end
+  else
+    evals << STDIN.read
+  end
+end
+
+evals.each(&display)
