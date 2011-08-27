@@ -74,10 +74,9 @@ module Acute
     def clone_method
       lambda do |env|
         o = self.class.new
-        self.slots.each { |k,v| o.register(k, v.data, :activatable => v.activatable?) }
         o.register(:parent, self)
         begin
-          slot = o.lookup "init"
+          slot = o.lookup(env, "init")
         rescue RuntimeError
           slot = nil
         end
