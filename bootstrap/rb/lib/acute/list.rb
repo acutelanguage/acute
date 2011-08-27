@@ -14,6 +14,7 @@ module Acute
     end
 
     def method_table
+      method(:parent)  { |env| env[:sender].perform(env[:sender], ::Acute::Message.new("Object")) }
       method(:append)  { |env, o| value << o }
       method(:prepend) { |env, o| value.unshift o }
       method(:isEmpty) { |env| value.empty? }

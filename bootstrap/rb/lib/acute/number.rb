@@ -15,14 +15,14 @@ module Acute
 
     def method_table
       %w{+ - * /}.each do |s|
-        method(s)         { |env, n| Number.new(value.send(s, n.to_i)) }
+        method(s)         { |env, n| Number.new(value.send(s, eval_in_context(n, env[:sender]).to_i)) }
       end
-      method(:bitwiseAnd) { |env, n| Number.new(value & n.to_i) }
-      method(:bitwiseOr)  { |env, n| Number.new(value | n.to_i) }
-      method(:bitwiseXor) { |env, n| Number.new(value ^ n.to_i) }
+      method(:bitwiseAnd) { |env, n| Number.new(value & eval_in_context(n, env[:sender]).to_i) }
+      method(:bitwiseOr)  { |env, n| Number.new(value | eval_in_context(n, env[:sender]).to_i) }
+      method(:bitwiseXor) { |env, n| Number.new(value ^ eval_in_context(n, env[:sender]).to_i) }
       method(:bitwiseNot) { |env| Number.new(~value) }
-      method(:shiftLeft)  { |env, n| Number.new(value << n.to_i) }
-      method(:shiftRight) { |env, n| Number.new(value >> n.to_i) }
+      method(:shiftLeft)  { |env, n| Number.new(value << eval_in_context(n, env[:sender]).to_i) }
+      method(:shiftRight) { |env, n| Number.new(value >> eval_in_context(n, env[:sender]).to_i) }
       method(:factorial)  { |env| Number.new((1..value).reduce(1, :*)) }
     end
 

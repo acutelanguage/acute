@@ -14,6 +14,10 @@ module Acute
       @cached_result = options[:cached_result]
     end
 
+    def perform_on(locals, target)
+      target.perform(locals, :msg => self)
+    end
+
     def <=>(other)
       to_s <=> other.to_s
     end

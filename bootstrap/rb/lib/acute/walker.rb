@@ -19,7 +19,7 @@ module Acute
       m = tree
       begin
         receiver = receiver.perform(receiver, :msg => m, :sender => sender)
-        blk.call receiver
+        blk.call(receiver) if blk
       end while m = m.next
     end
   end

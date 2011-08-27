@@ -53,4 +53,12 @@ describe ::Acute::Message do
     m.cached_result = other
     obj.perform(obj, :msg => m).should be other
   end
+
+  it "performs a message on a context" do
+    msg = ::Acute::Message.new("foo")
+    locals = ::Acute::Object.new
+    target = ::Acute::Object.new
+    target.register("foo", ::Acute::Number.new(42))
+    msg.perform_on(locals, target).value.should be 42
+  end
 end

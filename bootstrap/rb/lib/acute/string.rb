@@ -15,9 +15,10 @@ module Acute
     def method_table
       method(:clone, &clone_method)
       method(:with, &with_method)
-      method(:setString) { |env, s| @value = s.value; self }
-      method(:append)    { |env, s| @value << s.value; self }
-      method(:prepend)   { |env, s| @value = s.value + value; self }
+      method(:setString) { |env, s| @value = eval_in_context(s, env[:sender]).value; self }
+      method(:append)    { |env, s| @value << eval_in_context(s, env[:sender]).value; self }
+      method(:prepend)   { |env, s| @value = eval_in_context(s, env[:sender]).value + value; self }
+      method(:length)    { |env| ::Acute::Number.new(@value.length) }
     end
 
     def to_s

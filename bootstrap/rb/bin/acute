@@ -51,12 +51,13 @@ display = proc do |code|
 
   begin
     puts "Message: " + tree.to_s
-    lobby = ::Acute::Object.new
+    lobby = ::Acute::Object.new(true)
+    lobby.register("Lobby", lobby)
+    lobby.register("Object", ::Acute::Object.new(true))
+    lobby.register("List", ::Acute::List.new)
+    lobby.register("String", ::Acute::String.new)
     walker = ::Acute::Walker.new(lobby, tree)
     walker.walk { |obj| puts "=> " + obj.to_s }
-  rescue Exception => e
-    p e
-    #e.render
   end
 end
 

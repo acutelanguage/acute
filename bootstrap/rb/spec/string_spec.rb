@@ -15,7 +15,7 @@ describe ::Acute::String do
 
   it "creates a new string with the factory 'with'" do
     str = ::Acute::String.new("testing")
-    testable = str.perform(str, :msg => ::Acute::Message.new("with", [str]))
+    testable = str.perform(str, :msg => ::Acute::Message.new("with", [::Acute::Message.new("str", [], :cached_result => str)]))
     testable.value.should == str.value
   end
 
@@ -33,12 +33,12 @@ describe ::Acute::String do
   it "can append to an existing string" do
     str = ::Acute::String.new("foo")
     second = ::Acute::String.new("bar")
-    str.perform(str, :msg => ::Acute::Message.new("append", [second])).value.should == "foobar"
+    str.perform(str, :msg => ::Acute::Message.new("append", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "foobar"
   end
 
   it "can prepend to an existing string" do
     str = ::Acute::String.new("foo")
     second = ::Acute::String.new("bar")
-    str.perform(str, :msg => ::Acute::Message.new("prepend", [second])).value.should == "barfoo"
+    str.perform(str, :msg => ::Acute::Message.new("prepend", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "barfoo"
   end
 end

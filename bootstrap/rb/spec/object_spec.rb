@@ -53,7 +53,24 @@ describe ::Acute::Object do
     new_obj.lookup("parent").data.should_not be_nil
   end
 
+  it "found a parent slot with a non-nil value" do
+    obj = ::Acute::Object.new
+    parent = ::Acute::Object.new
+    obj.register("parent", parent)
+    obj.perform(obj, :msg => ::Acute::Message.new("parent", [])).should == parent
+  end
+ 
   it "displays the correct slot table" do
     @obj.perform(@obj, :msg => ::Acute::Message.new("slotNames")).value.should == @obj.slots.keys.map(&:to_s)
+  end
+
+  it "creates a message conveniently" do
+    obj = ::Acute::Object.new
+    obj.send(:message, 'foo', 1, 2).should == ::Acute::Message.new("foo", [1, 2])
+  end
+
+  it "creates a string conveniently" do
+    obj = ::Acute::Object.new
+    obj.send(:string, 'foo').value.should == 'foo'
   end
 end

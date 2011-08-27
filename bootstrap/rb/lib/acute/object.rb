@@ -4,31 +4,55 @@
 
 module Acute
   class Object
+    attr_accessor :done_lookup
     attr_reader :slots
 
     def initialize(init_mt = false)
       @slots = {}
+      @done_lookup = false
       method_table if init_mt
     end
 
     def method_table
+      method(:parent)    { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
-      method(:slotNames) { |env| ::Acute::List.new(*slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
+      method(:setSlot)   { |env, name, obj| self.register(name, obj)}
       method(:ifTrue)    { |env, msg| self.perform(env[:sender], :msg => msg) }
       method(:ifFalse)   { |env, msg| ::Acute::Nil.instance }
+      method(:slotNames) { |env| ::Acute::List.new(*slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
     end
 
     def lookup(env = {}, sym)
-      lookup_func = slots[:lookup]
-      lookup_func ||= lambda { |e, s| slots[s.to_sym] }
-      slot = lookup_func.call(env, sym.to_sym) if lookup_func
-      raise RuntimeError, "Could not find slot '#{sym}' on '#{self.class}'." unless slot
-      slot
+      lookup_slot = slots[:lookup]
+      lookup_func = lookup_slot.data if lookup_slot
+
+      lookup_func ||= lambda do |e, s|
+        slot = slots[s.to_sym]
+        return slot if slot
+        return if done_lookup
+        self.done_lookup = true
+        parent_slot = lookup(e, :parent)
+
+        if parent_slot
+          slot = parent_slot.data.lookup(e, s)
+          self.done_lookup = false
+          return slot
+        end
+        self.done_lookup = false
+        raise RuntimeError, "Could not find slot '#{sym}' on '#{self.class}'."
+      end
+
+      r = lookup_func.call(env, sym.to_sym) if lookup_func && done_lookup == false
+      self.done_lookup = false
+      r
     end
 
     def perform(sender, env = {})
-      env.merge!(:sender => sender)
+      #perform_slot = lookup(env, :perform)
+      #return perform_slot.data.call(env, sender) if perform_slot
+
       return env[:msg].cached_result if env[:msg] and env[:msg].cached_result?
+      env.merge!(:sender => sender)
       slot = lookup env, env[:msg].name
       if slot and slot.activatable? and slot.data.kind_of? ::Acute::Closure
         func = slot.data
@@ -36,7 +60,7 @@ module Acute
         activate = func.lookup(env, :activate)
         return activate.data.call env if activate
       end
-      raise RuntimeError, "Internal Error: Could not find slot '#{env[:msg].name}'" unless slot
+      return ::Acute::Nil.instance unless slot
       slot.data
     end
 
@@ -64,7 +88,19 @@ module Acute
     protected
 
     def method(name, &blk)
-      @slots[name.to_sym] = ::Acute::Slot.new(::Acute::Closure.new(&blk), :activatable => true)
+      register(name, ::Acute::Closure.new(&blk), :activatable => true)
+    end
+
+    def message(name, *args)
+      ::Acute::Message.new(name, args)
+    end
+
+    def string(str)
+      ::Acute::String.new(str)
+    end
+
+    def eval_in_context(msg, ctx)
+      ctx.perform(ctx, :msg => msg)
     end
   end
 end
