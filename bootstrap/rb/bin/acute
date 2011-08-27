@@ -13,9 +13,18 @@ require 'parslet'
 require 'acute'
 require 'pp'
 
+def usage
+  puts "Usage: #{$0} [options]"
+  puts " --eval, -e <code>     Evaluates the supplied code and exits"
+  puts " --repl, -i            Runs the read-eval-print-loop, this is the default"
+  puts " --bench, -b           Times how long the code takes to run"
+  puts " --help, -h            This message"
+end
+
 opts = GetoptLong.new(
   ['--eval', '-e', GetoptLong::REQUIRED_ARGUMENT],
   ['--repl', '-i', GetoptLong::NO_ARGUMENT],
+  ['--bench', '-b', GetoptLong::NO_ARGUMENT],
   ['--help', '-h', GetoptLong::NO_ARGUMENT]
 )
 
@@ -30,6 +39,8 @@ opts.each do |opt, arg|
     when '--help'
       usage
       exit 1
+    when '--bench'
+      bench = true
     when '--repl'
       repl = true
     when '--eval'
