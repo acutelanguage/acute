@@ -31,15 +31,16 @@ module Acute
         return slot if slot
         return if done_lookup
         self.done_lookup = true
-        parent_slot = lookup(e, :parent)
+        parent_slot = slots[:parent]
 
         if parent_slot
           slot = parent_slot.data.lookup(e, s)
           self.done_lookup = false
           return slot
         end
+
         self.done_lookup = false
-        raise RuntimeError, "Could not find slot '#{sym}' on '#{self.class}'."
+        raise RuntimeError, "Could not find slot '#{sym}'."
       end
 
       r = lookup_func.call(env, sym.to_sym) if lookup_func && done_lookup == false
@@ -53,7 +54,7 @@ module Acute
 
       return env[:msg].cached_result if env[:msg] and env[:msg].cached_result?
       env.merge!(:sender => sender)
-      slot = lookup env, env[:msg].name
+      slot = lookup(env, env[:msg].name)
       if slot and slot.activatable? and slot.data.kind_of? ::Acute::Closure
         func = slot.data
         func.env = env
