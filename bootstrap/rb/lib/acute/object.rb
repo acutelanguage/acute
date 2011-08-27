@@ -14,16 +14,20 @@ module Acute
     end
 
     def method_table
+      method(:'')        { |env, msg| r = nil; ::Acute::Walker.walk(msg, env[:sender]) { |o| r = o }; r }
       method(:parent)    { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
       method(:init)      { |env| self }
-      method(:setSlot)   { |env, name, obj| o = eval_in_context(obj, env[:sender]); self.slots[eval_in_context(name, env[:sender]).value.to_sym] = o; o }
-      method(:ifTrue)    { |env, msg| self.perform(env[:sender], :msg => msg) }
+      method(:setSlot)   { |env, name, obj| env[:target].register(eval_in_context(name, env[:sender]).value, eval_in_context(obj, env[:sender])) }
+      method(:ifTrue)    { |env, msg| env[:target].perform(env[:sender], :msg => msg) }
       method(:ifFalse)   { |env, msg| ::Acute::Nil.instance }
-      method(:slotNames) { |env| ::Acute::List.new(*slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
+      method(:slotNames) { |env| ::Acute::List.new(*env[:target].slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
+      method(:list)      { |env, *args| ::Acute::List.new(*args.map { |a| eval_in_context(a, env[:sender]) }) }
+      method(:message)   { |env, msg| msg }
+      method(:doMessage) { |env, msg| eval_in_context(eval_in_context(msg, env[:sender]), env[:sender], env[:target]) }
     end
 
-    def lookup(env = {}, sym)
+    def lookup(env, sym)
       lookup_slot = slots[:lookup]
       lookup_func = lookup_slot.data if lookup_slot
 
@@ -74,19 +78,15 @@ module Acute
 
     def clone_method
       lambda do |env|
-        o = self.class.new
-        o.register(:parent, self)
-        begin
-          slot = o.lookup(env, "init")
-        rescue RuntimeError
-          slot = nil
-        end
+        o = env[:target].class.new
+        o.register(:parent, env[:target])
+        slot = o.lookup(env, "init")
         o.perform(env[:sender], :msg => ::Acute::Message.new("init")) if slot
         o
       end
     end
 
-    protected
+    #protected
 
     def method(name, &blk)
       register(name, ::Acute::Closure.new(&blk), :activatable => true)
@@ -100,8 +100,10 @@ module Acute
       ::Acute::String.new(str)
     end
 
-    def eval_in_context(msg, ctx)
-      ctx.perform(ctx, :msg => msg)
+    def eval_in_context(msg, ctx, receiver = nil)
+      r = ::Acute::Nil.instance
+      Walker.walk(ctx, msg, receiver) { |o| r = o }
+      r
     end
   end
 end

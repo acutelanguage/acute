@@ -12,7 +12,7 @@ module Acute
       @env = env
       @func = blk
       activate_slot = Slot.new(lambda do |env|
-        blk_slot = env[:sender].lookup(env[:msg].name)
+        blk_slot = env[:sender].lookup(env, env[:msg].name)
         blk_slot.data.func.call(env, *env[:msg].arguments) if blk_slot
       end)
       activate_slot.activatable = true

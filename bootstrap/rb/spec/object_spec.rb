@@ -16,18 +16,18 @@ describe ::Acute::Object do
 
   it "looks up a slot" do
     @obj.register("fortyTwo", 42)
-    slot = @obj.lookup(:fortyTwo)
+    slot = @obj.lookup({}, :fortyTwo)
     slot.should be_an_instance_of(::Acute::Slot)
     slot.data.should be 42
   end
 
   it "cannot find a non-existent slot" do
-    lambda { @obj.lookup(:amazingStuff) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff'.")
+    lambda { @obj.lookup({}, :amazingStuff) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff'.")
   end
 
   it "stores an activatable message in the slot table" do
     @obj.register("add", ::Acute::Closure.new { |env, a, b| a + b }, :activatable => true)
-    slot = @obj.lookup(:add)
+    slot = @obj.lookup({}, :add)
     slot.data.should be_an_instance_of(::Acute::Closure)
     slot.data.func.should be_an_instance_of(Proc)
   end
@@ -45,12 +45,12 @@ describe ::Acute::Object do
   end
 
   it "can clone itself" do
-    @obj.perform(@obj, :msg => ::Acute::Message.new("clone")).should_not be_nil
+    @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("clone")).should_not be_nil
   end
 
   it "has a parent" do
-    new_obj = @obj.perform(@obj, :msg => ::Acute::Message.new("clone"))
-    new_obj.lookup("parent").data.should_not be_nil
+    new_obj = @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("clone"))
+    new_obj.lookup({}, "parent").data.should_not be_nil
   end
 
   it "found a parent slot with a non-nil value" do
@@ -61,7 +61,7 @@ describe ::Acute::Object do
   end
  
   it "displays the correct slot table" do
-    @obj.perform(@obj, :msg => ::Acute::Message.new("slotNames")).value.should == @obj.slots.keys.map(&:to_s)
+    @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("slotNames")).value.should == @obj.slots.keys.map(&:to_s)
   end
 
   it "creates a message conveniently" do
@@ -72,5 +72,10 @@ describe ::Acute::Object do
   it "creates a string conveniently" do
     obj = ::Acute::Object.new
     obj.send(:string, 'foo').value.should == 'foo'
+  end
+
+  it "can evaluate a message" do
+    msg = ::Acute::Message.new("message", [::Acute::Message.new("slotNames")])
+    @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("doMessage", [msg])).value.should == @obj.slots.keys.map(&:to_s)
   end
 end

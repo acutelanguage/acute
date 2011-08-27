@@ -27,8 +27,8 @@ module Acute
 
     def with_method
       lambda do |env, s|
-        o = self.perform(env[:sender], :msg => ::Acute::Message.new("clone"))
-        o.perform(env[:sender], :msg => ::Acute::Message.new("setString", [s]))
+        o = eval_in_context(::Acute::Message.new("clone"), env[:sender], env[:target])
+        eval_in_context(::Acute::Message.new("setString", [s]), env[:sender], o)
       end
     end
 

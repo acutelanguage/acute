@@ -76,8 +76,7 @@ display = proc do |code|
     $Lobby.register("Object", $Object)
     $Lobby.register("List", $List)
     $Lobby.register("String", $String)
-    walker = ::Acute::Walker.new($Lobby, tree)
-    walker.walk { |obj| puts "=> " + obj.to_s }
+    ::Acute::Walker.walk($Lobby, tree) { |obj| puts "=> " + obj.to_s }
   end
 end
 

@@ -13,9 +13,9 @@ describe ::Acute::String do
     str.value.should == "foobar"
   end
 
-  it "creates a new string with the factory 'with'" do
+  it "is able to set the string contents" do
     str = ::Acute::String.new("testing")
-    testable = str.perform(str, :msg => ::Acute::Message.new("with", [::Acute::Message.new("str", [], :cached_result => str)]))
+    testable = str.perform(str, :target => str, :msg => ::Acute::Message.new("setString", [::Acute::Message.new("str", [], :cached_result => str)]))
     testable.value.should == str.value
   end
 

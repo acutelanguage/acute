@@ -8,14 +8,24 @@ module Acute
     attr_accessor :name, :arguments, :next, :cached_result
 
     def initialize(name, arguments = [], options = { cached_result: nil })
+      super()
       @name = name
       @arguments = arguments
       @next = nil
       @cached_result = options[:cached_result]
+      register(:parent, $Object)
+      method_table
+    end
+
+    def method_table
+      method(:setNext)         { |env, msg| env[:target].next = eval_in_context(msg, env[:sender]); env[:target] }
+      method(:setCachedResult) { |env, msg| env[:target].cached_result = eval_in_context(msg, env[:sender]); env[:target] }
     end
 
     def perform_on(locals, target)
-      target.perform(locals, :msg => self)
+      r = nil
+      ::Acute::Walker.walk(locals, self, target) { |o| r = o }
+      r
     end
 
     def <=>(other)
