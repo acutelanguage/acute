@@ -49,6 +49,12 @@ opts.each do |opt, arg|
 end
 
 display = proc do |code|
+  $Object = ::Acute::Object.new(true)
+  $Lobby = ::Acute::Object.new
+  $Lobby.register(:parent, $Object)
+  $List = ::Acute::List.new
+  $String = ::Acute::String.new
+  
   parser = Acute::Parser.new
 
   if bench
@@ -62,12 +68,11 @@ display = proc do |code|
 
   begin
     puts "Message: " + tree.to_s
-    lobby = ::Acute::Object.new(true)
-    lobby.register("Lobby", lobby)
-    lobby.register("Object", ::Acute::Object.new(true))
-    lobby.register("List", ::Acute::List.new)
-    lobby.register("String", ::Acute::String.new)
-    walker = ::Acute::Walker.new(lobby, tree)
+    $Lobby.register("Lobby", $Lobby)
+    $Lobby.register("Object", $Object)
+    $Lobby.register("List", $List)
+    $Lobby.register("String", $String)
+    walker = ::Acute::Walker.new($Lobby, tree)
     walker.walk { |obj| puts "=> " + obj.to_s }
   end
 end

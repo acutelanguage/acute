@@ -11,6 +11,7 @@ module Acute
       super()
       @value = num.to_i
       method_table
+      register("parent", $Object)
     end
 
     def method_table
