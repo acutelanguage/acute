@@ -49,9 +49,13 @@ opts.each do |opt, arg|
 end
 
 display = proc do |code|
+  # We have a chicken-egg problem; which comes first? The Object or the Lobby?
   $Object = ::Acute::Object.new(true)
+  # Chronologically, the Object of course, but...
   $Lobby = ::Acute::Object.new
   $Lobby.register(:parent, $Object)
+  # We'll also make the Lobby a parent of Object. Don't worry, we solve lookup loops.
+  $Object.register(:parent, $Lobby)
   $List = ::Acute::List.new
   $String = ::Acute::String.new
   

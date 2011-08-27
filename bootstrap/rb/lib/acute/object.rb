@@ -16,7 +16,8 @@ module Acute
     def method_table
       method(:parent)    { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
-      method(:setSlot)   { |env, name, obj| self.register(name, obj)}
+      method(:init)      { |env| self }
+      method(:setSlot)   { |env, name, obj| o = eval_in_context(obj, env[:sender]); self.slots[eval_in_context(name, env[:sender]).value.to_sym] = o; o }
       method(:ifTrue)    { |env, msg| self.perform(env[:sender], :msg => msg) }
       method(:ifFalse)   { |env, msg| ::Acute::Nil.instance }
       method(:slotNames) { |env| ::Acute::List.new(*slots.keys.map { |e| ::Acute::String.new(e).to_s }) }

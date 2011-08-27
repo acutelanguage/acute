@@ -10,10 +10,10 @@ module Acute
       super()
       @value = str
       method_table
+      register(:parent, $Object)
     end
 
     def method_table
-      method(:clone, &clone_method)
       method(:with, &with_method)
       method(:setString) { |env, s| @value = eval_in_context(s, env[:sender]).value; self }
       method(:append)    { |env, s| @value << eval_in_context(s, env[:sender]).value; self }
