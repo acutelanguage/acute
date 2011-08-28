@@ -11,6 +11,9 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'getoptlong'
 require 'parslet'
 require 'acute'
+require 'llvm/core' 
+require 'llvm/execution_engine'
+require 'llvm/transforms/scalar'
 require 'pp'
 
 def usage
@@ -49,7 +52,10 @@ opts.each do |opt, arg|
 end
 
 display = proc do |code|
-  # We have a chicken-egg problem; which comes first? The Object or the Lobby?
+  LLVM.init_x86
+  $module = ::LLVM::Module.create("AcuteBootstrap")
+  $engine = LLVM::ExecutionEngine.create_jit_compiler($module)
+   # We have a chicken-egg problem; which comes first? The Object or the Lobby?
   $Object = ::Acute::Object.new(true)
   # Chronologically, the Object of course, but...
   $Lobby = ::Acute::Object.new
@@ -59,12 +65,15 @@ display = proc do |code|
   $List = ::Acute::List.new
   $String = ::Acute::String.new
   $Number = ::Acute::Number.new(0)
+  $Number.factorial_llvm_method
   $Nil = ::Acute::Nil.instance
   $Closure = ::Acute::Closure.new({})
   $Block = ::Acute::Block.new(nil, nil, [])
   $Message = ::Acute::Message.new("")
   $Slot = ::Acute::Slot.new($Nil, $Nil)
-  
+  $LLVMCore = ::Acute::LLVM::Core.new
+  $LLVMTypes = ::Acute::LLVM::Types::Base.new
+ 
   parser = Acute::Parser.new
 
   if bench
@@ -87,6 +96,10 @@ display = proc do |code|
     $Lobby.register("Block", $Block)
     $Lobby.register("Message", $Message)
     $Lobby.register("Slot", $Slot)
+    $Lobby.register("LLVM", $LLVMCore)
+    $LLVMCore.register("Types", $LLVMTypes)
+    $LLVMTypes.register("Pointer", ::Acute::LLVM::Types::Pointer.new)
+    $LLVMTypes.register("Integer", ::Acute::LLVM::Types::Integer.new)
     puts "=> " + tree.perform_on({ :sender => $Lobby, :target => $Lobby, :msg => tree }, $Lobby, $Lobby).to_s
     #::Acute::Walker.walk($Lobby, tree) { |obj| puts "=> " + obj.to_s }
   end

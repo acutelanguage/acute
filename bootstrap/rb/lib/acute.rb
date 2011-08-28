@@ -14,4 +14,5 @@ module Acute
   autoload :String, 'acute/string'
   autoload :Parser, 'acute/parser'
   autoload :Transformer, 'acute/transformer'
+  autoload :LLVM, 'acute/llvm'
 end
