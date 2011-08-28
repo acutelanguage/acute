@@ -19,6 +19,7 @@ module Acute
       method(:clone, &clone_method)
       method(:init)      { |env| self }
       method(:setSlot)   { |env, name, obj| env[:target].register(eval_in_context(name, env[:sender]).value, eval_in_context(obj, env[:sender])) }
+      method(:method)    { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
       method(:ifTrue)    { |env, msg| env[:target].perform(env[:sender], :msg => msg) }
       method(:ifFalse)   { |env, msg| ::Acute::Nil.instance }
       method(:slotNames) { |env| ::Acute::List.new(*env[:target].slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
@@ -41,11 +42,12 @@ module Acute
         if parent_slot
           slot = parent_slot.data.lookup(e, s)
           self.done_lookup = false
+          raise RuntimeError, "Could not find slot '#{sym}' on '#{env[:target].class}'." unless slot
           return slot
         end
 
         self.done_lookup = false
-        raise RuntimeError, "Could not find slot '#{sym}'."
+        raise RuntimeError, "Could not find slot '#{sym}' on '#{env[:target].class}'."
       end
 
       r = lookup_func.call(env, sym.to_sym) if lookup_func && done_lookup == false
@@ -86,7 +88,7 @@ module Acute
       end
     end
 
-    #protected
+    protected
 
     def method(name, &blk)
       register(name, ::Acute::Closure.new(&blk), :activatable => true)

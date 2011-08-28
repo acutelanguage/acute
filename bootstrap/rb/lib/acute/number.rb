@@ -16,7 +16,7 @@ module Acute
 
     def method_table
       %w{+ - * /}.each do |s|
-        method(s)         { |env, n| Number.new(value.send(s, eval_in_context(n, env[:sender]).to_i)) }
+        method(s)         { |env, n| Number.new(value.send(s, eval_in_context(n, env[:sender], env[:target]).to_i)) }
       end
       method(:bitwiseAnd) { |env, n| Number.new(value & eval_in_context(n, env[:sender]).to_i) }
       method(:bitwiseOr)  { |env, n| Number.new(value | eval_in_context(n, env[:sender]).to_i) }
