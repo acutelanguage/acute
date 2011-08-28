@@ -17,7 +17,7 @@ module Acute
       method(:parent)    { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
       method(:init)      { |env| self }
-      method(:setSlot)   { |env| slots[env[:msg].eval_arg_at(env, 0).to_s] = ::Acute::List.new}
+      method(:setSlot)   { |env| env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, env[:msg].eval_arg_at(env, 1)) }
       method(:method)    { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
       method(:ifTrue)    { |env| env[:msg].eval_arg_at(env, 0) }
       method(:ifFalse)   { |env| ::Acute::Nil.instance }
@@ -40,16 +40,9 @@ module Acute
         self.done_lookup = true
         parent_slot = slots[:parent]
 
-        if parent_slot
-          slot = parent_slot.data.lookup(e, s)
-          self.done_lookup = false
-          #raise RuntimeError, "Could not find slot '#{sym}' on '#{env[:target].class}'." unless slot
-          return slot
-        end
-
+        slot = parent_slot.data.lookup(e, s) if parent_slot
         self.done_lookup = false
-        return nil
-        raise RuntimeError, "Could not find slot '#{sym}' on '#{env[:target].class}'."
+        slot
       end
 
       r = lookup_func.call(env, sym.to_sym) if lookup_func && done_lookup == false

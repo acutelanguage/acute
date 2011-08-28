@@ -13,14 +13,14 @@ module Acute
       @scope = scope
       @body = body
       @locals = ::Acute::Nil.instance
-      @argument_names = args[0].map(&:name)
+      @argument_names = args[0].map(&:name) rescue []
       register(:parent, $Object)
       method_table
     end
 
     def method_table
-      method(:call)     { |env, *args| env[:target].call(env, *args) }
-      method(:activate) { |env| env[:target].activate(env) }
+      method(:call)     { |env| env[:target].call(env, *env[:msg].arguments) }
+      method(:activate) { |env| activate(env) }
     end
 
     def activate(env)
@@ -34,8 +34,7 @@ module Acute
         obj = locals.perform(env.merge(:msg => args[idx]))
         locals.register(name, obj)
       end
-      return doMessage(env.merge(:msg => body, :target => locals), locals)
-      body.perform_on(env, locals, locals)
+      doMessage(env.merge(:msg => body, :target => locals), locals)
     end
 
     def scope=(other)

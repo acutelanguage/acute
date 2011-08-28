@@ -2,15 +2,15 @@ require 'spec_helper'
 
 describe ::Acute::Slot do
   it "creates a slot" do
-    ::Acute::Slot.new(42).should_not be_nil
+    ::Acute::Slot.new(42, ::Acute::Nil.instance).should_not be_nil
   end
 
   it "creates an activatable slot" do
-    slot = ::Acute::Slot.new(42, :activatable => true)
+    slot = ::Acute::Slot.new(42, ::Acute::Nil.instance, :activatable => true)
     slot.activatable?.should be_true
   end
 
   it "shows a string representation of a slot" do
-    ::Acute::Slot.new(42, :activatable => true).to_s.should == "<Slot data_type=Fixnum activates>"
+    ::Acute::Slot.new(42, ::Acute::Nil.instance, :activatable => true).to_s.should == "<Slot data_type=Fixnum context=nil activates>"
   end
 end

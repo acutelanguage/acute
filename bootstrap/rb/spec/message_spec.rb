@@ -51,7 +51,7 @@ describe ::Acute::Message do
     obj.register("object", obj)
     m = ::Acute::Message.new("object")
     m.cached_result = other
-    obj.perform(obj, :msg => m).should be other
+    obj.perform(:msg => m).should be other
   end
 
   it "performs a message on a context" do
@@ -59,6 +59,16 @@ describe ::Acute::Message do
     locals = ::Acute::Object.new
     target = ::Acute::Object.new
     target.register("foo", ::Acute::Number.new(42))
-    msg.perform_on(locals, target).value.should be 42
+    msg.perform_on({:msg => msg}, locals, target).value.should be 42
+  end
+
+  it "tries to evaluate an argument out of bounds" do
+    msg = ::Acute::Message.new("foo", [::Acute::Message.new("bar")])
+    msg.eval_arg_at({}, 5).should be ::Acute::Nil.instance
+  end
+
+  it "evaluates all arguments" do
+    msg = ::Acute::Message.new("foo", [::Acute::Message.new("bar", [], :cached_result => 1)])
+    msg.eval_args({}).should == [1]
   end
 end

@@ -22,11 +22,12 @@ describe ::Acute::Object do
   end
 
   it "cannot find a non-existent slot" do
-    lambda { @obj.lookup({}, :amazingStuff) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff'.")
+    @obj.lookup({}, :amazingStuff).should be_nil
+    lambda { @obj.perform({:msg => ::Acute::Message.new("amazingStuff")}) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff' on 'NilClass'.")
   end
 
   it "stores an activatable message in the slot table" do
-    @obj.register("add", ::Acute::Closure.new { |env, a, b| a + b }, :activatable => true)
+    @obj.register("add", ::Acute::Closure.new({}) { |env, a, b| a + b }, :activatable => true)
     slot = @obj.lookup({}, :add)
     slot.data.should be_an_instance_of(::Acute::Closure)
     slot.data.func.should be_an_instance_of(Proc)
@@ -35,21 +36,21 @@ describe ::Acute::Object do
   it "performs a message that will return the value in the slot" do
     @obj.register("fortyTwo", 42)
     msg = ::Acute::Message.new("fortyTwo")
-    @obj.perform(@obj, :msg => msg).should be 42
+    @obj.perform(:msg => msg).should be 42
   end
 
   it "performs a message that will activate a closure" do
-    @obj.register("add", ::Acute::Closure.new { |env, a, b| a + b }, :activatable => true)
+    @obj.register("add", ::Acute::Closure.new({}) { |env, a, b| a + b }, :activatable => true)
     msg = ::Acute::Message.new("add", [1, 2])
-    @obj.perform(@obj, :msg => msg).should be 3
+    @obj.perform(:msg => msg).should be 3
   end
 
   it "can clone itself" do
-    @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("clone")).should_not be_nil
+    @obj.perform(:target => @obj, :msg => ::Acute::Message.new("clone")).should_not be_nil
   end
 
   it "has a parent" do
-    new_obj = @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("clone"))
+    new_obj = @obj.perform(:target => @obj, :msg => ::Acute::Message.new("clone"))
     new_obj.lookup({}, "parent").data.should_not be_nil
   end
 
@@ -57,11 +58,11 @@ describe ::Acute::Object do
     obj = ::Acute::Object.new
     parent = ::Acute::Object.new
     obj.register("parent", parent)
-    obj.perform(obj, :msg => ::Acute::Message.new("parent", [])).should == parent
+    obj.perform(:msg => ::Acute::Message.new("parent", [])).should == parent
   end
  
   it "displays the correct slot table" do
-    @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("slotNames")).value.should == @obj.slots.keys.map(&:to_s)
+    @obj.perform(:target => @obj, :msg => ::Acute::Message.new("slotNames")).value.should == @obj.slots.keys.map(&:to_s)
   end
 
   it "creates a message conveniently" do
@@ -76,6 +77,14 @@ describe ::Acute::Object do
 
   it "can evaluate a message" do
     msg = ::Acute::Message.new("message", [::Acute::Message.new("slotNames")])
-    @obj.perform(@obj, :target => @obj, :msg => ::Acute::Message.new("doMessage", [msg])).value.should == @obj.slots.keys.map(&:to_s)
+    @obj.perform(:target => @obj, :msg => ::Acute::Message.new("doMessage", [msg])).value.should == @obj.slots.keys.map(&:to_s)
+  end
+
+  it "can evaluate a message chain and handles ; properly" do
+    m1 = ::Acute::Message.new("slotNames")
+    m1.next = ::Acute::Message.new(";")
+    m1.next.next = ::Acute::Message.new("list")
+    msg = ::Acute::Message.new("message", [m1])
+    @obj.doMessage({:target => @obj, :sender => @obj, :msg => ::Acute::Message.new("doMessage", [msg])}, @obj).should == ::Acute::List.new
   end
 end

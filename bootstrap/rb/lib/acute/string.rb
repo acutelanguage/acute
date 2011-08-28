@@ -23,7 +23,7 @@ module Acute
     end
 
     def to_s
-      "\"#{value.to_s}\""
+      value.to_s
     end
 
     def with_method

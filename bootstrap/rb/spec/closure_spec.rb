@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ::Acute::Closure do
   before(:each) do
-    @closure = ::Acute::Closure.new { |env, a, b| a + b }
+    @closure = ::Acute::Closure.new({}) { |env, a, b| a + b }
   end
 
   it "creates a closure" do
@@ -14,7 +14,7 @@ describe ::Acute::Closure do
   end
 
   it "is passed the environment" do
-    @closure = ::Acute::Closure.new { |env| env }
+    @closure = ::Acute::Closure.new({}) { |env| env }
     @closure.call(:sender => @closure).should == { :sender => @closure }
   end
 end

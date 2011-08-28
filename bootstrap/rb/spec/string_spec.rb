@@ -15,7 +15,7 @@ describe ::Acute::String do
 
   it "is able to set the string contents" do
     str = ::Acute::String.new("testing")
-    testable = str.perform(str, :target => str, :msg => ::Acute::Message.new("setString", [::Acute::Message.new("str", [], :cached_result => str)]))
+    testable = str.perform(:target => str, :msg => ::Acute::Message.new("setString", [::Acute::Message.new("str", [], :cached_result => str)]))
     testable.value.should == str.value
   end
 
@@ -33,12 +33,18 @@ describe ::Acute::String do
   it "can append to an existing string" do
     str = ::Acute::String.new("foo")
     second = ::Acute::String.new("bar")
-    str.perform(str, :msg => ::Acute::Message.new("append", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "foobar"
+    str.perform(:msg => ::Acute::Message.new("append", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "foobar"
   end
 
   it "can prepend to an existing string" do
     str = ::Acute::String.new("foo")
     second = ::Acute::String.new("bar")
-    str.perform(str, :msg => ::Acute::Message.new("prepend", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "barfoo"
+    str.perform(:msg => ::Acute::Message.new("prepend", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "barfoo"
+  end
+
+  it "creates a new string using the factory method 'with'" do
+    str = ::Acute::String.new("foo")
+    second = ::Acute::String.new("bar")
+    str.perform(:target => str, :sender => str, :msg => ::Acute::Message.new("with", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "bar"
   end
 end

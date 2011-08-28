@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ::Acute::List do
+describe ::Acute::Parser do
   before(:each) do
     @parser = ::Acute::Parser.new
   end
@@ -22,7 +22,7 @@ describe ::Acute::List do
   end
 
   it "recognizes strings" do
-    @parser.parse('"foo"').should == ::Acute::String.new("foo")
+    @parser.parse('"foo"').to_s.should == ::Acute::String.new("foo").value
   end
 
   it "has a next message" do
