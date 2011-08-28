@@ -5,15 +5,17 @@
 module Acute
   class Slot < ::Acute::Object
     attr_accessor :activatable, :data
+    attr_reader :context
 
-    def initialize(data, options = { :activatable => false })
+    def initialize(data, context, options = { :activatable => false })
       @slots = {}
+      @context = context
       @activatable = options[:activatable]
       @data = data
     end
 
     def to_s
-      "<Slot data_type=#{data.class}#{activatable? ? ' activates' : ''}>"
+      "<Slot data_type=#{data.class} context=#{context}#{activatable? ? ' activates' : ''}>"
     end
 
     alias :activatable? :activatable

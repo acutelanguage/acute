@@ -18,14 +18,41 @@ module Acute
     end
 
     def method_table
-      method(:setNext)         { |env, msg| env[:target].next = eval_in_context(msg, env[:sender]); env[:target] }
-      method(:setCachedResult) { |env, msg| env[:target].cached_result = eval_in_context(msg, env[:sender]); env[:target] }
+      method(:setNext)         { |env| env[:target].next = env[:msg].eval_arg_at(env, 0); env[:target] }
+      method(:setCachedResult) { |env| env[:target].cached_result = env[:msg].eval_arg_at(env, 0); env[:target] }
+      method(:asString)        { |env| String.new(to_s) }
     end
 
-    def perform_on(locals, target)
-      r = nil
-      ::Acute::Walker.walk(locals, self, target) { |o| r = o }
-      r
+    def eval_arg_at(env, idx)
+      msg = arguments[idx]
+      if msg
+        return msg.cached_result if msg.cached_result? && msg.next.nil?
+        return perform_on(env.merge(:msg => msg), env[:sender], env[:sender])
+      end
+      ::Acute::Nil.instance
+    end
+
+    def eval_args(env)
+      arguments.map.with_index do |arg, idx|
+        eval_arg_at(env, idx)
+      end
+    end
+
+    def perform_on(env, locals, target)
+      result = target
+      cached_target = target
+      m = env[:msg]
+
+      begin
+        if name.eql? ';'
+          target = cached_target
+        else
+          result = m.cached_result
+          result ||= target.perform(env.merge(:target => target, :sender => locals, :msg => m))
+          target = result
+        end
+      end while m = m.next
+      result
     end
 
     def <=>(other)

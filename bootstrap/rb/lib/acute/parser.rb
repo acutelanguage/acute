@@ -45,7 +45,7 @@ module Acute
     end
     
     rule :identifier do
-      (match('[a-zA-Z_\+\-\*\/!@$%^&=\.\?:<>\|~]') >> match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~]').repeat).as(:identifier) >> space?
+      (match('[a-zA-Z_\+\-\*\/!@$%^&=\.\?:<>\|~;]') >> match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~]').repeat).as(:identifier) >> space?
     end
     
     rule :integer do

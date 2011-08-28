@@ -16,16 +16,17 @@ module Acute
 
     def method_table
       %w{+ - * /}.each do |s|
-        method(s)         { |env, n| Number.new(value.send(s, eval_in_context(n, env[:sender], env[:target]).to_i)) }
+        method(s)         { |env| Number.new(value.send(s, env[:msg].eval_arg_at(env, 0).to_i)) }
       end
-      method(:bitwiseAnd) { |env, n| Number.new(value & eval_in_context(n, env[:sender]).to_i) }
-      method(:bitwiseOr)  { |env, n| Number.new(value | eval_in_context(n, env[:sender]).to_i) }
-      method(:bitwiseXor) { |env, n| Number.new(value ^ eval_in_context(n, env[:sender]).to_i) }
+      method(:bitwiseAnd) { |env| Number.new(value & env[:msg].eval_arg_at(env, 0).to_i) }
+      method(:bitwiseOr)  { |env| Number.new(value | env[:msg].eval_arg_at(env, 0).to_i) }
+      method(:bitwiseXor) { |env| Number.new(value ^ env[:msg].eval_arg_at(env, 0).to_i) }
       method(:bitwiseNot) { |env| Number.new(~value) }
-      method(:shiftLeft)  { |env, n| Number.new(value << eval_in_context(n, env[:sender]).to_i) }
-      method(:shiftRight) { |env, n| Number.new(value >> eval_in_context(n, env[:sender]).to_i) }
+      method(:shiftLeft)  { |env| Number.new(value << env[:msg].eval_arg_at(env, 0).to_i) }
+      method(:shiftRight) { |env| Number.new(value >> env[:msg].eval_arg_at(env, 0).to_i) }
       method(:factorial)  { |env| Number.new((1..value).reduce(1, :*)) }
-      method(:times)      { |env, msg| r = ::Acute::Nil.instance; value.times { r = eval_in_context(msg, env[:sender]) }; r }
+      method(:times)      { |env| r = ::Acute::Nil.instance; value.times { r = env[:msg].eval_arg_at(env, 0) }; r }
+      method(:asString)   { |env| String.new(value.to_s) }
     end
 
     def <=>(other)

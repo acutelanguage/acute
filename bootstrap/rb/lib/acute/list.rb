@@ -15,8 +15,8 @@ module Acute
     end
 
     def method_table
-      method(:append)  { |env, o| value << eval_in_context(o, env[:sender]); self }
-      method(:prepend) { |env, o| value.unshift eval_in_context(o, env[:sender]); self }
+      method(:append)  { |env| value << env[:msg].eval_arg_at(env, 0); self }
+      method(:prepend) { |env| value.unshift env[:msg].eval_arg_at(env, 0); self }
       method(:isEmpty) { |env| value.empty? }
       method(:size)    { |env| ::Acute::Number.new value.count }
     end

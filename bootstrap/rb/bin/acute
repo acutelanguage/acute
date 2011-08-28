@@ -58,6 +58,12 @@ display = proc do |code|
   $Object.register(:parent, $Lobby)
   $List = ::Acute::List.new
   $String = ::Acute::String.new
+  $Number = ::Acute::Number.new(0)
+  $Nil = ::Acute::Nil.instance
+  $Closure = ::Acute::Closure.new({})
+  $Block = ::Acute::Block.new(nil, nil, [])
+  $Message = ::Acute::Message.new("")
+  $Slot = ::Acute::Slot.new($Nil, $Nil)
   
   parser = Acute::Parser.new
 
@@ -71,12 +77,18 @@ display = proc do |code|
   end
 
   begin
-    puts "Message: " + tree.to_s
     $Lobby.register("Lobby", $Lobby)
     $Lobby.register("Object", $Object)
     $Lobby.register("List", $List)
     $Lobby.register("String", $String)
-    ::Acute::Walker.walk($Lobby, tree) { |obj| puts "=> " + obj.to_s }
+    $Lobby.register("Number", $Number)
+    $Lobby.register("nil", $Nil)
+    $Lobby.register("Closure", $Closure)
+    $Lobby.register("Block", $Block)
+    $Lobby.register("Message", $Message)
+    $Lobby.register("Slot", $Slot)
+    puts "=> " + tree.perform_on({ :sender => $Lobby, :target => $Lobby, :msg => tree }, $Lobby, $Lobby).to_s
+    #::Acute::Walker.walk($Lobby, tree) { |obj| puts "=> " + obj.to_s }
   end
 end
 

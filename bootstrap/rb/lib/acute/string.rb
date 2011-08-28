@@ -15,20 +15,21 @@ module Acute
 
     def method_table
       method(:with, &with_method)
-      method(:setString) { |env, s| @value = eval_in_context(s, env[:sender]).value; self }
-      method(:append)    { |env, s| @value << eval_in_context(s, env[:sender]).value; self }
-      method(:prepend)   { |env, s| @value = eval_in_context(s, env[:sender]).value + value; self }
+      method(:setString) { |env| @value = env[:msg].eval_arg_at(env, 0).value; self }
+      method(:append)    { |env| @value << env[:msg].eval_arg_at(env, 0).value; self }
+      method(:prepend)   { |env| @value = env[:msg].eval_arg_at(env, 0).value + value; self }
       method(:length)    { |env| ::Acute::Number.new(@value.length) }
+      method(:asString)  { |env| String.new(value.to_s) }
     end
 
     def to_s
-      value.to_s
+      "\"#{value.to_s}\""
     end
 
     def with_method
       lambda do |env, s|
-        o = eval_in_context(::Acute::Message.new("clone"), env[:sender], env[:target])
-        eval_in_context(::Acute::Message.new("setString", [s]), env[:sender], o)
+        o = ::Acute::Message.new("clone").perform_on(env, env[:sender], env[:target])
+        ::Acute::Message.new("setString", [s]).perform_on(env, env[:sender], o)
       end
     end
 
