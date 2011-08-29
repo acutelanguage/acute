@@ -16,7 +16,7 @@ module Acute
     def method_table
       method(:parent)    { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
-      method(:init)      { |env| self }
+      method(:init)      { |env| env[:target] }
       method(:setSlot)   { |env| env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, env[:msg].eval_arg_at(env, 1)) }
       method(:method)    { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
       method(:ifTrue)    { |env| env[:msg].eval_arg_at(env, 0) }
@@ -25,7 +25,8 @@ module Acute
       method(:list)      { |env| ::Acute::List.new(*env[:msg].eval_args(env)) }
       method(:message)   { |env| env[:msg].arguments[0] }
       method(:doMessage) { |env| env[:msg].eval_arg_at(env, 0).perform_on(env, env[:sender], env[:target]) }
-      method(:asString)  { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{self.object_id}") }
+      method(:uniqueId)  { |env| env[:target].object_id }
+      method(:asString)  { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
       method(:print)     { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
     end
 
@@ -37,16 +38,16 @@ module Acute
         slot = slots[s.to_sym]
         return slot if slot
         return if done_lookup
-        self.done_lookup = true
+        e[:target].done_lookup = true
         parent_slot = slots[:parent]
 
         slot = parent_slot.data.lookup(e, s) if parent_slot
-        self.done_lookup = false
+        e[:target].done_lookup = false
         slot
       end
 
       r = lookup_func.call(env, sym.to_sym) if lookup_func && done_lookup == false
-      self.done_lookup = false
+      env[:target].done_lookup = false
       r
     end
 

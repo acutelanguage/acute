@@ -51,7 +51,6 @@ opts.each do |opt, arg|
   end
 end
 
-display = proc do |code|
   LLVM.init_x86
   $module = ::LLVM::Module.create("AcuteBootstrap")
   $engine = LLVM::ExecutionEngine.create_jit_compiler($module)
@@ -64,8 +63,8 @@ display = proc do |code|
   $Object.register(:parent, $Lobby)
   $List = ::Acute::List.new
   $String = ::Acute::String.new
-  $Number = ::Acute::Number.new(0)
-  $Number.factorial_llvm_method
+  $Number = ::Acute::Number.new(0, true)
+  $Number.method_table
   $Nil = ::Acute::Nil.instance
   $Closure = ::Acute::Closure.new({})
   $Block = ::Acute::Block.new(nil, nil, [])
@@ -74,18 +73,6 @@ display = proc do |code|
   $LLVMCore = ::Acute::LLVM::Core.new
   $LLVMTypes = ::Acute::LLVM::Types::Base.new
  
-  parser = Acute::Parser.new
-
-  if bench
-    require 'benchmark'
-    Benchmark.bmbm do |x|
-      x.report { tree = parser.parse(code) }
-    end
-  else
-    tree = parser.parse(code)
-  end
-
-  begin
     $Lobby.register("Lobby", $Lobby)
     $Lobby.register("Object", $Object)
     $Lobby.register("List", $List)
@@ -100,6 +87,21 @@ display = proc do |code|
     $LLVMCore.register("Types", $LLVMTypes)
     $LLVMTypes.register("Pointer", ::Acute::LLVM::Types::Pointer.new)
     $LLVMTypes.register("Integer", ::Acute::LLVM::Types::Integer.new)
+
+display = proc do |code|
+  parser = Acute::Parser.new
+
+  if bench
+    require 'benchmark'
+    Benchmark.bmbm do |x|
+      x.report { tree = parser.parse(code) }
+    end
+  else
+    tree = parser.parse(code)
+  end
+
+  begin
+
     puts "=> " + tree.perform_on({ :sender => $Lobby, :target => $Lobby, :msg => tree }, $Lobby, $Lobby).to_s
     #::Acute::Walker.walk($Lobby, tree) { |obj| puts "=> " + obj.to_s }
   end
