@@ -60,4 +60,10 @@ describe ::Acute::String do
     msg.next.name.should == "bar"
   end
   
+  it "can be converted into a message with correct arguments" do
+    str = ::Acute::String.new("foo(me, foo you)")
+    msg = str.perform(:target => str, :sender => str, :msg => ::Acute::Message.new("asMessage"))
+    msg.arguments.should == ["me", "foo you"]
+  end
+  
 end
