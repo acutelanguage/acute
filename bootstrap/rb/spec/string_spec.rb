@@ -54,4 +54,10 @@ describe ::Acute::String do
     msg.name.should == "foo"
   end
   
+  it "can be converted into a message chain with correct next" do
+    str = ::Acute::String.new("foo bar")
+    msg = str.perform(:target => str, :sender => str, :msg => ::Acute::Message.new("asMessage"))
+    msg.next.name.should == "bar"
+  end
+  
 end
