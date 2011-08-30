@@ -20,6 +20,7 @@ module Acute
       method(:prepend)   { |env| @value = env[:msg].eval_arg_at(env, 0).value + value; self }
       method(:length)    { |env| ::Acute::Number.new(@value.length) }
       method(:asString)  { |env| String.new(value.to_s) }
+      method(:asMessage) { |env| ::Acute::Parser.new.parse(value)}
     end
 
     def to_s
