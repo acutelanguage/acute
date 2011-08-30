@@ -47,4 +47,11 @@ describe ::Acute::String do
     second = ::Acute::String.new("bar")
     str.perform(:target => str, :sender => str, :msg => ::Acute::Message.new("with", [::Acute::Message.new("second", [], :cached_result => second)])).value.should == "bar"
   end
+  
+  it "can be converted into a message with correct name" do
+    str = ::Acute::String.new("foo")
+    msg = str.perform(:target => str, :sender => str, :msg => ::Acute::Message.new("asMessage"))
+    msg.name.should == "foo"
+  end
+  
 end
