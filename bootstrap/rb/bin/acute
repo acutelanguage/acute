@@ -73,20 +73,20 @@ end
   $LLVMCore = ::Acute::LLVM::Core.new
   $LLVMTypes = ::Acute::LLVM::Types::Base.new
  
-    $Lobby.register("Lobby", $Lobby)
-    $Lobby.register("Object", $Object)
-    $Lobby.register("List", $List)
-    $Lobby.register("String", $String)
-    $Lobby.register("Number", $Number)
-    $Lobby.register("nil", $Nil)
-    $Lobby.register("Closure", $Closure)
-    $Lobby.register("Block", $Block)
-    $Lobby.register("Message", $Message)
-    $Lobby.register("Slot", $Slot)
-    $Lobby.register("LLVM", $LLVMCore)
-    $LLVMCore.register("Types", $LLVMTypes)
-    $LLVMTypes.register("Pointer", ::Acute::LLVM::Types::Pointer.new)
-    $LLVMTypes.register("Integer", ::Acute::LLVM::Types::Integer.new)
+  $Lobby.register("Lobby", $Lobby)
+  $Lobby.register("Object", $Object)
+  $Lobby.register("List", $List)
+  $Lobby.register("String", $String)
+  $Lobby.register("Number", $Number)
+  $Lobby.register("nil", $Nil)
+  $Lobby.register("Closure", $Closure)
+  $Lobby.register("Block", $Block)
+  $Lobby.register("Message", $Message)
+  $Lobby.register("Slot", $Slot)
+  $Lobby.register("LLVM", $LLVMCore)
+  $LLVMCore.register("Types", $LLVMTypes)
+  $LLVMTypes.register("Pointer", ::Acute::LLVM::Types::Pointer.new)
+  $LLVMTypes.register("Integer", ::Acute::LLVM::Types::Integer.new)
 
 display = proc do |code|
   parser = Acute::Parser.new
@@ -101,9 +101,11 @@ display = proc do |code|
   end
 
   begin
-
     puts "=> " + tree.perform_on({ :sender => $Lobby, :target => $Lobby, :msg => tree }, $Lobby, $Lobby).to_s
     #::Acute::Walker.walk($Lobby, tree) { |obj| puts "=> " + obj.to_s }
+  rescue Exception => e
+    puts "Exception: " + e.message
+    puts "\t" + e.backtrace.join("\n\t")
   end
 end
 
