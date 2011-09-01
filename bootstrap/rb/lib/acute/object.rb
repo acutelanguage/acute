@@ -17,6 +17,7 @@ module Acute
       method(:parent)    { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
       method(:init)      { |env| env[:target] }
+      method(:type)      { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
       method(:setSlot)   { |env| env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, env[:msg].eval_arg_at(env, 1)) }
       method(:method)    { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
       method(:ifTrue)    { |env| env[:msg].eval_arg_at(env, 0) }

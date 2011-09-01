@@ -58,6 +58,7 @@ end
   $Object = ::Acute::Object.new(true)
   # Chronologically, the Object of course, but...
   $Lobby = ::Acute::Object.new
+  $Lobby.register(:type, ::Acute::String.new("Lobby"))
   $Lobby.register(:parent, $Object)
   # We'll also make the Lobby a parent of Object. Don't worry, we solve lookup loops.
   $Object.register(:parent, $Lobby)
