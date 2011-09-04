@@ -58,6 +58,7 @@ module Acute
       if slot && slot.data
         if slot.activatable?
           activate_func = slot.data.lookup(env, :activate)
+          env[:target] = self
           return activate_func.data.call(env.merge(:slot_context => slot.context)) if activate_func
         end
         return slot.data
