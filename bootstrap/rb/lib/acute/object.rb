@@ -56,10 +56,10 @@ module Acute
     def perform(env)
       return env[:msg].cached_result if env[:msg].cached_result?
       slot = lookup(env, env[:msg].name)
+      env[:target] = self
       if slot && slot.data
         if slot.activatable?
           activate_func = slot.data.lookup(env, :activate)
-          env[:target] = self
           return activate_func.data.call(env.merge(:slot_context => slot.context)) if activate_func
         end
         return slot.data
