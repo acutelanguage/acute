@@ -29,7 +29,7 @@ module Acute
 
     def call(env, *args)
       self.scope = env[:sender] unless scope
-      create_locals(scope)
+      create_locals(env, scope)
       argument_names.each_with_index do |name, idx|
         obj = locals.perform(env.merge(:msg => args[idx]))
         locals.register(name, obj)
@@ -44,10 +44,16 @@ module Acute
 
     private
 
-    def create_locals(parent)
+    def create_locals(env, parent)
       @locals = ::Acute::Object.new
       locals.register(:parent, parent)
       locals.register(:self, scope)
+      call = ::Acute::Object.new
+      call.register(:parent, $Object)
+      %w{target message sender}.each { |str| call.register(str, env[str]) }
+      call.register(:slotContext, env[:slot_context])
+      call.register(:activated, self)
+      locals.register(:call, call)
     end
   end
 end
