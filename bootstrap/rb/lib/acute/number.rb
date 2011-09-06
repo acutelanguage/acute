@@ -20,6 +20,9 @@ module Acute
       %w{+ - * / %}.each do |s|
         method(s)         { |env| Number.new(env[:target].value.send(s, env[:msg].eval_arg_at(env, 0).to_i)) }
       end
+      %w{> < != ==}.each do |s|
+        method(s)         { |env| env[:target].value.send(s, env[:msg].eval_arg_at(env, 0).to_i) ? env[:target] : ::Acute::Nil.instance }
+      end
       method(:bitwiseAnd) { |env| Number.new(env[:target].value & env[:msg].eval_arg_at(env, 0).to_i) }
       method(:bitwiseOr)  { |env| Number.new(env[:target].value | env[:msg].eval_arg_at(env, 0).to_i) }
       method(:bitwiseXor) { |env| Number.new(env[:target].value ^ env[:msg].eval_arg_at(env, 0).to_i) }
