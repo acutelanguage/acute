@@ -31,7 +31,7 @@ module Acute
       self.scope = env[:sender] unless scope
       create_locals(env, scope)
       argument_names.each_with_index do |name, idx|
-        obj = locals.perform(env.merge(:msg => args[idx]))
+        obj = env[:msg].eval_arg_at(env, idx)
         locals.register(name, obj)
       end
       doMessage(env.merge(:msg => body, :target => locals), locals)
