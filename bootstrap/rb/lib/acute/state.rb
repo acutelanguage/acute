@@ -11,6 +11,7 @@ module Acute
 
     def init_protos
       object = ::Acute::Object.new(true)
+      lobby.register(:Lobby, lobby)
       lobby.register(:Object, object)
       lobby.register(:type, ::Acute::String.new("Lobby"))
       lobby.register(:parent, object)
