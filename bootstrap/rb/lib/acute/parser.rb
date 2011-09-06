@@ -22,7 +22,7 @@ module Acute
     end
 
     rule :message do
-      (identifier >> (str('(') >> arglist.maybe.as(:args) >> str(')')).maybe).as(:message) >> space?
+      (identifier >> (str('(') >> separator? >> arglist.maybe.as(:args) >> separator? >> str(')')).maybe).as(:message) >> space?
     end
 
     rule :arglist do
@@ -36,8 +36,17 @@ module Acute
     rule :space do
       match('\s').repeat(1)
     end
+
     rule :space? do
       space.maybe
+    end
+
+    rule :separator do
+      space | match('\n').repeat(1) | match('\t').repeat(1)
+    end
+
+    rule :separator? do
+      separator.maybe
     end
 
     rule :comma do
