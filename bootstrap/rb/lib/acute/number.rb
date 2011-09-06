@@ -10,13 +10,14 @@ module Acute
     def initialize(num, init_mt = false)
       super()
       @value = num.to_i
-      register("parent", init_mt ? $Object : $Number)
+      obj_name = init_mt ? "Object" : "Number"
+      register("parent", $state.find(obj_name))
       method_table if init_mt
     end
 
     def method_table
       #method(:+)          { |env| other = env[:msg].eval_arg_at(env, 0); Number.new($engine.run_function($module.functions.named("add"), env[:target].value.to_i, other.to_i)) }
-      %w{+ - * /}.each do |s|
+      %w{+ - * / %}.each do |s|
         method(s)         { |env| Number.new(env[:target].value.send(s, env[:msg].eval_arg_at(env, 0).to_i)) }
       end
       method(:bitwiseAnd) { |env| Number.new(env[:target].value & env[:msg].eval_arg_at(env, 0).to_i) }

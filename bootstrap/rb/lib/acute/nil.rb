@@ -12,7 +12,7 @@ module Acute
     def initialize
       super()
       @value = nil
-      register(:parent, $Object)
+      register(:parent, $state.find("Object"))
       method_table
     end
 

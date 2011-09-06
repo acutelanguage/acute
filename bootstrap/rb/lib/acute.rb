@@ -3,6 +3,7 @@
 #
 
 module Acute
+  autoload :State, 'acute/state'
   autoload :Object, 'acute/object'
   autoload :Nil, 'acute/nil'
   autoload :Message, 'acute/message'

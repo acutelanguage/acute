@@ -14,7 +14,7 @@ module Acute
       @body = body
       @locals = ::Acute::Nil.instance
       @argument_names = args[0].map(&:name) rescue []
-      register(:parent, $Object)
+      register(:parent, $state.find("Object"))
       method_table
     end
 
@@ -49,7 +49,7 @@ module Acute
       locals.register(:parent, parent)
       locals.register(:self, scope)
       call = ::Acute::Object.new
-      call.register(:parent, $Object)
+      call.register(:parent, $state.find("Object"))
       %w{target message sender}.each { |str| call.register(str, env[str]) }
       call.register(:slotContext, env[:slot_context])
       call.register(:activated, self)

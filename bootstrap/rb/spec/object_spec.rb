@@ -16,19 +16,19 @@ describe ::Acute::Object do
 
   it "looks up a slot" do
     @obj.register("fortyTwo", 42)
-    slot = @obj.lookup({}, :fortyTwo)
+    slot = @obj.lookup({ :target => @obj }, :fortyTwo)
     slot.should be_an_instance_of(::Acute::Slot)
     slot.data.should be 42
   end
 
   it "cannot find a non-existent slot" do
-    @obj.lookup({}, :amazingStuff).should be_nil
-    lambda { @obj.perform({:msg => ::Acute::Message.new("amazingStuff")}) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff' on 'NilClass'.")
+    @obj.lookup({ :target => @obj }, :amazingStuff).should be_nil
+    lambda { @obj.perform({:target => @obj, :msg => ::Acute::Message.new("amazingStuff")}) }.should raise_error(RuntimeError, "Could not find slot 'amazingStuff' on 'Acute::Object'.")
   end
 
   it "stores an activatable message in the slot table" do
     @obj.register("add", ::Acute::Closure.new({}) { |env, a, b| a + b }, :activatable => true)
-    slot = @obj.lookup({}, :add)
+    slot = @obj.lookup({ :target => @obj }, :add)
     slot.data.should be_an_instance_of(::Acute::Closure)
     slot.data.func.should be_an_instance_of(Proc)
   end
@@ -36,13 +36,13 @@ describe ::Acute::Object do
   it "performs a message that will return the value in the slot" do
     @obj.register("fortyTwo", 42)
     msg = ::Acute::Message.new("fortyTwo")
-    @obj.perform(:msg => msg).should be 42
+    @obj.perform(:target => @obj, :msg => msg).should be 42
   end
 
   it "performs a message that will activate a closure" do
     @obj.register("add", ::Acute::Closure.new({}) { |env, a, b| a + b }, :activatable => true)
     msg = ::Acute::Message.new("add", [1, 2])
-    @obj.perform(:msg => msg).should be 3
+    @obj.perform(:target => @obj, :msg => msg).should be 3
   end
 
   it "can clone itself" do
@@ -51,14 +51,14 @@ describe ::Acute::Object do
 
   it "has a parent" do
     new_obj = @obj.perform(:target => @obj, :msg => ::Acute::Message.new("clone"))
-    new_obj.lookup({}, "parent").data.should_not be_nil
+    new_obj.lookup({ :target => @obj }, "parent").data.should_not be_nil
   end
 
   it "found a parent slot with a non-nil value" do
     obj = ::Acute::Object.new
     parent = ::Acute::Object.new
     obj.register("parent", parent)
-    obj.perform(:msg => ::Acute::Message.new("parent", [])).should == parent
+    obj.perform(:target => obj, :msg => ::Acute::Message.new("parent", [])).should == parent
   end
  
   it "displays the correct slot table" do
@@ -77,7 +77,7 @@ describe ::Acute::Object do
 
   it "can evaluate a message" do
     msg = ::Acute::Message.new("message", [::Acute::Message.new("slotNames")])
-    @obj.perform(:target => @obj, :msg => ::Acute::Message.new("doMessage", [msg])).value.should == @obj.slots.keys.map(&:to_s)
+    @obj.perform(:target => @obj, :sender => @obj, :msg => ::Acute::Message.new("doMessage", [msg])).value.should == @obj.slots.keys.map(&:to_s)
   end
 
   it "can evaluate a message chain and handles ; properly" do

@@ -11,7 +11,7 @@ module Acute
       super()
       @value = args
       method_table
-      register(:parent, $Object)
+      register(:parent, $state.find("Object"))
     end
 
     def method_table

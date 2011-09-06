@@ -10,7 +10,7 @@ describe ::Acute::Closure do
   end
 
   it "can call the closure" do
-    @closure.call({}, 1, 2).should be 3
+    @closure.call({ :target => @closure }, 1, 2).should be 3
   end
 
   it "is passed the environment" do

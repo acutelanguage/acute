@@ -13,7 +13,7 @@ module Acute
       @arguments = arguments
       @next = nil
       @cached_result = options[:cached_result]
-      register(:parent, $Object)
+      register(:parent, $state.find("Object"))
       method_table
     end
 

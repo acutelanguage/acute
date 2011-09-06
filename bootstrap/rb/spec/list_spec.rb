@@ -26,35 +26,35 @@ describe ::Acute::List do
 
   it "outputs a string representation of a populated list" do
     msg = ::Acute::Message.new("1", [], :cached_result => ::Acute::Number.new(1))
-    @list.perform(:msg => ::Acute::Message.new("append", [msg])).should_not be_nil
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("append", [msg])).should_not be_nil
     @list.to_s.should == "list(1)"
   end
 
   it "outputs a string representation of a populated list with multiple arguments" do
     first = ::Acute::Message.new("1", [], :cached_result => ::Acute::Number.new(1))
     second = ::Acute::Message.new("2", [], :cached_result => ::Acute::Number.new(2))
-    @list.perform(:msg => ::Acute::Message.new("append", [first])).should_not be_nil
-    @list.perform(:msg => ::Acute::Message.new("append", [second])).should_not be_nil
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("append", [first])).should_not be_nil
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("append", [second])).should_not be_nil
     @list.to_s.should == "list(1, 2)"
   end
 
   it "is empty" do
-    @list.perform(:msg => ::Acute::Message.new("isEmpty")).should be_true
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("isEmpty")).should be_true
   end
 
   it "size is zero" do
-    @list.perform(:msg => ::Acute::Message.new("size")).should == ::Acute::Number.new(0)
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("size")).should == ::Acute::Number.new(0)
   end
 
   it "appends an item to the list" do
     msg = ::Acute::Message.new("1", [], :cached_result => ::Acute::Number.new(1))
-    @list.perform(:msg => ::Acute::Message.new("append", [msg])).should_not be_nil
-    @list.perform(:msg => ::Acute::Message.new("isEmpty")).should_not be_true
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("append", [msg])).should_not be_nil
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("isEmpty")).should_not be_true
   end
 
   it "prepends an item to the list" do
     msg = ::Acute::Message.new("1", [], :cached_result => ::Acute::Number.new(1))
-    @list.perform(:msg => ::Acute::Message.new("prepend", [msg])).should_not be_nil
-    @list.perform(:msg => ::Acute::Message.new("isEmpty")).should_not be_true
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("prepend", [msg])).should_not be_nil
+    @list.perform(:target => @list, :msg => ::Acute::Message.new("isEmpty")).should_not be_true
   end
 end

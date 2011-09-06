@@ -64,11 +64,11 @@ describe ::Acute::Message do
 
   it "tries to evaluate an argument out of bounds" do
     msg = ::Acute::Message.new("foo", [::Acute::Message.new("bar")])
-    msg.eval_arg_at({}, 5).should be ::Acute::Nil.instance
+    msg.eval_arg_at({ :target => $state.lobby }, 5).should be ::Acute::Nil.instance
   end
 
   it "evaluates all arguments" do
     msg = ::Acute::Message.new("foo", [::Acute::Message.new("bar", [], :cached_result => 1)])
-    msg.eval_args({}).should == [1]
+    msg.eval_args({ :target => $state.lobby }).should == [1]
   end
 end

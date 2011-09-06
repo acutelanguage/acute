@@ -51,43 +51,14 @@ opts.each do |opt, arg|
   end
 end
 
-  LLVM.init_x86
-  $module = ::LLVM::Module.create("AcuteBootstrap")
-  $engine = LLVM::ExecutionEngine.create_jit_compiler($module)
-   # We have a chicken-egg problem; which comes first? The Object or the Lobby?
-  $Object = ::Acute::Object.new(true)
-  # Chronologically, the Object of course, but...
-  $Lobby = ::Acute::Object.new
-  $Lobby.register(:type, ::Acute::String.new("Lobby"))
-  $Lobby.register(:parent, $Object)
-  # We'll also make the Lobby a parent of Object. Don't worry, we solve lookup loops.
-  $Object.register(:parent, $Lobby)
-  $List = ::Acute::List.new
-  $String = ::Acute::String.new
-  $Number = ::Acute::Number.new(0, true)
-  $Number.method_table
-  $Nil = ::Acute::Nil.instance
-  $Closure = ::Acute::Closure.new({})
-  $Block = ::Acute::Block.new(nil, nil, [])
-  $Message = ::Acute::Message.new("")
-  $Slot = ::Acute::Slot.new($Nil, $Nil)
-  $LLVMCore = ::Acute::LLVM::Core.new
-  $LLVMTypes = ::Acute::LLVM::Types::Base.new
- 
-  $Lobby.register("Lobby", $Lobby)
-  $Lobby.register("Object", $Object)
-  $Lobby.register("List", $List)
-  $Lobby.register("String", $String)
-  $Lobby.register("Number", $Number)
-  $Lobby.register("nil", $Nil)
-  $Lobby.register("Closure", $Closure)
-  $Lobby.register("Block", $Block)
-  $Lobby.register("Message", $Message)
-  $Lobby.register("Slot", $Slot)
-  $Lobby.register("LLVM", $LLVMCore)
-  $LLVMCore.register("Types", $LLVMTypes)
-  $LLVMTypes.register("Pointer", ::Acute::LLVM::Types::Pointer.new)
-  $LLVMTypes.register("Integer", ::Acute::LLVM::Types::Integer.new)
+LLVM.init_x86
+$module = ::LLVM::Module.create("AcuteBootstrap")
+$engine = LLVM::ExecutionEngine.create_jit_compiler($module)
+# We solve the chicken-egg problem by creating a new empty object as the lobby, we'll later set its parent
+# to Object once we create Object.
+lobby = ::Acute::Object.new
+$state = ::Acute::State.new(lobby)
+$state.init_protos
 
 display = proc do |code|
   parser = Acute::Parser.new
@@ -102,8 +73,7 @@ display = proc do |code|
   end
 
   begin
-    puts "=> " + tree.perform_on({ :sender => $Lobby, :target => $Lobby, :msg => tree }, $Lobby, $Lobby).to_s
-    #::Acute::Walker.walk($Lobby, tree) { |obj| puts "=> " + obj.to_s }
+    puts "=> " + tree.perform_on({ :sender => lobby, :target => lobby, :msg => tree }, lobby, lobby).to_s
   rescue Exception => e
     puts "Exception: " + e.message
     puts "\t" + e.backtrace.join("\n\t")

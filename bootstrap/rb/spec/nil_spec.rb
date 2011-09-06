@@ -18,16 +18,16 @@ describe ::Acute::Nil do
   end
 
   it "returns itself when being cloned" do
-    @nil.perform(:msg => ::Acute::Message.new("clone")).should be @nil
+    @nil.perform(:target => @nil, :msg => ::Acute::Message.new("clone")).should be @nil
   end
 
   it "does not evaluate its argument when receiving ifTrue" do
-    @nil.perform(:msg => ::Acute::Message.new("ifTrue", [::Acute::Message.new("slotNames")])).should be @nil
+    @nil.perform(:target => @nil, :msg => ::Acute::Message.new("ifTrue", [::Acute::Message.new("slotNames")])).should be @nil
   end
 
   it "evaluates the argument passed to ifFalse" do
     obj = ::Acute::Object.new
     @nil.register(:foo, obj)
-    @nil.perform(:sender => @nil, :msg => ::Acute::Message.new("ifFalse", [::Acute::Message.new("foo")])).should be obj
+    @nil.perform(:sender => @nil, :target => @nil, :msg => ::Acute::Message.new("ifFalse", [::Acute::Message.new("foo")])).should be obj
   end
 end

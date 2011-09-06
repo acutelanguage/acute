@@ -10,7 +10,7 @@ module Acute
       super()
       @value = str
       method_table
-      register(:parent, $Object)
+      register(:parent, $state.find("Object"))
     end
 
     def method_table
