@@ -20,9 +20,11 @@ module Acute
       %w{+ - * / %}.each do |s|
         method(s)         { |env| Number.new(env[:target].value.send(s, env[:msg].eval_arg_at(env, 0).to_i)) }
       end
-      %w{> < != ==}.each do |s|
-        method(s)         { |env| env[:target].value.send(s, env[:msg].eval_arg_at(env, 0).to_i) ? env[:target] : ::Acute::Nil.instance }
-      end
+      method(:compare)    { |env| Number.new(env[:target].value <=> env[:msg].eval_arg_at(env, 0).to_i) }
+      method(:<)          { |env| compare_helper(env, -1) }
+      method(:>)          { |env| compare_helper(env, 1) }
+      method(:==)         { |env| compare_helper(env, 0) }
+      method(:'!=')       { |env| (env[:target].perform(env.merge(:msg => ::Acute::Message.new("compare", [env[:msg].arguments[0]]))).to_i != 0) ? env[:target] : ::Acute::Nil.instance }
       method(:bitwiseAnd) { |env| Number.new(env[:target].value & env[:msg].eval_arg_at(env, 0).to_i) }
       method(:bitwiseOr)  { |env| Number.new(env[:target].value | env[:msg].eval_arg_at(env, 0).to_i) }
       method(:bitwiseXor) { |env| Number.new(env[:target].value ^ env[:msg].eval_arg_at(env, 0).to_i) }
@@ -37,6 +39,10 @@ module Acute
 
     def <=>(other)
       self.value <=> other.value
+    end
+
+    def compare_helper(env, expected_value)
+      (env[:target].perform(env.merge(:msg => ::Acute::Message.new("compare", [env[:msg].arguments[0]]))).to_i == expected_value) ? env[:target] : ::Acute::Nil.instance
     end
 
     def to_i
