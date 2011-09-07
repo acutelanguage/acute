@@ -29,4 +29,10 @@ describe ::Acute::Parser do
     tree = @parser.parse('foo bar')
     tree.next.should == ::Acute::Message.new("bar")
   end
+  
+  it "recognizes ';' separator message" do
+    tree = @parser.parse('foo ; bar')
+    tree.next.name.should == ";"
+  end
+  
 end
