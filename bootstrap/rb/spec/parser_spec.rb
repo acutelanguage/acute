@@ -35,4 +35,8 @@ describe ::Acute::Parser do
     tree.next.name.should == ";"
   end
   
+  it "recognizes '\n' separator message" do
+    tree = @parser.parse('foo\n bar')
+    tree.next.name.should == ";"
+  end
 end
