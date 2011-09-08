@@ -18,11 +18,11 @@ module Acute
     root :expression
 
     rule :expression do
-      (literal | message).repeat.as(:expr)
+      ((literal | message)  >> space?).repeat.as(:expr)
     end
 
     rule :message do
-      (identifier >> (str('(') >> separator? >> arglist.maybe.as(:args) >> separator? >> str(')')).maybe).as(:message) >> space?
+      (identifier >> (str('(') >> separator? >> arglist.maybe.as(:args) >> separator? >> str(')')).maybe).as(:message)
     end
 
     rule :arglist do
@@ -54,18 +54,18 @@ module Acute
     end
     
     rule :identifier do
-      (match('[a-zA-Z_\+\-\*\/!@$%^&=\.\?:<>\|~;]') >> match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~]').repeat).as(:identifier) >> space?
+      (match('[a-zA-Z_\+\-\*\/!@$%^&=\.\?:<>\|~;]') >> match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~]').repeat).as(:identifier)
     end
     
     rule :integer do
-      ((str('+') | str('-')).maybe >> match("[0-9]").repeat(1)).as(:integer) >> space?
+      ((str('+') | str('-')).maybe >> match("[0-9]").repeat(1)).as(:integer)
     end
     
     rule :string do
       str('"') >> (
         str('\\') >> any |
         str('"').absent? >> any 
-      ).repeat.as(:string) >> str('"') >> space?
+      ).repeat.as(:string) >> str('"')
     end
   end
 end
