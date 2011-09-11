@@ -78,4 +78,9 @@ describe ::Acute::Parser do
     tree = @parser.parse("foo(\n a)")
     tree.to_s.should == "foo(a)"
   end
+  
+  it "ignores '\n' separator message after :" do
+    tree = @parser.parse("foo:\n a")
+    tree.to_s.should == "foo(a)"
+  end
 end
