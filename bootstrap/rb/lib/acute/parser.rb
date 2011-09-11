@@ -71,6 +71,10 @@ module Acute
       str(' ').repeat(1)
     end
     
+    rule :terminating_separator do
+      non_terminating_separator.maybe >> match('\n') >> (non_terminating_separator | match('\n')).repeat
+    end
+    
     rule :non_terminating_separator do
       (space | match('\t')).repeat(1)
     end
