@@ -26,7 +26,7 @@ module Acute
     end
 
     rule :message do
-      (identifier >> (str('(') >> separator? >> arglist.maybe.as(:args) >> separator? >> str(')')).maybe).as(:message)
+      (identifier >> (opener >> arglist.as(:args).maybe >> closer).maybe).as(:message)
     end
 
     rule :arglist do
