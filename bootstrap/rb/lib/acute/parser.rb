@@ -16,6 +16,9 @@ module Acute
     end
 
     root :expression
+    rule :code do
+      expression.maybe.as(:code)
+    end
 
     rule :expression do
       ((literal | message)  >> space?).repeat.as(:expr)
