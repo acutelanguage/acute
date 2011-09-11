@@ -60,6 +60,10 @@ module Acute
       ).repeat.as(:string) >> str('"')
     end
     
+    rule :closer do
+      str(')')
+    end
+    
     rule :comma do
       match(',').repeat(1) >> separator.maybe
     end
