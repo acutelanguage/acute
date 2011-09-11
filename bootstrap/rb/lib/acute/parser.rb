@@ -22,7 +22,8 @@ module Acute
     end
 
     rule :expression do
-      ((literal | message)  >> space?).repeat.as(:expr)
+      atom.as(:current) >> expression.maybe.as(:next)
+    end
     
     rule :atom do
       literal | message | sugar_separator | insignificant_separator
