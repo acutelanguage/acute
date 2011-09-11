@@ -24,6 +24,10 @@ describe ::Acute::Parser do
   it "recognizes strings" do
     @parser.parse('"foo"').to_s.should == ::Acute::String.new("foo").value
   end
+  
+  it "builds message name as string" do
+    @parser.parse("foo").name.class.should == "string".class
+  end
 
   it "has a next message" do
     tree = @parser.parse('foo bar')
