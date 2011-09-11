@@ -91,5 +91,9 @@ module Acute
     rule :non_terminating_separator do
       (space | match('\t')).repeat(1)
     end
+    
+    rule :terminator do
+      closer | comma | str(";") | any.absent?
+    end
   end
 end
