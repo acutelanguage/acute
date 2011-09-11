@@ -41,14 +41,6 @@ module Acute
       integer | string
     end
     
-    rule :space? do
-      space.maybe
-    end
-
-    rule :separator? do
-      separator.maybe
-    end
-
     rule :identifier do
       match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~;]').repeat(1).as(:identifier)
     end
