@@ -6,14 +6,19 @@ require 'parslet'
 
 module Acute
   class Transformer < Parslet::Transform
-    rule :expr => subtree(:expr) do
-      t = expr.shift
-      r = t
-      expr.each do |o|
-        t.next = o
-        t = t.next
-      end
-      r
+    
+    rule :code => simple(:exp) do
+      exp
+    end
+    
+    rule :current=>{:insignificant=>simple(:insg)}, :next=>subtree(:nxt) do
+      nxt
+    end
+        
+    rule :current=>simple(:message), :next=>simple(:nxt) do
+      message.next = nxt
+      message
+    end
     
     rule :sugarSep => simple(:sugarSep) do
       ::Acute::Message.new(";", [])
