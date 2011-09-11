@@ -41,10 +41,6 @@ module Acute
       space.maybe
     end
 
-    rule :separator do
-      space | match('\n').repeat(1) | match('\t').repeat(1)
-    end
-
     rule :separator? do
       separator.maybe
     end
@@ -69,6 +65,10 @@ module Acute
     end
     rule :space do
       str(' ').repeat(1)
+    end
+
+    rule :separator do
+      terminating_separator | non_terminating_separator
     end
     
     rule :terminating_separator do
