@@ -14,6 +14,9 @@ module Acute
         t = t.next
       end
       r
+    
+    rule :sugarSep => simple(:sugarSep) do
+      ::Acute::Message.new(";", [])
     end
 
     rule :integer => simple(:integer) do
