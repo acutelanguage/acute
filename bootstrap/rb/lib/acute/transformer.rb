@@ -25,7 +25,7 @@ module Acute
     end
 
     rule :message => { :identifier => simple(:identifier) } do
-      ::Acute::Message.new(identifier.to_s, [])
+      ::Acute::Message.new(identifier.to_s)
     end
 
     rule :message => { :identifier => simple(:identifier), :args => subtree(:args) } do
