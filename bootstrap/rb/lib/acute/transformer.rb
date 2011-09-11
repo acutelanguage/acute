@@ -17,11 +17,11 @@ module Acute
     end
 
     rule :integer => simple(:integer) do
-      ::Acute::Message.new(integer, [], { cached_result: ::Acute::Number.new(integer.to_s.to_i) })
+      ::Acute::Message.new(integer.to_s, [], { cached_result: ::Acute::Number.new(integer.to_s.to_i) })
     end
 
     rule :string => simple(:string) do
-      ::Acute::Message.new(string, [], { cached_result: ::Acute::String.new(string.to_s) })
+      ::Acute::Message.new(string.to_s, [], { cached_result: ::Acute::String.new(string.to_s) })
     end
 
     rule :message => { :identifier => simple(:identifier) } do
