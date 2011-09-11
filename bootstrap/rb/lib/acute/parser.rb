@@ -72,6 +72,10 @@ module Acute
       separator.as(:insignificant)
     end
     
+    rule :single_opener do
+      str(":") >> separator.maybe
+    end
+    
     rule :opener do
       str('(') >> separator.maybe
     end
