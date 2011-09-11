@@ -70,5 +70,9 @@ module Acute
     rule :space do
       str(' ').repeat(1)
     end
+    
+    rule :non_terminating_separator do
+      (space | match('\t')).repeat(1)
+    end
   end
 end
