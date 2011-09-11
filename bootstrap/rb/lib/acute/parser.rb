@@ -12,7 +12,7 @@ module Acute
     end
 
     def parse(code)
-      @transformer.apply expression.parse(code)
+      @transformer.apply root.parse(code)
     end
 
     root :expression
