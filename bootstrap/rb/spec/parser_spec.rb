@@ -24,9 +24,48 @@ describe ::Acute::Parser do
   it "recognizes strings" do
     @parser.parse('"foo"').to_s.should == ::Acute::String.new("foo").value
   end
+  
+  it "builds message name as string" do
+    @parser.parse("foo").name.class.should == "string".class
+  end
 
   it "has a next message" do
     tree = @parser.parse('foo bar')
     tree.next.should == ::Acute::Message.new("bar")
+  end
+  
+  it "recognizes ';' separator message" do
+    tree = @parser.parse('foo ; bar')
+    tree.next.name.should == ";"
+  end
+  
+  it "recognizes '\n' separator message" do
+    tree = @parser.parse("foo\n bar")
+    tree.next.name.should == ";"
+  end
+  
+  it "ignores '\n' separator message preceding ;" do
+    tree = @parser.parse("foo\n; bar")
+    tree.to_s.should == "foo ; bar"
+  end
+  
+  it "ignores '\n' separator message preceding eof" do
+    tree = @parser.parse("foo\n")
+    tree.to_s.should == "foo"
+  end
+  
+  it "ignores '\n' separator message preceding )" do
+    tree = @parser.parse("foo(a\n)")
+    tree.to_s.should == "foo(a)"
+  end
+  
+  it "ignores '\n' separator message after file begining" do
+    tree = @parser.parse("\nfoo")
+    tree.to_s.should == "foo"
+  end
+  
+  it "ignores '\n' separator message after (" do
+    tree = @parser.parse("foo(\n a)")
+    tree.to_s.should == "foo(a)"
   end
 end
