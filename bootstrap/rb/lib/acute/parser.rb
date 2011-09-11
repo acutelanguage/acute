@@ -12,17 +12,25 @@ module Acute
     end
 
     def parse(code)
-      @transformer.apply expression.parse(code)
+      @transformer.apply root.parse(code)
     end
 
-    root :expression
+    root :code
+    
+    rule :code do
+      separator.maybe >> expression.maybe.as(:code)
+    end
 
     rule :expression do
-      (literal | message).repeat.as(:expr)
+      atom.as(:current) >> expression.maybe.as(:next)
+    end
+    
+    rule :atom do
+      literal | message | sugar_separator | insignificant_separator
     end
 
     rule :message do
-      (identifier >> (str('(') >> separator? >> arglist.maybe.as(:args) >> separator? >> str(')')).maybe).as(:message) >> space?
+      (identifier >> (opener >> arglist.as(:args).maybe >> closer).maybe).as(:message)
     end
 
     rule :arglist do
@@ -33,39 +41,59 @@ module Acute
       integer | string
     end
     
-    rule :space do
-      match('\s').repeat(1)
-    end
-
-    rule :space? do
-      space.maybe
-    end
-
-    rule :separator do
-      space | match('\n').repeat(1) | match('\t').repeat(1)
-    end
-
-    rule :separator? do
-      separator.maybe
-    end
-
-    rule :comma do
-      match(',').repeat(1) >> space?
-    end
-    
     rule :identifier do
-      (match('[a-zA-Z_\+\-\*\/!@$%^&=\.\?:<>\|~;]') >> match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~]').repeat).as(:identifier) >> space?
+      match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~;]').repeat(1).as(:identifier)
     end
     
     rule :integer do
-      ((str('+') | str('-')).maybe >> match("[0-9]").repeat(1)).as(:integer) >> space?
+      ((str('+') | str('-')).maybe >> match("[0-9]").repeat(1)).as(:integer)
     end
     
     rule :string do
       str('"') >> (
         str('\\') >> any |
         str('"').absent? >> any 
-      ).repeat.as(:string) >> str('"') >> space?
+      ).repeat.as(:string) >> str('"')
+    end
+    
+    rule :sugar_separator do
+      (terminating_separator >> terminator.absent?).as(:sugarSep)
+    end
+    
+    rule :insignificant_separator do
+      separator.as(:insignificant)
+    end
+    
+    rule :opener do
+      str('(') >> separator.maybe
+    end
+
+    rule :closer do
+      str(')')
+    end
+    
+    rule :comma do
+      match(',').repeat(1) >> separator.maybe
+    end
+    
+    rule :space do
+      str(' ').repeat(1)
+    end
+
+    rule :separator do
+      terminating_separator | non_terminating_separator
+    end
+    
+    rule :terminating_separator do
+      non_terminating_separator.maybe >> match('\n') >> (non_terminating_separator | match('\n')).repeat
+    end
+    
+    rule :non_terminating_separator do
+      (space | match('\t')).repeat(1)
+    end
+    
+    rule :terminator do
+      closer | comma | str(";") | any.absent?
     end
   end
 end
