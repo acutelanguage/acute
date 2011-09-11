@@ -43,4 +43,29 @@ describe ::Acute::Parser do
     tree = @parser.parse("foo\n bar")
     tree.next.name.should == ";"
   end
+  
+  it "ignores '\n' separator message preceding ;" do
+    tree = @parser.parse("foo\n; bar")
+    tree.to_s.should == "foo ; bar"
+  end
+  
+  it "ignores '\n' separator message preceding eof" do
+    tree = @parser.parse("foo\n")
+    tree.to_s.should == "foo"
+  end
+  
+  it "ignores '\n' separator message preceding )" do
+    tree = @parser.parse("foo(a\n)")
+    tree.to_s.should == "foo(a)"
+  end
+  
+  it "ignores '\n' separator message after file begining" do
+    tree = @parser.parse("\nfoo")
+    tree.to_s.should == "foo"
+  end
+  
+  it "ignores '\n' separator message after (" do
+    tree = @parser.parse("foo(\n a)")
+    tree.to_s.should == "foo(a)"
+  end
 end
