@@ -60,6 +60,10 @@ module Acute
       ).repeat.as(:string) >> str('"')
     end
     
+    rule :insignificant_separator do
+      separator.as(:insignificant)
+    end
+    
     rule :opener do
       str('(') >> separator.maybe
     end
