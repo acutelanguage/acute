@@ -18,7 +18,7 @@ module Acute
     root :code
     
     rule :code do
-      expression.maybe.as(:code)
+      separator.maybe >> expression.maybe.as(:code)
     end
 
     rule :expression do
