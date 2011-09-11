@@ -37,10 +37,6 @@ module Acute
       integer | string
     end
     
-    rule :space do
-      match('\s').repeat(1)
-    end
-
     rule :space? do
       space.maybe
     end
@@ -70,6 +66,9 @@ module Acute
         str('\\') >> any |
         str('"').absent? >> any 
       ).repeat.as(:string) >> str('"')
+    end
+    rule :space do
+      str(' ').repeat(1)
     end
   end
 end
