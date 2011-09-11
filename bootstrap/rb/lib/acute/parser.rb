@@ -45,10 +45,6 @@ module Acute
       separator.maybe
     end
 
-    rule :comma do
-      match(',').repeat(1) >> space?
-    end
-    
     rule :identifier do
       (match('[a-zA-Z_\+\-\*\/!@$%^&=\.\?:<>\|~;]') >> match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~]').repeat).as(:identifier)
     end
@@ -63,6 +59,11 @@ module Acute
         str('"').absent? >> any 
       ).repeat.as(:string) >> str('"')
     end
+    
+    rule :comma do
+      match(',').repeat(1) >> separator.maybe
+    end
+    
     rule :space do
       str(' ').repeat(1)
     end
