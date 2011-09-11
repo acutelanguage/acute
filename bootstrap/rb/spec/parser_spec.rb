@@ -8,6 +8,12 @@ describe ::Acute::Parser do
   it "builds a message with no arguments" do
     @parser.parse("foo").should == ::Acute::Message.new("foo")
   end
+  
+  it "builds a single arg message with an argument" do
+    m = ::Acute::Message.new("foo", [::Acute::Message.new("bar")])
+    m.next = ::Acute::Message.new("baz")
+    @parser.parse("foo:bar baz").should == m
+  end
 
   it "builds a message with an argument" do
     @parser.parse("foo(1)").should == ::Acute::Message.new("foo", [::Acute::Message.new("1")])
