@@ -15,7 +15,8 @@ module Acute
       @transformer.apply root.parse(code)
     end
 
-    root :expression
+    root :code
+    
     rule :code do
       expression.maybe.as(:code)
     end
