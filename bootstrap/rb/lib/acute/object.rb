@@ -23,7 +23,7 @@ module Acute
       method(:ruby)      { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
       method(:do)        { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
       method(:ifTrue)    { |env| env[:msg].eval_arg_at(env, 0) }
-      method(:ifFalse)   { |env| ::Acute::Nil.instance }
+      method(:ifFalse)   { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
       method(:slotNames) { |env| ::Acute::List.new(*env[:target].slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
       method(:list)      { |env| ::Acute::List.new(*env[:msg].eval_args(env)) }
       method(:message)   { |env| env[:msg].arguments[0] }
