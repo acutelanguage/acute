@@ -30,11 +30,11 @@ module Acute
     end
 
     rule :message do
-      (identifier >> (opener >> arglist.as(:args).maybe >> closer).maybe).as(:message)
+      (identifier >> (opener >> arglist.maybe >> closer).maybe).as(:message)
     end
 
     rule :arglist do
-      expression >> (comma >> expression).repeat
+      (expression >> (comma >> expression).repeat).as(:args)
     end
 
     rule :literal do
