@@ -32,7 +32,11 @@ module Acute
     rule :message do
       (identifier >> (opener >> arglist.maybe >> closer).maybe).as(:message)
     end
-
+    
+    rule :no_arg_message do
+      identifier.as(:identifier)
+    end
+    
     rule :arglist do
       (expression >> (comma >> expression).repeat).as(:args)
     end
