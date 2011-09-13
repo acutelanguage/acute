@@ -26,6 +26,10 @@ describe ::Acute::Parser do
   it "builds a message with an empty name" do
     @parser.parse("(1, 2)").should == ::Acute::Message.new("", [::Acute::Message.new("1"), ::Acute::Message.new("2")])
   end
+  
+  it "builds a single arg message with an empty name" do
+    @parser.parse(":1").should == ::Acute::Message.new("", [::Acute::Message.new("1")])
+  end
 
   it "recognizes integers" do
     @parser.parse("1").should == ::Acute::Message.new("1")
