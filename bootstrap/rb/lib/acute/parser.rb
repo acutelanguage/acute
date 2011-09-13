@@ -50,7 +50,7 @@ module Acute
     end
     
     rule :identifier do
-      match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~;]').repeat(1)
+      match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?<>\|~;]').repeat(1)
     end
     
     rule :integer do
