@@ -30,11 +30,19 @@ module Acute
     end
 
     rule :message do
-      (identifier >> (opener >> arglist.as(:args).maybe >> closer).maybe).as(:message)
+      (multi_arg_message | no_arg_message).as(:message)
     end
-
+    
+    rule :no_arg_message do
+      identifier.as(:identifier)
+    end
+    
+    rule :multi_arg_message do
+      identifier.maybe.as(:identifier) >> (opener >> arglist.maybe >> closer)
+    end
+    
     rule :arglist do
-      expression >> (comma >> expression).repeat
+      (expression >> (comma >> expression).repeat).as(:args)
     end
 
     rule :literal do
@@ -42,7 +50,7 @@ module Acute
     end
     
     rule :identifier do
-      match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~;]').repeat(1).as(:identifier)
+      match('[a-zA-Z0-9_\+\-\*\/!@$%^&=\.\?:<>\|~;]').repeat(1)
     end
     
     rule :integer do
