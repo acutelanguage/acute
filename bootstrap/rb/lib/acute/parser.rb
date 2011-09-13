@@ -37,6 +37,10 @@ module Acute
       identifier.as(:identifier)
     end
     
+    rule :single_arg_message do
+      identifier.maybe.as(:identifier) >> single_opener >> (literal | message).as(:args).maybe
+    end
+    
     rule :multi_arg_message do
       identifier.maybe.as(:identifier) >> (opener >> arglist.maybe >> closer)
     end
