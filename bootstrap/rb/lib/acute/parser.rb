@@ -30,7 +30,7 @@ module Acute
     end
 
     rule :message do
-      (multi_arg_message | no_arg_message).as(:message)
+      (multi_arg_message | single_arg_message | no_arg_message).as(:message)
     end
     
     rule :no_arg_message do
