@@ -19,7 +19,7 @@ module Acute
       lobby.register(:String, ::Acute::String.new)
       lobby.register(:Number, ::Acute::Number.new(0, true))
       lobby.register(:nil, ::Acute::Nil.instance)
-      lobby.register(:Closure, ::Acute::Closure.new({}))
+      lobby.register(:Closure, ::Acute::Closure.new({}, true))
       lobby.register(:Block, ::Acute::Block.new(nil, nil, []))
       lobby.register(:Message, ::Acute::Message.new(""))
       lobby.register(:Slot, ::Acute::Slot.new(::Acute::Nil.instance, ::Acute::Nil.instance))
