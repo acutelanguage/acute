@@ -39,19 +39,15 @@ module Acute
       end
     end
 
-    def perform_on(env, locals, target)
+    def perform_on(env, locals, target = env[:target])
       result = target
       cached_target = target
       m = env[:msg]
 
       begin
-        if name.eql? ';'
-          target = cached_target
-        else
-          result = m.cached_result
-          result ||= target.perform(env.merge(:target => target, :sender => locals, :msg => m))
-          target = result
-        end
+        result = m.cached_result
+        result ||= target.perform(env.merge(:target => target, :sender => locals, :msg => m))
+        target = result
       end while m = m.next
       result
     end
