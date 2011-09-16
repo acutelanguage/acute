@@ -7,7 +7,7 @@ module Acute
     include Comparable
     attr_accessor :name, :arguments, :next, :cached_result
 
-    def initialize(name, arguments = [], options = { cached_result: nil })
+    def initialize(name, arguments = [], options = { :cached_result => nil })
       super()
       @name = name
       @arguments = arguments
