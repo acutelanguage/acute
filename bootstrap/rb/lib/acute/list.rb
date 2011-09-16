@@ -20,6 +20,7 @@ module Acute
       method(:prepend) { |env| env[:target].value.unshift env[:msg].eval_arg_at(env, 0); self }
       method(:isEmpty) { |env| env[:target].value.empty? }
       method(:size)    { |env| ::Acute::Number.new env[:target].value.count }
+      method(:indexOf) { |env| ::Acute::Number.new(env[:target].value.index(env[:msg].eval_arg_at(env, 0))) }
     end
 
     def <=>(other)
