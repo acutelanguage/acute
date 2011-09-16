@@ -50,7 +50,7 @@ module Acute
       locals.register(:self, scope)
       call = ::Acute::Object.new
       call.register(:parent, $state.find("Object"))
-      %w{target message sender}.each { |str| call.register(str, env[str]) }
+      %w{target message sender}.each { |str| call.register(str, env[str.to_sym]) }
       call.register(:slotContext, env[:slot_context])
       call.register(:activated, self)
       locals.register(:call, call)
