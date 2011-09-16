@@ -35,10 +35,5 @@ module Acute
       slot = lobby.lookup({ :target => lobby }, str)
       slot.data if slot
     end
-
-    def set_on(obj_str, str, val)
-      obj = find(obj_str)
-      obj.register(str, val) if obj
-    end
   end
 end
