@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ::Acute::Block do
   before(:all) do
     @scope = ::Acute::Object.new
-    @body = ::Acute::Message.new("1 +(1)")
+    @body = ::Acute::Parser.new.parse("1 +(1)")
     @block = ::Acute::Block.new(@scope, @body)
   end
 
