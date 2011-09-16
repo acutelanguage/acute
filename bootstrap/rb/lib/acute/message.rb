@@ -18,6 +18,7 @@ module Acute
     end
 
     def method_table
+      method(:next)            { |env| env[:target].next }
       method(:setNext)         { |env| env[:target].next = env[:msg].eval_arg_at(env, 0); env[:target] }
       method(:setCachedResult) { |env| env[:target].cached_result = env[:msg].eval_arg_at(env, 0); env[:target] }
       method(:asString)        { |env| String.new(to_s) }
