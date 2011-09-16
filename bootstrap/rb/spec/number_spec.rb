@@ -87,6 +87,16 @@ describe ::Acute::Number do
     @num.perform(:target => @num, :sender => @num, :msg => msg).value.should be 10
   end
 
+  it "is greater than 5" do
+    five = ::Acute::Message.new("5", [], :cached_result => ::Acute::Number.new(5))
+    @num.perform(:target => @num, :sender => @num, :msg => ::Acute::Message.new(">", [five])).should be @num
+  end
+
+  it "is less than 100" do
+    hundred = ::Acute::Message.new("100", [], :cached_result => ::Acute::Number.new(100))
+    @num.perform(:target => @num, :sender => @num, :msg => ::Acute::Message.new("<", [hundred])).should be @num
+  end
+
   it "converts its representation to a string" do
     ::Acute::Number.new(42).to_s.should == "42"
   end
