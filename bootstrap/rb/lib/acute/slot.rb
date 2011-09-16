@@ -11,10 +11,12 @@ module Acute
       @context = context
       @activatable = options[:activatable]
       @data = data
-      dummy_slot = self.dup
-      dummy_slot.context = $state.find("Object")
-      dummy_slot.data = $state.find("Object")
-      @slots[:parent] = dummy_slot
+      dummy_slot = $state.find("Slot").dup rescue nil
+      if dummy_slot
+        dummy_slot.context = $state.find("Object")
+        dummy_slot.data = $state.find("Object")
+        @slots[:parent] = dummy_slot
+      end
     end
 
     def to_s

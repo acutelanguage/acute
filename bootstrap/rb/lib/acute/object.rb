@@ -18,7 +18,8 @@ module Acute
       method(:clone, &clone_method)
       method(:init)      { |env| env[:target] }
       method(:type)      { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
-      method(:getSlot)   { |env| lookup(env, env[:msg].eval_arg_at(env, 0)) }
+      method(:_lookup)   { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
+      method(:getSlot, &getSlot_method)
       method(:setSlot)   { |env| val = env[:msg].eval_arg_at(env, 1); env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, val, :activatable => val.kind_of?(::Acute::Block)) }
       method(:method)    { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
       method(:ruby)      { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
@@ -42,7 +43,7 @@ module Acute
       lookup_func ||= lambda do |e, s|
         slot = slots[s.to_sym]
         return slot if slot
-        return if done_lookup
+        return if e[:target].done_lookup
         e[:target].done_lookup = true
         parent_slot = slots[:parent]
 
@@ -88,6 +89,13 @@ module Acute
       end
     end
 
+    def getSlot_method
+      lambda do |env|
+        slot = lookup(env, env[:msg].eval_arg_at(env, 0).to_s)
+        slot ? slot.data : slot
+      end
+    end
+
     def doMessage(env, ctx)
       target = env[:target]
       result = target
@@ -95,13 +103,9 @@ module Acute
       m = env[:msg]
 
       begin
-        if m.name.eql? ';'
-          target = cached_target
-        else
-          result = m.cached_result
-          result ||= target.perform(env.merge(:target => ctx, :sender => ctx, :msg => m))
-          target = result
-        end
+        result = m.cached_result
+        result ||= target.perform(env.merge(:target => ctx, :sender => ctx, :msg => m))
+        target = result
       end while m = m.next
       result
     end
