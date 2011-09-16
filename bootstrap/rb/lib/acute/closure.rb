@@ -10,6 +10,8 @@ module Acute
       super()
       @func = blk
       @slots[:activate] = Slot.new(lambda {|env| activate(env) }, env[:target], :activatable => true)
+      @slots[:parent] = Slot.new($state.find("Object"), env[:target])
+
     end
 
     def activate(env)
