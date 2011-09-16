@@ -13,7 +13,7 @@ module Acute
       @scope = scope
       @body = body
       @locals = ::Acute::Nil.instance
-      @argument_names = args[0].map(&:name) rescue []
+      @argument_names = args.map(&:name) rescue [] #args[0].map(&:name) rescue []
       register(:parent, $state.find("Object"))
       method_table
     end
