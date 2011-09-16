@@ -11,6 +11,7 @@ module Acute
 
     def init_protos
       object = ::Acute::Object.new(true)
+      lobby.register(:Slot, ::Acute::Slot.new(::Acute::Nil.instance, ::Acute::Nil.instance))
       lobby.register(:Lobby, lobby)
       lobby.register(:Object, object)
       lobby.register(:type, ::Acute::String.new("Lobby"))
@@ -22,7 +23,6 @@ module Acute
       lobby.register(:Closure, ::Acute::Closure.new({}))
       lobby.register(:Block, ::Acute::Block.new(nil, nil, []))
       lobby.register(:Message, ::Acute::Message.new(""))
-      lobby.register(:Slot, ::Acute::Slot.new(::Acute::Nil.instance, ::Acute::Nil.instance))
       llvm = ::Acute::LLVM::Core.new
       lobby.register(:LLVM, llvm)
       llvm_types = ::Acute::LLVM::Types::Base.new
