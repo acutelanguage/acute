@@ -28,7 +28,7 @@ module Acute
       msg = arguments[idx]
       if msg
         return msg.cached_result if msg.cached_result? && msg.next.nil?
-        return perform_on(env.merge(:msg => msg), env[:sender], env[:sender])
+        return msg.perform_on(env.merge(:msg => msg), env[:sender], env[:sender])
       end
       ::Acute::Nil.instance
     end
@@ -42,7 +42,7 @@ module Acute
     def perform_on(env, locals, target = env[:target])
       result = target
       cached_target = target
-      m = env[:msg]
+      m = self
 
       begin
         result = m.cached_result
