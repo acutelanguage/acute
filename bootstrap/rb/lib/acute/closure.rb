@@ -6,10 +6,10 @@ module Acute
   class Closure < ::Acute::Object
     attr_reader :func
 
-    def initialize(env, init_mt = false, &blk)
+    def initialize(env, &blk)
       super()
       @func = blk
-      @slots[:activate] = Slot.new(lambda {|env| activate(env) }, env[:target], :activatable => true) if init_mt
+      @slots[:activate] = Slot.new(lambda {|env| activate(env) }, env[:target], :activatable => true)
     end
 
     def activate(env)
