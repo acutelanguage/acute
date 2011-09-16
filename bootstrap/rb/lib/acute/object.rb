@@ -14,25 +14,26 @@ module Acute
     end
 
     def method_table
-      method(:parent)    { |env| ::Acute::Nil.instance }
+      method(:parent)     { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
-      method(:init)      { |env| env[:target] }
-      method(:type)      { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
-      method(:_lookup)   { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
-      method(:setSlot)   { |env| val = env[:msg].eval_arg_at(env, 1); env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, val, :activatable => val.kind_of?(::Acute::Block)); val }
-      method(:method)    { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
-      method(:ruby)      { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
-      method(:do)        { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
-      method(:';')       { |env| env[:sender] }
-      method(:ifTrue)    { |env| env[:msg].eval_arg_at(env, 0) }
-      method(:ifFalse)   { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
-      method(:slotNames) { |env| ::Acute::List.new(*env[:target].slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
-      method(:list)      { |env| ::Acute::List.new(*env[:msg].eval_args(env)) }
-      method(:message)   { |env| env[:msg].arguments[0] }
-      method(:doMessage) { |env| env[:msg].eval_arg_at(env, 0).perform_on(env, env[:sender], env[:target]) }
-      method(:uniqueId)  { |env| env[:target].object_id }
-      method(:asString)  { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
-      method(:print)     { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
+      method(:init)       { |env| env[:target] }
+      method(:type)       { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
+      method(:_lookup)    { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
+      method(:createSlot) { |env| create_slot_helper(env) }
+      method(:setSlot)    { |env| val = create_slot_helper(env); val.data }
+      method(:method)     { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
+      method(:ruby)       { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
+      method(:do)         { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
+      method(:';')        { |env| env[:sender] }
+      method(:ifTrue)     { |env| env[:msg].eval_arg_at(env, 0) }
+      method(:ifFalse)    { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
+      method(:slotNames)  { |env| ::Acute::List.new(*env[:target].slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
+      method(:list)       { |env| ::Acute::List.new(*env[:msg].eval_args(env)) }
+      method(:message)    { |env| env[:msg].arguments[0] }
+      method(:doMessage)  { |env| env[:msg].eval_arg_at(env, 0).perform_on(env, env[:sender], env[:target]) }
+      method(:uniqueId)   { |env| env[:target].object_id }
+      method(:asString)   { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
+      method(:print)      { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
     end
 
     def lookup(env, sym)
@@ -103,6 +104,11 @@ module Acute
     end
 
     protected
+
+    def create_slot_helper(env)
+      val = env[:msg].eval_arg_at(env, 1)
+      env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, val, :activatable => val.kind_of?(::Acute::Block))
+    end
 
     def method(name, &blk)
       register(name, ::Acute::Closure.new({:target => self}, &blk), :activatable => true)

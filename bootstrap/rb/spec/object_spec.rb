@@ -45,6 +45,14 @@ describe ::Acute::Object do
     @obj.perform(:target => @obj, :msg => msg).should be 3
   end
 
+  it "sets a slot in its slot table" do
+    num = ::Acute::Number.new(42)
+    arg1 = ::Acute::Message.new("\"foo\"", [], :cached_result => ::Acute::String.new("foo"))
+    arg2 = ::Acute::Message.new("42", [], :cached_result => num)
+    msg = ::Acute::Message.new("setSlot", [ arg1, arg2 ])
+    @obj.perform(:target => @obj, :sender => @obj, :msg => msg).should be num
+  end
+
   it "can clone itself" do
     @obj.perform(:target => @obj, :msg => ::Acute::Message.new("clone")).should_not be_nil
   end
