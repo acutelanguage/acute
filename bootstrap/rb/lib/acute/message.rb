@@ -27,8 +27,9 @@ module Acute
       method(:setNext)         { |env| env[:target].next = env[:msg].eval_arg_at(env, 0); env[:target] }
       method(:setCachedResult) { |env| env[:target].cached_result = env[:msg].eval_arg_at(env, 0); env[:target] }
       method(:asString)        { |env| String.new(to_s) }
-      method(:lineNumber)      { |env| ::Acute::Number.new(@line_number) }
-      method(:characterNumber) { |env| ::Acute::Number.new(@character_number) }
+      method(:lineNumber)      { |env| ::Acute::Number.new(line_number) }
+      method(:characterNumber) { |env| ::Acute::Number.new(character_number) }
+      method(:origin)          { |env| ::Acute::String.new(origin)}
     end
 
     def eval_arg_at(env, idx)
