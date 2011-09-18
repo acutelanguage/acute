@@ -69,7 +69,11 @@ display = proc do |code|
       x.report { tree = parser.parse(code) }
     end
   else
-    tree = parser.parse(code)
+    begin
+      tree = parser.parse(code)
+    rescue Parslet::ParseFailed => error
+      puts error, parser.root.error_tree
+    end
   end
 
   begin
