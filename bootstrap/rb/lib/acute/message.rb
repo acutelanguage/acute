@@ -7,14 +7,16 @@ require 'enumerator'
 module Acute
   class Message < ::Acute::Object
     include Comparable
-    attr_accessor :name, :arguments, :next, :cached_result
+    attr_accessor :name, :arguments, :next, :cached_result, :line_number, :character_number
 
-    def initialize(name, arguments = [], options = { :cached_result => nil })
+    def initialize(name, arguments = [], options = { :cached_result => nil, :line_number => -1, :character_number => -1})
       super()
       @name = name
       @arguments = arguments
       @next = nil
       @cached_result = options[:cached_result]
+      @line_number = options[:line_number]
+      @character_number = options[:character_number]
       register(:parent, $state.find("Object"))
       method_table
     end
