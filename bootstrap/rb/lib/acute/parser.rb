@@ -6,13 +6,14 @@ require 'parslet'
 
 module Acute
   class Parser < ::Parslet::Parser
-    def initialize
+    def initialize(origin = nil)
+      @origin = origin
       @transformer = ::Acute::Transformer.new
-      super
+      super()
     end
 
     def parse(code)
-      @transformer.apply root.parse(code)
+      @transformer.apply(root.parse(code), :origin => @origin)
     end
 
     root :code
