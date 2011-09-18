@@ -74,6 +74,10 @@ describe ::Acute::Parser do
     @parser.parse("foo\n  \n  +42").next.next.character_number.should == 3
   end
   
+  it "builds a message with correct origin" do
+   ::Acute::Parser.new("myFile.io").parse("foo").origin.should == "myFile.io"
+  end
+  
   it "ignores '\n' separator message preceding ;" do
     tree = @parser.parse("foo\n; bar")
     tree.to_s.should == "foo ; bar"
