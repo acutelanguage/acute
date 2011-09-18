@@ -69,7 +69,7 @@ module Acute
     end
     
     rule :sugar_separator do
-      (terminating_separator >> terminator.absent?).as(:sugarSep)
+      (terminating_separator >> terminator.absent?).as(:sugar_sep)
     end
     
     rule :insignificant_separator do

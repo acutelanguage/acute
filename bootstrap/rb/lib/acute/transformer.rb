@@ -20,8 +20,8 @@ module Acute
       message
     end
     
-    rule :sugarSep => simple(:sugarSep) do
-      lc = sugarSep.line_and_column
+    rule :sugar_sep => simple(:sugar_sep) do
+      lc = sugar_sep.line_and_column
       l = lc[0]
       c = lc[1]
       ::Acute::Message.new(";", [], {:cached_result => nil, :line_number => l, :character_number => c})
