@@ -23,7 +23,7 @@ module Acute
       method(:setSlot)    { |env| val = create_slot_helper(env); val.data }
       method(:method)     { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
       method(:ruby)       { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
-      method(:do)         { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
+      method(:do)         { |env| env[:msg].eval_arg_at(env.merge(:sender => env[:target]), 0); env[:target] }
       method(:';')        { |env| env[:sender] }
       method(:ifTrue)     { |env| env[:msg].eval_arg_at(env, 0) }
       method(:ifFalse)    { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
@@ -69,7 +69,7 @@ module Acute
         return slot.data
       end
       slot = lookup(env, :forward)
-      slot.data.activate(env.merge(:slot_context => slot.context)) if slot && slot.activatable?
+      return slot.data.activate(env.merge(:slot_context => slot.context)) if slot && slot.activatable?
       raise RuntimeError, "Could not find slot '#{env[:msg].name}' on '#{env[:target].class}'."
     end
 
