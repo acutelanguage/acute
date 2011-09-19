@@ -2,6 +2,8 @@
 # Copyright © 2011, Jeremy Tregunna, All Rights Reserved.
 #
 
+require 'enumerator'
+
 module Acute
   class Message < ::Acute::Object
     include Comparable
@@ -34,7 +36,8 @@ module Acute
     end
 
     def eval_args(env)
-      arguments.map.with_index do |arg, idx|
+      #arguments.map.with_index do |arg, idx|
+      arguments.to_enum(:each_with_index).map do |arg, idx|
         eval_arg_at(env, idx)
       end
     end

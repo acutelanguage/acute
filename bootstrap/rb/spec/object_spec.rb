@@ -40,8 +40,8 @@ describe ::Acute::Object do
   end
 
   it "performs a message that will activate a closure" do
-    @obj.register("add", ::Acute::Closure.new({}) { |env, a, b| a + b }, :activatable => true)
-    msg = ::Acute::Message.new("add", [1, 2])
+    @obj.register("add", ::Acute::Closure.new({}) { |env| env[:msg].eval_arg_at(env, 0).to_i + env[:msg].eval_arg_at(env, 1).to_i }, :activatable => true)
+    msg = ::Acute::Message.new("add", [::Acute::Message.new("a", [], :cached_result => ::Acute::Number.new(1)), ::Acute::Message.new("b", [], :cached_result => ::Acute::Number.new(2))])
     @obj.perform(:target => @obj, :msg => msg).should be 3
   end
 

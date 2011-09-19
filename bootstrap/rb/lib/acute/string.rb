@@ -31,9 +31,9 @@ module Acute
     end
 
     def with_method
-      lambda do |env, s|
+      lambda do |env|
         o = ::Acute::Message.new("clone").perform_on(env, env[:sender], env[:target])
-        ::Acute::Message.new("setString", [s]).perform_on(env, env[:sender], o)
+        ::Acute::Message.new("setString", [ env[:msg].arguments[0] ]).perform_on(env, env[:sender], o)
       end
     end
 

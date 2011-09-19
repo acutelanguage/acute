@@ -9,15 +9,15 @@ module Acute
     def initialize(env, &blk)
       super()
       @func = blk
-      @slots[:activate] = Slot.new(lambda {|env| activate(env) }, env[:target], :activatable => true)
+      @slots[:activate] = Slot.new(lambda {|e| activate(e) }, env[:target], :activatable => true)
     end
 
     def activate(env)
-      func.call(env, *env[:msg].arguments)
+      call(env, env[:msg].arguments)
     end
 
-    def call(env, *args)
-      func.call(env, *args)
+    def call(env, args = [])
+      func.call(env)
     end
   end
 end

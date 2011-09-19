@@ -19,15 +19,15 @@ module Acute
     end
 
     def method_table
-      method(:call)     { |env| env[:target].call(env, *env[:msg].arguments) }
+      method(:call)     { |env| env[:target].call(env) }#, env[:msg].arguments) }
       method(:activate) { |env| activate(env) }
     end
 
     def activate(env)
-      call(env, *env[:msg].arguments)
+      call(env)#, env[:msg].arguments)
     end
 
-    def call(env, *args)
+    def call(env)#, args = [])
       self.scope = env[:sender] unless scope
       create_locals(env, scope)
       argument_names.each_with_index do |name, idx|

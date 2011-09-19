@@ -3,7 +3,6 @@ GEM
   specs:
     blankslate (2.1.2.4)
     diff-lcs (1.1.2)
-    ffi (1.0.9)
     parslet (1.2.1)
       blankslate (~> 2.0)
     rake (0.8.7)
@@ -15,8 +14,6 @@ GEM
     rspec-expectations (2.6.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.6.0)
-    ruby-llvm (2.9.1)
-      ffi (>= 1.0.0)
     simplecov (0.4.2)
       simplecov-html (~> 0.4.4)
     simplecov-html (0.4.5)
@@ -29,6 +26,5 @@ DEPENDENCIES
   parslet
   rake
   rspec
-  ruby-llvm (~> 2.9.1)
   simplecov (>= 0.4.0)
   simplecov-rcov

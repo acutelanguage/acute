@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ::Acute::Closure do
   before(:each) do
-    @closure = ::Acute::Closure.new({}) { |env, a, b| a + b }
+    @closure = ::Acute::Closure.new({}) { |env| env[:msg].eval_arg_at(env, 0).to_i + env[:msg].eval_arg_at(env, 1).to_i }
   end
 
   it "creates a closure" do
@@ -10,7 +10,8 @@ describe ::Acute::Closure do
   end
 
   it "can call the closure" do
-    @closure.call({ :target => @closure }, 1, 2).should be 3
+    num_msg = ::Acute::Message.new("a", [], :cached_result => ::Acute::Number.new(1))
+    @closure.call({ :target => @closure, :msg => ::Acute::Message.new("add", [num_msg, num_msg]) }).should be 2
   end
 
   it "is passed the environment" do
