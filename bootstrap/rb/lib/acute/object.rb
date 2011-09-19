@@ -33,7 +33,7 @@ module Acute
       method(:doMessage)  { |env| env[:msg].eval_arg_at(env, 0).perform_on(env, env[:sender], env[:target]) }
       method(:uniqueId)   { |env| env[:target].object_id }
       method(:asString)   { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
-      method(:print)      { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
+      method(:print)      { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); print str.to_s; str }
     end
 
     def lookup(env, sym)
