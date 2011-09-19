@@ -16,5 +16,5 @@ module Acute
   autoload :Parser, 'acute/parser'
   autoload :Transformer, 'acute/transformer'
   autoload :JIT, 'acute/jit'
-  autoload :LLVM, 'acute/llvm'
+  #autoload :LLVM, 'acute/llvm'
 end

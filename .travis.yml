@@ -1,5 +1,6 @@
 rvm:
   - 1.9.2
+  - rbx-2.0
 gemfile: bootstrap/rb/Gemfile
 notifications:
   recipients:

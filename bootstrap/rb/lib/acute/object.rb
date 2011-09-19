@@ -21,7 +21,7 @@ module Acute
       method(:_lookup)    { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
       method(:createSlot) { |env| create_slot_helper(env) }
       method(:setSlot)    { |env| val = create_slot_helper(env); val.data }
-      method(:method)     { |env, *args| ::Acute::Block.new(nil, args.pop, args) }
+      method(:method)     { |env| args = env[:msg].arguments; ::Acute::Block.new(nil, args.pop, args) }
       method(:ruby)       { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
       method(:do)         { |env| env[:msg].eval_arg_at(env.merge(:sender => env[:target]), 0); env[:target] }
       method(:';')        { |env| env[:sender] }

@@ -1,6 +1,6 @@
 source :rubygems
 
-gem 'ruby-llvm', '~> 2.9.1'
+#gem 'ruby-llvm', '~> 2.9.1'
 gem 'parslet'
 gem 'rake'
 gem 'rspec'

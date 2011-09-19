@@ -53,9 +53,9 @@ module Acute
       to_i.to_s
     end
 
-    def to_llvm(builder)
-      ::LLVM::Int(value.to_i)
-    end
+    #def to_llvm(builder)
+    #  ::LLVM::Int(value.to_i)
+    #end
 
 =begin
     def add_llvm_method
