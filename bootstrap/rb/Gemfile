@@ -1,7 +1,8 @@
 source :rubygems
 
 #gem 'ruby-llvm', '~> 2.9.1'
-gem 'parslet'
+gem 'ruby-llvm', '~> 2.9.1'
+gem 'parslet', :git => 'git://github.com/kschiess/parslet.git'
 gem 'rake'
 gem 'rspec'
 gem 'simplecov', '>= 0.4.0', :require => false
