@@ -58,6 +58,26 @@ describe ::Acute::Parser do
     tree.next.name.should == ";"
   end
   
+  it "builds a message with correct line number" do
+    @parser.parse("foo\n  \n  bar").next.next.line_number.should == 3
+  end
+  
+  it "builds a message with correct character number" do
+    @parser.parse("foo\n  \n  bar").next.next.character_number.should == 3
+  end
+  
+  it "builds a string with correct character number" do
+    @parser.parse("foo\n  \n  \"bar\"").next.next.character_number.should == 3
+  end
+  
+  it "builds a number with correct character number" do
+    @parser.parse("foo\n  \n  +42").next.next.character_number.should == 3
+  end
+  
+  it "builds a message with correct origin" do
+   ::Acute::Parser.new("myFile.io").parse("foo").origin.should == "myFile.io"
+  end
+  
   it "ignores '\n' separator message preceding ;" do
     tree = @parser.parse("foo\n; bar")
     tree.to_s.should == "foo ; bar"
