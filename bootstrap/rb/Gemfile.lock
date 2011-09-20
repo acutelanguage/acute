@@ -8,6 +8,7 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    ansi (1.3.0)
     blankslate (2.1.2.4)
     diff-lcs (1.1.3)
     ffi (1.0.9)
@@ -36,6 +37,7 @@ PLATFORMS
 DEPENDENCIES
   parslet!
   rake
+  rexpl!
   rspec
   ruby-llvm (~> 2.9.1)
   simplecov (>= 0.4.0)
