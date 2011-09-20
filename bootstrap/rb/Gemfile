@@ -7,4 +7,3 @@ gem 'rake'
 gem 'rspec'
 gem 'simplecov', '>= 0.4.0', :require => false
 gem 'simplecov-rcov', :require => false
-gem 'rexpl', :git => "https://github.com/txus/rexpl.git"
