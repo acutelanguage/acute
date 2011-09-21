@@ -23,14 +23,6 @@ module Acute
       lobby.register(:Closure, ::Acute::Closure.new({}))
       lobby.register(:Block, ::Acute::Block.new(nil, nil, []))
       lobby.register(:Message, ::Acute::Message.new(""))
-=begin
-      llvm = ::Acute::LLVM::Core.new
-      lobby.register(:LLVM, llvm)
-      llvm_types = ::Acute::LLVM::Types::Base.new
-      llvm.register(:Types, llvm_types)
-      llvm_types.register(:Pointer, ::Acute::LLVM::Types::Pointer.new)
-      llvm_types.register(:Pointer, ::Acute::LLVM::Types::Integer.new)
-=end
     end
 
     def find(str)

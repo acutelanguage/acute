@@ -11,9 +11,6 @@ $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'getoptlong'
 require 'parslet'
 require 'acute'
-#require 'llvm/core' 
-#require 'llvm/execution_engine'
-#require 'llvm/transforms/scalar'
 require 'pp'
 
 def usage
@@ -51,9 +48,6 @@ opts.each do |opt, arg|
   end
 end
 
-#LLVM.init_x86
-#$module = ::LLVM::Module.create("AcuteBootstrap")
-#$engine = LLVM::ExecutionEngine.create_jit_compiler($module)
 # We solve the chicken-egg problem by creating a new empty object as the lobby, we'll later set its parent
 # to Object once we create Object.
 lobby = ::Acute::Object.new
