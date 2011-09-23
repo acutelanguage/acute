@@ -1,6 +1,7 @@
 source :rubygems
 
 gem 'parslet', :git => 'git://github.com/kschiess/parslet.git'
+#gem 'first-essence', :git => 'git://github.com/acutelanguage/acute.git'
 gem 'rake'
 gem 'rspec'
 gem 'simplecov', '>= 0.4.0', :require => false

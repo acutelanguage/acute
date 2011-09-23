@@ -19,7 +19,7 @@ module Acute
       method(:init)       { |env| env[:target] }
       method(:type)       { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
       method(:_lookup)    { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
-      method(:createSlot) { |env| create_slot_helper(env) }
+      method(:createSlot) { |env| create_slot_helper(env.merge(:sender => env[:target])) }
       method(:setSlot)    { |env| val = create_slot_helper(env); val.data }
       method(:method)     { |env| args = env[:msg].arguments; ::Acute::Block.new(nil, args.pop, args) }
       method(:ruby)       { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
@@ -33,7 +33,7 @@ module Acute
       method(:doMessage)  { |env| env[:msg].eval_arg_at(env, 0).perform_on(env, env[:sender], env[:target]) }
       method(:uniqueId)   { |env| env[:target].object_id }
       method(:asString)   { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
-      method(:print)      { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); print str.to_s; str }
+      method(:print)      { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
     end
 
     def lookup(env, sym)
@@ -43,24 +43,24 @@ module Acute
       lookup_func ||= lambda do |e, s|
         slot = slots[s.to_sym]
         return slot if slot
-        return if e[:target].done_lookup
-        e[:target].done_lookup = true
-        parent_slot = slots[:parent]
+        return if self.done_lookup
+        self.done_lookup = true
+        parent_slot = env[:target].slots[:parent]
 
-        slot = parent_slot.data.lookup(e, s) if parent_slot
-        e[:target].done_lookup = false
+        slot = parent_slot.data.lookup(e, s) if parent_slot && parent_slot.data
+        self.done_lookup = false
         slot
       end
 
       r = lookup_func.call(env, sym.to_sym) if lookup_func && done_lookup == false
-      env[:target].done_lookup = false
+      self.done_lookup = false
       r
     end
 
     def perform(env)
+      env[:target] = self
       return env[:msg].cached_result if env[:msg].cached_result?
       slot = lookup(env, env[:msg].name)
-      env[:target] = self
       if slot && slot.data
         if slot.activatable?
           activate_func = slot.data.lookup(env, :activate)

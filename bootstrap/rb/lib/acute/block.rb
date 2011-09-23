@@ -8,7 +8,7 @@ module Acute
     attr_accessor :argument_names, :scope, :body
     attr_reader :locals
 
-    def initialize(scope, body, *args)
+    def initialize(scope, body, args)
       super()
       @scope = scope
       @body = body
@@ -19,8 +19,12 @@ module Acute
     end
 
     def method_table
-      method(:call)     { |env| env[:target].call(env) }#, env[:msg].arguments) }
-      method(:activate) { |env| activate(env) }
+      method(:call)          { |env| env[:target].call(env) }#, env[:msg].arguments) }
+      method(:activate)      { |env| activate(env) }
+      method(:message)       { |env| env[:target].body }
+      method(:argumentNames) { |env| ::Acute::List.new(env[:target].argument_names.map { |a| ::Acute::String.new(a) }) }
+      method(:scope)         { |env| env[:target].scope }
+      method(:setScope)      { |env| env[:target].scope = env[:msg].eval_arg_at(env, 0); env[:target] }
     end
 
     def activate(env)
@@ -28,13 +32,14 @@ module Acute
     end
 
     def call(env)#, args = [])
-      self.scope = env[:sender] unless scope
+      #self.scope = $state.find("Object") unless scope
       create_locals(env, scope)
       argument_names.each_with_index do |name, idx|
         obj = env[:msg].eval_arg_at(env, idx)
         locals.register(name, obj)
       end
-      doMessage(env.merge(:msg => body, :target => locals), locals)
+      body.perform_on(env, locals, locals)
+      #doMessage(env.merge(:msg => body, :target => locals), locals)
     end
 
     def scope=(other)
@@ -47,7 +52,7 @@ module Acute
     def create_locals(env, parent)
       @locals = ::Acute::Object.new
       locals.register(:parent, parent)
-      locals.register(:self, scope)
+      locals.register(:self, scope || env[:target])
       call = ::Acute::Object.new
       call.register(:parent, $state.find("Object"))
       %w{target message sender}.each { |str| call.register(str, env[str.to_sym]) }

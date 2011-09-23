@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/kschiess/parslet.git
-  revision: 531591923fa021d7ee0e22bf8c0db59e88f57f7c
+  revision: 75da149355ea03b3ea6b26ef153d4b0b7f0b147e
   specs:
-    parslet (1.2.2)
+    parslet (1.2.3)
       blankslate (~> 2.0)
 
 GEM

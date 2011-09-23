@@ -54,6 +54,7 @@ module Acute
       m = self
 
       begin
+        p m.to_s
         result = m.cached_result
         result ||= target.perform(env.merge(:target => target, :sender => locals, :msg => m))
         target = result

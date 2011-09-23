@@ -15,12 +15,13 @@ module Acute
     end
 
     def method_table
-      method(:at)      { |env| env[:target].value[env[:msg].eval_arg_at(env, 0).to_i] }
-      method(:append)  { |env| env[:target].value << env[:msg].eval_arg_at(env, 0); self }
-      method(:prepend) { |env| env[:target].value.unshift env[:msg].eval_arg_at(env, 0); self }
-      method(:isEmpty) { |env| env[:target].value.empty? }
-      method(:size)    { |env| ::Acute::Number.new env[:target].value.count }
-      method(:indexOf) { |env| ::Acute::Number.new(env[:target].value.index(env[:msg].eval_arg_at(env, 0))) }
+      method(:at)       { |env| env[:target].value[env[:msg].eval_arg_at(env, 0).to_i] }
+      method(:append)   { |env| env[:target].value << env[:msg].eval_arg_at(env, 0); self }
+      method(:prepend)  { |env| env[:target].value.unshift env[:msg].eval_arg_at(env, 0); self }
+      method(:isEmpty)  { |env| env[:target].value.empty? }
+      method(:size)     { |env| ::Acute::Number.new env[:target].value.count }
+      method(:indexOf)  { |env| ::Acute::Number.new(env[:target].value.index(env[:msg].eval_arg_at(env, 0))) }
+      method(:asString) { |env| ::Acute::String.new(self.to_s) }
     end
 
     def <=>(other)

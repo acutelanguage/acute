@@ -50,6 +50,5 @@ module Acute
     def to_s
       to_i.to_s
     end
-=end
   end
 end
