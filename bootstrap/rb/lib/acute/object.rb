@@ -4,52 +4,51 @@
 
 module Acute
   class Object
-    attr_accessor :done_lookup
+    attr_accessor :done_lookup, :activatable
     attr_reader :slots
 
     def initialize(init_mt = false)
       @slots = {}
       @done_lookup = false
+      @activatable = false
       method_table if init_mt
     end
 
     def method_table
-      method(:parent)     { |env| ::Acute::Nil.instance }
+      method(:parent)           { |env| ::Acute::Nil.instance }
       method(:clone, &clone_method)
-      method(:init)       { |env| env[:target] }
-      method(:type)       { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
-      method(:_lookup)    { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
-      method(:createSlot) { |env| create_slot_helper(env.merge(:sender => env[:target])) }
-      method(:setSlot)    { |env| val = create_slot_helper(env); val.data }
-      method(:method)     { |env| args = env[:msg].arguments; ::Acute::Block.new(nil, args.pop, args) }
-      method(:ruby)       { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
-      method(:do)         { |env| env[:msg].eval_arg_at(env.merge(:sender => env[:target]), 0); env[:target] }
-      method(:';')        { |env| env[:sender] }
-      method(:ifTrue)     { |env| env[:msg].eval_arg_at(env, 0) }
-      method(:ifFalse)    { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
-      method(:slotNames)  { |env| ::Acute::List.new(*env[:target].slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
-      method(:list)       { |env| ::Acute::List.new(*env[:msg].eval_args(env)) }
-      method(:message)    { |env| env[:msg].arguments[0] }
-      method(:doMessage)  { |env| env[:msg].eval_arg_at(env, 0).perform_on(env, env[:sender], env[:target]) }
-      method(:uniqueId)   { |env| env[:target].object_id }
-      method(:asString)   { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
-      method(:print)      { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
+      method(:init)             { |env| env[:target] }
+      method(:type)             { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
+      method(:_lookup)          { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
+      method(:setSlot)          { |env| set_slot_helper(env) }
+      method(:method)           { |env| args = env[:msg].arguments; ::Acute::Block.new(nil, args.pop, args) }
+      method(:ruby)             { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
+      method(:do)               { |env| env[:msg].eval_arg_at(env.merge(:sender => env[:target]), 0); env[:target] }
+      method(:';')              { |env| env[:sender] }
+      method(:ifTrue)           { |env| env[:msg].eval_arg_at(env, 0) }
+      method(:ifFalse)          { |env| env[:msg].eval_arg_at(env, 0); env[:target] }
+      method(:slotNames)        { |env| ::Acute::List.new(*env[:target].slots.keys.map { |e| ::Acute::String.new(e).to_s }) }
+      method(:list)             { |env| ::Acute::List.new(*env[:msg].eval_args(env)) }
+      method(:message)          { |env| env[:msg].arguments[0] }
+      method(:doMessage)        { |env| env[:msg].eval_arg_at(env, 0).perform_on(env, env[:sender], env[:target]) }
+      method(:uniqueId)         { |env| env[:target].object_id }
+      method(:asString)         { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
+      method(:print)            { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
+      method(:setIsActivatable) { |env| env[:target].activatable = true }
     end
 
     def lookup(env, sym)
-      lookup_slot = slots[:lookup]
-      lookup_func = lookup_slot.data if lookup_slot
+      lookup_func = slots[:lookup]
 
       lookup_func ||= lambda do |e, s|
-        slot = slots[s.to_sym]
-        return slot if slot
         return if self.done_lookup
+        obj = slots[s.to_sym]
+        return obj if obj
         self.done_lookup = true
-        parent_slot = env[:target].slots[:parent]
-
-        slot = parent_slot.data.lookup(e, s) if parent_slot && parent_slot.data
+        parent = env[:target].slots[:parent]
+        obj = parent.lookup(e, s) if parent
         self.done_lookup = false
-        slot
+        obj
       end
 
       r = lookup_func.call(env, sym.to_sym) if lookup_func && done_lookup == false
@@ -60,23 +59,22 @@ module Acute
     def perform(env)
       env[:target] = self
       return env[:msg].cached_result if env[:msg].cached_result?
-      slot = lookup(env, env[:msg].name)
-      if slot && slot.data
-        if slot.activatable?
-          activate_func = slot.data.lookup(env, :activate)
-          return activate_func.data.call(env.merge(:slot_context => slot.context)) if activate_func
+      obj = lookup(env, env[:msg].name)
+      if obj
+        if obj && obj.activatable
+          activate_func = obj.lookup(env, :activate)
+          return activate_func.call(env.merge(:slot_context => self)) if activate_func
         end
-        return slot.data
+        return obj
       end
-      slot = lookup(env, :forward)
-      return slot.data.activate(env.merge(:slot_context => slot.context)) if slot && slot.activatable?
+      obj = lookup(env, :forward)
+      return obj.activate(env.merge(:slot_context => slot.context)) if obj
       raise RuntimeError, "Could not find slot '#{env[:msg].name}' on '#{env[:target].class}'."
     end
 
-    def register(name, obj, options = {})
-      slot = Slot.new(obj, self, options)
-      slots[name.to_sym] = slot
-      slot
+    def register(name, obj)
+      slots[name.to_sym] = obj
+      obj
     end
 
     def clone_method
@@ -105,13 +103,13 @@ module Acute
 
     protected
 
-    def create_slot_helper(env)
+    def set_slot_helper(env)
       val = env[:msg].eval_arg_at(env, 1)
-      env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, val, :activatable => val.kind_of?(::Acute::Block))
+      env[:target].register(env[:msg].eval_arg_at(env, 0).to_s, val)
     end
 
     def method(name, &blk)
-      register(name, ::Acute::Closure.new({:target => self}, &blk), :activatable => true)
+      register(name, ::Acute::Closure.new({:target => self}, &blk))
     end
 
     def message(name, *args)

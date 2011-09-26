@@ -9,7 +9,8 @@ module Acute
     def initialize(env, &blk)
       super()
       @func = blk
-      @slots[:activate] = Slot.new(lambda {|e| activate(e) }, env[:target], :activatable => true)
+      @activatable = true
+      @slots[:activate] = lambda {|e| activate(e) }
     end
 
     def activate(env)
