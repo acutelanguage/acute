@@ -11,7 +11,6 @@ module Acute
 
     def init_protos
       object = ::Acute::Object.new(true)
-      lobby.register(:Slot, ::Acute::Slot.new(::Acute::Nil.instance, ::Acute::Nil.instance))
       lobby.register(:Lobby, lobby)
       lobby.register(:Object, object)
       lobby.register(:type, ::Acute::String.new("Lobby"))
@@ -26,8 +25,7 @@ module Acute
     end
 
     def find(str)
-      slot = lobby.lookup({ :target => lobby }, str)
-      slot.data if slot
+      lobby.lookup({ :target => lobby }, str)
     end
   end
 end
