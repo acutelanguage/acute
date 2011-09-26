@@ -11,14 +11,13 @@ describe ::Acute::Object do
 
   it "registers a slot on the object" do
     @obj.register("fortyTwo", 42)
-    @obj.slots[:fortyTwo].data.should == 42
+    @obj.slots[:fortyTwo].should == 42
   end
 
   it "looks up a slot" do
     @obj.register("fortyTwo", 42)
     slot = @obj.lookup({ :target => @obj }, :fortyTwo)
-    slot.should be_an_instance_of(::Acute::Slot)
-    slot.data.should be 42
+    slot.should be 42
   end
 
   it "cannot find a non-existent slot" do
@@ -27,20 +26,21 @@ describe ::Acute::Object do
   end
 
   it "stores an activatable message in the slot table" do
-    @obj.register("add", ::Acute::Closure.new({}) { |env, a, b| a + b }, :activatable => true)
+    @obj.register("add", ::Acute::Closure.new({}) { |env, a, b| a + b })
     slot = @obj.lookup({ :target => @obj }, :add)
-    slot.data.should be_an_instance_of(::Acute::Closure)
-    slot.data.func.should be_an_instance_of(Proc)
+    slot.should be_an_instance_of(::Acute::Closure)
+    slot.func.should be_an_instance_of(Proc)
   end
 
   it "performs a message that will return the value in the slot" do
-    @obj.register("fortyTwo", 42)
+    number = ::Acute::Number.new(42)
+    @obj.register("fortyTwo", number)
     msg = ::Acute::Message.new("fortyTwo")
-    @obj.perform(:target => @obj, :msg => msg).should be 42
+    @obj.perform(:target => @obj, :msg => msg).should be number
   end
 
   it "performs a message that will activate a closure" do
-    @obj.register("add", ::Acute::Closure.new({}) { |env| env[:msg].eval_arg_at(env, 0).to_i + env[:msg].eval_arg_at(env, 1).to_i }, :activatable => true)
+    @obj.register("add", ::Acute::Closure.new({}) { |env| env[:msg].eval_arg_at(env, 0).to_i + env[:msg].eval_arg_at(env, 1).to_i })
     msg = ::Acute::Message.new("add", [::Acute::Message.new("a", [], :cached_result => ::Acute::Number.new(1)), ::Acute::Message.new("b", [], :cached_result => ::Acute::Number.new(2))])
     @obj.perform(:target => @obj, :msg => msg).should be 3
   end
@@ -59,7 +59,7 @@ describe ::Acute::Object do
 
   it "has a parent" do
     new_obj = @obj.perform(:target => @obj, :msg => ::Acute::Message.new("clone"))
-    new_obj.lookup({ :target => @obj }, "parent").data.should_not be_nil
+    new_obj.lookup({ :target => @obj }, "parent").should_not be_nil
   end
 
   it "found a parent slot with a non-nil value" do

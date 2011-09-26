@@ -9,7 +9,6 @@ module Acute
   autoload :Message, 'acute/message'
   autoload :Closure, 'acute/closure'
   autoload :Block, 'acute/block'
-  autoload :Slot, 'acute/slot'
   autoload :Number, 'acute/number'
   autoload :List, 'acute/list'
   autoload :String, 'acute/string'

@@ -22,13 +22,13 @@ describe ::Acute::Block do
   end
 
   it "activates when called by name" do
-    @scope.register("test", @block, :activatable => true)
+    @scope.register("test", @block)
     @scope.perform(:target => @scope, :sender => @scope, :msg => ::Acute::Message.new("test")).should == ::Acute::Number.new(2)
   end
 
   it "calls a block with some arguments" do
     block = ::Acute::Block.new(@scope, @body, ::Acute::Message.new("a"))
-    @scope.register("test", block, :activatable => true)
+    @scope.register("test", block)
     msg = ::Acute::Message.new("test", [ ::Acute::Message.new("1", [], :cached_result => ::Acute::Number.new(1)) ])
     @scope.perform(:target => @scope, :sender => @scope, :msg => msg).should == ::Acute::Number.new(2)
   end

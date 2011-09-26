@@ -19,7 +19,7 @@ module Acute
       method(:clone, &clone_method)
       method(:init)             { |env| env[:target] }
       method(:type)             { |env| ::Acute::String.new(env[:target].class.to_s.split("::").last) }
-      method(:_lookup)          { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
+      method(:getSlot)          { |env| lookup(env, env[:msg].eval_arg_at(env, 0).to_s) }
       method(:setSlot)          { |env| set_slot_helper(env) }
       method(:method)           { |env| args = env[:msg].arguments; ::Acute::Block.new(nil, args.pop, args) }
       method(:ruby)             { |env| env[:target].send(:eval, env[:msg].eval_arg_at(env, 0).to_s) }
@@ -35,6 +35,7 @@ module Acute
       method(:asString)         { |env| ::Acute::String.new("#{env[:target].class.to_s.split('::').last}_0x#{env[:target].object_id}") }
       method(:print)            { |env| str = env[:target].perform(env.merge(:msg => ::Acute::Message.new("asString"))); puts str.to_s; str }
       method(:setIsActivatable) { |env| env[:target].activatable = true }
+      method(:isActivatable)    { |env| env[:target].activatable ? env[:target] : ::Acute::Nil.instance }
     end
 
     def lookup(env, sym)
