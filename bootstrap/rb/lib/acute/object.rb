@@ -58,9 +58,9 @@ module Acute
     end
 
     def perform(env)
-      env[:target] = self
       return env[:msg].cached_result if env[:msg].cached_result?
       obj = lookup(env, env[:msg].name)
+      env[:target] = self
       if obj
         if obj && obj.activatable
           activate_func = obj.lookup(env, :activate)
