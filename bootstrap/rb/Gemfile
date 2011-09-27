@@ -1,6 +1,6 @@
 source :rubygems
 
-gem 'parslet', :git => 'git://github.com/kschiess/parslet.git'
+gem 'parslet', '~> 1.2.3' #, :git => 'git://github.com/kschiess/parslet.git'
 #gem 'first-essence', :git => 'git://github.com/acutelanguage/acute.git'
 gem 'rake'
 gem 'rspec'
