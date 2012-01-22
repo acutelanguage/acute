@@ -19,12 +19,34 @@ priority at this stage of development.
 
 ## Phases
 
-Acute will be (but presently is not) self hosting. A small bootstrap is being built which will provide a basic object model, some basic
-types and of course, emit LLVM IR so we can produce a binary. We do this, so we can build our full vm, which will, in turn, compile
-itself and emit LLVM IR to replace the bootstrap. So long as this version is able to compile itself, and we can generate the LLVM IR,
-then we have all we need to produce an executable. Of course, the final vm will have to be able to compile itself first.
+Acute is bootstrapped so that we can write the language in ourself. While it's true, we could just use (Steve Dekorte's IoVM](http://iolanguage.com/)
+that was seen as less than ideal (dependent on another Io implementation is not a good starting point IMO).
 
-More information about the bootstrap can be found in the bootstrap directory, including source code.
+Acute is built in stages, the bootstrap lives at the bottom of the stack, for now. I'll discuss the different parts below.
+
+### Caribou
+
+Caribou is the virtual machine that presently does not exist. However, when it does, its job will be to handle providing critical subsystems, such as
+the garbage collector, object space, the low level object model itself, and the JIT primitive operations.
+
+### Wee
+
+Wee is the bootstrap interpreter. All of acute is executed through it at some level. While this is not optimal long term, the long term plans involve
+separating wee out strictly for compilation help, and adding a virtual machine below it.
+
+Wee is responsible for interpreting code, building an AST, exposing an API through which further layers can deal with, and basically allowing us to
+write the whole system in itself.
+
+### Platform
+
+The platform subsystem provides platform agnostic APIs around the low level primitives where appropriate. It will also be responsible at some point
+in the future, for providing a foreign function interface to Acute.
+
+### stdlib
+
+This subsystem, as its name suggests is responsible for loading the standard library. These are the APIs that programs should execute. By the time
+this subsystem is loaded, it is ready for evaluating programs.
+
 
 ## License
 
@@ -59,8 +81,3 @@ There are a few things we'd like you to respect though:
 1. Develop your feature in a separate branch that I can pull into my repo. Don't clobber the `master` branch. It's the stable branch;
 2. We want to keep a uniform license. As such, by contributing code to us, you are granting us license to distribute your changes under
 the terms of the MIT license, as found above; and
-3. If your code isn't completely done yet, it's ok to open a pull request. Just be sure to clearly note that it is incomplete and
-shouldn't be merged into the mainline. I test these things out beforehand, but still; be respectful of others who may want your feature
-now.
-4. Please include tests. Included is [a fork](https://github.com/jeremytregunna/iospec2) of [Jonathan Wright's iospec2](https://github.com/quag/iospec2)
-It's not the most complete BDD tool out there, but I'll make it better as needed, please do the same.
