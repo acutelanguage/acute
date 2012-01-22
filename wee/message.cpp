@@ -21,10 +21,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include <string>
 #include "message.hpp"
+#include "object.hpp"
 
 namespace Acute
 {
+	Object* Message::performOn(Object* target, Object* locals)
+	{
+		Object* result = target;
+		Message* m = this;
+
+		do
+		{
+			result = target->perform(locals, m);
+			target = result;
+		} while((m = m->next));
+
+		return result;
+	}
+
 	const std::string Message::object_name()
 	{
 		return "Message";

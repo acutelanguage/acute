@@ -36,6 +36,8 @@ namespace Acute
 		Message() : name(""), arguments() {}
 		Message(const std::string& n, std::vector<Message*> args) : name(n), arguments(args) {}
 
+		Object* performOn(Object*, Object*);
+
 		virtual const std::string object_name();
 
 		std::string get_name() { return name; }
@@ -44,6 +46,9 @@ namespace Acute
 	private:
 		std::string           name;
 		std::vector<Message*> arguments;
+
+	public:
+		Message*              next;
 	};
 }
 

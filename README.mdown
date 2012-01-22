@@ -47,7 +47,6 @@ in the future, for providing a foreign function interface to Acute.
 This subsystem, as its name suggests is responsible for loading the standard library. These are the APIs that programs should execute. By the time
 this subsystem is loaded, it is ready for evaluating programs.
 
-
 ## License
 
 Copyright (c) 2011, Jeremy Tregunna, All Rights Reserved.
