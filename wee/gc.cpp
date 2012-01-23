@@ -30,6 +30,8 @@
 
 namespace Acute
 {
+	GarbageCollector* collector = nullptr;
+
 	GarbageCollector::GarbageCollector()
 	{
 		blacks = new GCMarker(kGCColourBlack);
