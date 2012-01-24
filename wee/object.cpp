@@ -67,34 +67,18 @@ namespace Acute
 
 			if(implements(p.first, result))
 				throw SlotExistsError(p.first, result);
-		}
 
-		traits.push_back(trait);
+			Object* val = p.second;
+			if(val->object_name() == "Block")
+				// Skip any non-Block objects
+				add_slot(p.first, val);
+		}
 	}
 
 	// We don't want any conflicts. Returns true if we already implement name.
 	bool Object::implements(const std::string& name, Object*& obj)
 	{
-		SlotTable::iterator it;
-
-		for(auto t : traits)
-		{
-			// When we find that one of our traits already implements a given slot,
-			// we should through an exception.
-			SlotTable& st = t->slot_table();
-			it = st.find(name);
-			if(it != st.end())
-			{
-				obj = t;
-				return true;
-			}
-		}
-
-		it = slots.find(name);
-		if(it != slots.end())
-			return true;
-
-		return false;
+		return slots.find(name) == slots.end();
 	}
 
 	void Object::receive(Object* ctx)
@@ -121,18 +105,15 @@ namespace Acute
 
 	Object* Object::lookup(const std::string str, Object*& slot_context)
 	{
-		Object* value = NULL;
+		Object* value = nullptr;
 
-		if(local_lookup(str, value, slot_context))
-			return value;
+		local_lookup(str, value, slot_context);
+		// TODO:
+		// Invoke a catch-all "missing method" callback if available. This will allow our users to
+		// implement their own inheritance model if they so choose, and better yet, isolate it to
+		// their own library code.
 
-		for(auto t : traits)
-		{
-			if(t->local_lookup(str, value, slot_context))
-				return value;
-		}
-
-		return NULL;
+		return value;
 	}
 
 	Object* Object::perform(Object* locals, Message* msg)

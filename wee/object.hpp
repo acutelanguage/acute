@@ -76,7 +76,8 @@ namespace Acute
 		void receive(Object*);
 
 		// Look up a slot
-		Object* lookup(const std::string str, Object*& slot_context);
+		bool local_lookup(const std::string, Object*&, Object*&);
+		Object* lookup(const std::string, Object*&);
 		Object* perform(Object*, Message*);
 		Object* forward(Object*, Message*);
 		Object* activate(Object*, Object*, Message*, Object*);
@@ -96,9 +97,6 @@ namespace Acute
 		// The mailbox is where messages come into. This allows us to decouple
 		// message sending and message receiving.
 		Mailbox*             mailbox;
-
-	protected:
-		bool local_lookup(const std::string, Object*&, Object*&);
 
 	private:
 		bool implements(const std::string&, Object*& obj);
