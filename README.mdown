@@ -49,7 +49,7 @@ this subsystem is loaded, it is ready for evaluating programs.
 
 ## License
 
-Copyright (c) 2011, Jeremy Tregunna, All Rights Reserved.
+Copyright (c) 2011-2012, Jeremy Tregunna, All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
