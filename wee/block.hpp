@@ -38,12 +38,14 @@ namespace Acute
 	private:
 		Message* message;
 		Object*  scope;
-		ArgNames argumentNames;
+		ArgNames argument_names;
 		Object*  locals;
 
 	public:
 		Block(Message*, ArgNames, Object*);
 		~Block();
+
+		Object* activate(Object*, Object*, Message*, Object*);
 
 		virtual const std::string object_name();
 		virtual void walk();

@@ -36,12 +36,14 @@ namespace Acute
 		Message() : name(""), arguments() {}
 		Message(const std::string& n, std::vector<Message*> args) : name(n), arguments(args) {}
 
-		Object* performOn(Object*, Object*);
+		Object* perform_on(Object*, Object*);
 
 		virtual const std::string object_name();
 
 		std::string get_name() { return name; }
 		std::vector<Message*> get_arguments() { return arguments; }
+
+		Object* object_at_arg(int, Object*);
 
 	private:
 		std::string           name;

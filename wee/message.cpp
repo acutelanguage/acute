@@ -27,7 +27,7 @@
 
 namespace Acute
 {
-	Object* Message::performOn(Object* target, Object* locals)
+	Object* Message::perform_on(Object* target, Object* locals)
 	{
 		Object* result = target;
 		Message* m = this;
@@ -39,6 +39,12 @@ namespace Acute
 		} while((m = m->next));
 
 		return result;
+	}
+
+	Object* Message::object_at_arg(int num, Object* ctx)
+	{
+		Message* msg = arguments.at(num);
+		return msg->perform_on(ctx, ctx);
 	}
 
 	const std::string Message::object_name()

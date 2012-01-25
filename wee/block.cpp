@@ -33,6 +33,23 @@ namespace Acute
 		locals = new Object();
 	}
 
+	Object* Block::activate(Object* target, Object* locals, Message* body, Object* slot_context)
+	{
+		Object* s = scope;
+		Object* ctx = new Object();
+
+		if(!s)
+			s = target;
+
+		for(int i = 0; i < argument_names.size(); i++)
+		{
+			Object* arg = message->object_at_arg(i);
+			ctx->add_slot(argument_names.at(i));
+		}
+
+		return message->perform_on(ctx, ctx);
+	}
+
 	void Block::walk()
 	{
 		generic_object_walk();
