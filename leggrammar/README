@@ -1,0 +1,6 @@
+Usage:
+	To generate a usable C file from the grammar use `leg -o psr.c acute.peg`.
+
+Currently the Parser reads from stein, to change this define the YY_INPUT macro and implement the corresponding callback, for more information see http://piumarta.com/software/peg/peg.1.html.
+
+Additionally the literals need to be implemented, marked with TODO.

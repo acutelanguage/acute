@@ -1,0 +1,78 @@
+%{
+#define YYSTYPE void*
+#define YY_DEBUG 
+
+typedef struct List {
+    struct Message *data;
+    struct List    *next;
+} List;
+
+typedef struct Message {
+    char           *value;
+    struct List    *args;
+    struct Message *next;
+} Message;
+
+Message* newMessage(char* value, List* args, Message* next){
+    Message* m = (Message*) malloc(sizeof(Message));
+    
+    m->value = value;
+    m->args = args;
+    m->next = next;
+    
+    return m;
+}
+
+List* newList(Message* data, List* next){
+    List* l = (List*) malloc(sizeof(List));
+
+    l->data = data;
+    l->next = next;
+
+    return l;
+}
+
+Message* root;
+%}
+
+#expression
+start      = r:expression {root = r;} 
+expression = current:atom nxt:expression?                                               {if(current){((Message*) current)->next = nxt; $$ = current;}else{$$ = nxt;}}
+atom       = literal | message | sugar-separator | insignificant-separator
+
+#messages
+message            = multi-arg-message | single-arg-message | no-arg-message
+no-arg-message     = identifier:identifier                                         {$$ = newMessage((char*)identifier, NULL, NULL);}
+single-arg-message = identifier:identifier? single-opener arg:single-arg?          {$$ = newMessage((char*)identifier, newList((Message*)arg, NULL), NULL);}
+multi-arg-message  = identifier:identifier? opener arg:arglist? closer             {$$ = newMessage((char*)identifier, (List*)arg, NULL);}
+single-arg         = separator? (literal | message)
+arglist            = data:expression (comma next:arglist)?                         {$$ = newList(data, next);}
+identifier         = < ([a-zA-Z0-9_+*|!@$%^&=.?<>~;\\/]|'-')+ >                    {$$ = strdup(yytext);}
+
+#syntactic sugar having a profound effect on other rules
+sugar-separator = terminating-separator !terminator                                {$$ = newMessage(";", NULL, NULL);}
+insignificant-separator = separator                                                {$$ = NULL}
+
+#literals
+literal = number | string
+number  = < (('+' | '-')? [0-9]+ '.' [0-9]+) >                                     {$$ = newMessage((char*)strdup(yytext), NULL, NULL);} #TODO
+string  = ["] < (('\\' .)|(!["] .))* > ["]                                         {$$ = newMessage((char*)strdup(yytext), NULL, NULL);} #TODO
+
+#guides
+single-opener = ':'
+opener        = '('
+closer        = ')'
+comma         = ','
+terminator    = closer | comma | ';' | !.
+
+#separators
+separator                 = terminating-separator | non-terminating-separator
+terminating-separator     = non-terminating-separator? "\n" (non-terminating-separator | "\n")*
+non-terminating-separator = (' ' | "\t")+
+
+%%
+int main() {
+    yyparse();
+    Message* r = root;
+    return 0;
+}
