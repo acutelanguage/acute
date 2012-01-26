@@ -94,6 +94,18 @@ namespace Acute
 		// Our object name.
 		virtual const std::string object_name();
 
+		//
+		// Exposed primitives
+		//
+
+		virtual void register_primitives();
+
+		virtual Object* setSlot(Object*, Message*);
+		virtual Object* addTrait(Object*, Message*);
+		virtual Object* doPrim(Object*, Message*);
+		virtual Object* hasSlot(Object*, Message*);
+		virtual Object* getSlot(Object*, Message*);
+
 		// The mailbox is where messages come into. This allows us to decouple
 		// message sending and message receiving.
 		Mailbox*             mailbox;
