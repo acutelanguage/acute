@@ -9,6 +9,7 @@ set(SRCS
   "string.cpp"
   "nil.cpp"
   "object_space.cpp"
+  "block.cpp"
 )
 
 add_library(wee SHARED ${SRCS})

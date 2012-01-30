@@ -29,6 +29,7 @@
 #include "integer.hpp"
 #include "string.hpp"
 #include "boolean.hpp"
+#include "block.hpp"
 
 namespace Acute
 {
