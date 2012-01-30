@@ -189,6 +189,14 @@ namespace Acute
 		// TODO: Implement.
 	}
 
+	Object* Object::clone(Object* locals, Message* m)
+	{
+		Object* obj = new Object();
+		Object* ctx = nullptr;
+		Block<Object>* func = dynamic_cast<Block<Object>*>(obj->lookup("init", ctx));
+		return func->call();
+	}
+
 	Object* Object::setSlot(Object* locals, Message* m)
 	{
 		String* str = dynamic_cast<String*>(m->object_at_arg(0, locals));

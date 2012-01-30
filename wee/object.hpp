@@ -100,6 +100,7 @@ namespace Acute
 
 		virtual void register_primitives();
 
+		virtual Object* clone(Object*, Message*);
 		virtual Object* setSlot(Object*, Message*);
 		virtual Object* addTrait(Object*, Message*);
 		virtual Object* doPrim(Object*, Message*);
