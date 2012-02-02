@@ -29,7 +29,7 @@
 namespace Acute
 {
 	template<class T>
-	Block<T>::Block(Message* body, ArgNames argNames, Object* ctx) : message(body), argument_names(argNames), scope(ctx), my_locals(new Object())
+	Block<T>::Block(Message* body, ArgNames argNames, Object* ctx) : message(body), argument_names(argNames), scope(ctx)
 	{
 	}
 
@@ -37,7 +37,7 @@ namespace Acute
 	Object* Block<T>::activate(Object* target, Object* locals, Message* body, Object* slot_context)
 	{
 		Object* s = scope;
-		Object* ctx = new Object();
+		my_locals = new Object();
 
 		if(!s)
 			s = target;
@@ -45,10 +45,11 @@ namespace Acute
 		for(int i = 0; i < argument_names.size(); i++)
 		{
 			Object* arg = message->object_at_arg(i, locals);
-			ctx->add_slot(argument_names.at(i));
+			my_locals->add_slot(argument_names.at(i));
 		}
+		my_locals->add_slot("self", s);
 
-		return message->perform_on(ctx, ctx);
+		return message->perform_on(my_locals, my_locals);
 	}
 
 	template<class T>
