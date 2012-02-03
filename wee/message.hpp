@@ -33,8 +33,8 @@ namespace Acute
 	class Message : public Object
 	{
 	public:
-		Message() : name(""), arguments() {}
-		Message(const std::string& n, std::vector<Message*> args) : name(n), arguments(args) {}
+		Message() : name(""), arguments(), line_number(-1) {}
+		Message(const std::string& n, std::vector<Message*> args, long line) : name(n), arguments(args), line_number(line) {}
 
 		Object* perform_on(Object*, Object*);
 
@@ -49,6 +49,7 @@ namespace Acute
 	private:
 		std::string           name;
 		std::vector<Message*> arguments;
+		long                  line_number;
 
 	public:
 		Message*              next;
