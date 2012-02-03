@@ -27,6 +27,9 @@
 #include "object.hpp"
 #include "mailbox.hpp"
 #include "integer.hpp"
+#include "string.hpp"
+#include "boolean.hpp"
+#include "block.hpp"
 
 namespace Acute
 {
@@ -180,5 +183,59 @@ namespace Acute
 	const std::string Object::object_name()
 	{
 		return "Object";
+	}
+
+	void Object::register_primitives()
+	{
+		// TODO: Implement.
+	}
+
+	Object* Object::clone(Object* locals, Message* m)
+	{
+		Object* obj = new Object();
+		Object* ctx = nullptr;
+		Block<Object>* func = dynamic_cast<Block<Object>*>(obj->lookup("init", ctx));
+		return func->call();
+	}
+
+	Object* Object::setSlot(Object* locals, Message* m)
+	{
+		String* str = dynamic_cast<String*>(m->object_at_arg(0, locals));
+		Object* val = m->object_at_arg(1, locals);
+		add_slot(str->stringValue(), val);
+		return this;
+	}
+
+	Object* Object::addTrait(Object* locals, Message* m)
+	{
+		Object* trait = m->object_at_arg(0, locals);
+		add_trait(trait);
+		return this;
+	}
+
+	Object* Object::doPrim(Object* locals, Message* m)
+	{
+		if(m->get_arguments().size() > 0)
+		{
+			Message* msg = m->message_at_arg(0);
+			msg->perform_on(this, this);
+		}
+		return this;
+	}
+
+	Object* Object::hasSlot(Object* locals, Message* m)
+	{
+		Boolean* b = nullptr;
+		String* name = dynamic_cast<String*>(m->object_at_arg(0, locals));
+		Object* tmp1 = nullptr;
+		Object* tmp2 = nullptr;
+		return dynamic_cast<Object*>(new Boolean(local_lookup(name->stringValue(), tmp1, tmp2)));
+	}
+
+	Object* Object::getSlot(Object* locals, Message* m)
+	{
+		String* str = dynamic_cast<String*>(m->object_at_arg(0, locals));
+		Object* slot_context = nullptr;
+		return lookup(str->stringValue(), slot_context);
 	}
 }

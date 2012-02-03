@@ -33,19 +33,23 @@ namespace Acute
 {
 	typedef std::vector<std::string> ArgNames;
 
+	template<class T = Object>
 	class Block : public Object
 	{
 	private:
 		Message* message;
 		Object*  scope;
 		ArgNames argument_names;
-		Object*  locals;
+		Object*  my_locals;
+		typedef Object* (T::*builtin)(Object*, Message*);
 
 	public:
 		Block(Message*, ArgNames, Object*);
 		~Block();
 
 		Object* activate(Object*, Object*, Message*, Object*);
+
+		virtual Object* call(void);
 
 		virtual const std::string object_name();
 		virtual void walk();
