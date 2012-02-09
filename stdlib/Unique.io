@@ -1,3 +1,3 @@
-Unique := Object clone do(
+Unique := Object trait do(
   clone := method(self)
 )

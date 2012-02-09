@@ -1,7 +1,7 @@
 // Comparable only depends on two outside non-primitive methods:
 //    compare() -- a ternary comparison operator to be implemented
 //    and() -- a boolean and which should exist on true and false.
-Comparable := Object clone do(
+Comparable := Object trait do(
   == := method(other, Wee primitive: equal call(self compare: other, 0)
 
   != := method(other, Wee primitive: not call(self compare: other == 0))
