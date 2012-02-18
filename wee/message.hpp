@@ -45,6 +45,8 @@ namespace Acute
 
 		Object* object_at_arg(int, Object*);
 
+		void set_next(Message* m) { next = m; }
+
 	private:
 		std::string           name;
 		std::vector<Message*> arguments;

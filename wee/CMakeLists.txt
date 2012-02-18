@@ -9,6 +9,15 @@ set(SRCS
   "string.cpp"
   "nil.cpp"
   "object_space.cpp"
+  "parser.cpp"
 )
+#set(PARSER_SRC "${CMAKE_CURRENT_SOURCE_DIR}/acute.peg")
+
+#add_custom_command(
+#  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/parser.cpp
+#  COMMAND ${PROJECT_BINARY_DIR}/pegleg/leg -o ${CMAKE_CURRENT_SOURCE_DIR}/parser.cpp ${PARSER_SRC}
+#  DEPENDS leg
+#)
+#list(APPEND SRCS "${CMAKE_CURRENT_SOURCE_DIR}/parser.cpp")
 
 add_library(wee SHARED ${SRCS})
