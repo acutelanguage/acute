@@ -10,6 +10,7 @@ set(SRCS
   "nil.cpp"
   "object_space.cpp"
   "parser.cpp"
+  "block.cpp"
 )
 #set(PARSER_SRC "${CMAKE_CURRENT_SOURCE_DIR}/acute.peg")
 

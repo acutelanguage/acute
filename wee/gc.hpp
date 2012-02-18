@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <stdint.h>
+#include <climits>
 #include "address.hpp"
 
 #define GC_MAX_FREE_OBJECTS 8192

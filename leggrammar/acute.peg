@@ -55,7 +55,7 @@ insignificant-separator = separator                                             
 
 #literals
 literal = number | string
-number  = < (('+' | '-')? [0-9]+ '.' [0-9]+) >                                     {$$ = newMessage((char*)strdup(yytext), NULL, NULL);} #TODO
+number  = < (('+' | '-')? [0-9]+) >                                                {$$ = new Integer(strtoi(yytext));}
 string  = ["] < (('\\' .)|(!["] .))* > ["]                                         {$$ = newMessage((char*)strdup(yytext), NULL, NULL);} #TODO
 
 #guides

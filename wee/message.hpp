@@ -43,6 +43,7 @@ namespace Acute
 		std::string get_name() { return name; }
 		std::vector<Message*> get_arguments() { return arguments; }
 
+		Message* message_at_arg(int n) { return arguments.at(n); }
 		Object* object_at_arg(int, Object*);
 
 		void set_next(Message* m) { next = m; }

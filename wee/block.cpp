@@ -28,32 +28,47 @@
 
 namespace Acute
 {
-	Block::Block(Message* body, ArgNames argNames, Object* ctx) : message(body), argumentNames(argNames), scope(ctx)
+	template<class T>
+	Block<T>::Block(Message* body, ArgNames argNames, Object* ctx) : message(body), argument_names(argNames), scope(ctx)
 	{
-		locals = new Object();
 	}
 
-	Object* Block::activate(Object* target, Object* locals, Message* body, Object* slot_context)
+	template<class T>
+	Object* Block<T>::activate(Object* target, Object* locals, Message* body, Object* slot_context)
 	{
 		Object* s = scope;
-		Object* ctx = new Object();
+		my_locals = new Object();
 
 		if(!s)
 			s = target;
 
 		for(int i = 0; i < argument_names.size(); i++)
 		{
-			Object* arg = message->object_at_arg(i);
-			ctx->add_slot(argument_names.at(i));
+			Object* arg = message->object_at_arg(i, locals);
+			my_locals->add_slot(argument_names.at(i));
 		}
+		my_locals->add_slot("self", s);
 
-		return message->perform_on(ctx, ctx);
+		return message->perform_on(my_locals, my_locals);
 	}
 
-	void Block::walk()
+	template<class T>
+	Object* Block<T>::call(void)
+	{
+		if(this->builtin)
+		{
+			Object* locals = new Object(); // TODO: Need a real locals object
+			return builtin(locals, new Message());
+		}
+		// TODO: call activate.
+		return nullptr;
+	}
+
+	template<class T>
+	void Block<T>::walk()
 	{
 		generic_object_walk();
-		collector->shade(locals);
+		collector->shade(my_locals);
 		if(scope)
 			collector->shade(scope);
 		collector->shade(message);
