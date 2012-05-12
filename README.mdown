@@ -22,7 +22,15 @@ priority at this stage of development.
 Acute is bootstrapped so that we can write the language in ourself. While it's true, we could just use (Steve Dekorte's IoVM](http://iolanguage.com/)
 that was seen as less than ideal (dependent on another Io implementation is not a good starting point IMO).
 
-Acute is built in stages, the bootstrap lives at the bottom of the stack, for now. I'll discuss the different parts below.
+Acute is built in stages, the bootstrap lives at the bottom of the stack, for now. I'll discuss the different parts below. For now, look at this
+pretty picture of our stack:
+
+![Our stack](acute_stack.png)
+
+### Code Generation
+
+This part of the system is responsible for exposing the routines that will let us easily generate machine code, both for our ahead of time compiler,
+and our just in time compiler.
 
 ### Caribou
 
@@ -42,7 +50,7 @@ write the whole system in itself.
 The platform subsystem provides platform agnostic APIs around the low level primitives where appropriate. It will also be responsible at some point
 in the future, for providing a foreign function interface to Acute.
 
-### stdlib
+### Standard Library
 
 This subsystem, as its name suggests is responsible for loading the standard library. These are the APIs that programs should execute. By the time
 this subsystem is loaded, it is ready for evaluating programs.
