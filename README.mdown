@@ -55,6 +55,18 @@ in the future, for providing a foreign function interface to Acute.
 This subsystem, as its name suggests is responsible for loading the standard library. These are the APIs that programs should execute. By the time
 this subsystem is loaded, it is ready for evaluating programs.
 
+## Installation
+
+To build Acute, follow these steps:
+
+1. mkdir build
+2. cd build
+3. cmake -DCMAKE_C_COMPILER=clang ..
+4. make all install
+
+I use C block syntax (an extension Apple created) which is only found in the clang compiler. You'll need it. Any version from 1.0 or up should do,
+3.1 is current at the moment.
+
 ## License
 
 Copyright (c) 2011-2012, Jeremy Tregunna, All Rights Reserved.
