@@ -1,6 +1,7 @@
 set(CMAKE_C_FLAGS "-g -std=c99")
 set(SRCS
   "list.c"
+  "message.c"
   "sparse_array.c"
 )
 
