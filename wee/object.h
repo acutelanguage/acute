@@ -28,7 +28,6 @@
 
 typedef struct
 {
-	list_t* traits;
 	hash_t* slots;
 } obj_t;
 

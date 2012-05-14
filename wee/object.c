@@ -34,14 +34,12 @@ obj_t* obj_new(void)
 {
     obj_t* obj = malloc(sizeof(*obj));
     obj->slots = hash_new(8);
-    obj->traits = list_new();
     return obj;
 }
 
 void obj_destroy(obj_t* obj)
 {
     hash_destroy(obj->slots);
-    list_destroy(obj->traits);
     free(obj);
     obj = NULL;
 }
