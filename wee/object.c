@@ -27,6 +27,20 @@
 #include "list.h"
 #include "object.h"
 
+static inline uint32_t _hash_name(char* name)
+{
+    uint32_t hash = 6211;
+    uint32_t c = 0;
+
+    if(name != NULL)
+    {
+        while((c = (uint32_t)*name++))
+            hash *= 33 + c;
+    }
+
+    return hash;
+}
+
 obj_t* obj_new(void)
 {
     obj_t* obj = malloc(sizeof(*obj));
