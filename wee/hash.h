@@ -24,6 +24,8 @@
 #ifndef __WEE__HASH_H__
 #define __WEE__HASH_H__
 
+#include <stdbool.h>
+
 typedef struct hash_record
 {
 	char*               key;
@@ -55,5 +57,8 @@ extern bool hash_delete(hash_t*, char*);
 
 // Returns the number of items in the hash table
 extern size_t hash_count(hash_t*);
+
+// Iterate the items in the hash table.
+extern void hash_foreach(hash_t*, void (^)(char*, void*));
 
 #endif /* !__WEE__HASH_H__ */

@@ -173,3 +173,14 @@ size_t hash_count(hash_t* hash)
 {
     return hash->count;
 }
+
+void hash_foreach(hash_t* hash, void (^iterator)(char* key, void* value))
+{
+    hash_record_t* record = NULL;
+    for(size_t n = 0; n < hash_count(hash); n++)
+    {
+        record = hash->records[n];
+        if(record)
+            iterator(record->key, record->value);
+    }
+}
