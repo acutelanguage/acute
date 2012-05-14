@@ -34,7 +34,7 @@ typedef struct msg_s
 } msg_t;
 
 // Create a new message
-extern msg_t* msg_new(const char*, size_t, list_t*, msg_t*);
+extern msg_t* msg_new(const char*, list_t*, msg_t*);
 
 // Destroy a message
 extern void msg_destroy(msg_t*);

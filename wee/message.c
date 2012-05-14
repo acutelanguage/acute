@@ -26,10 +26,10 @@
 #include <string.h>
 #include "message.h"
 
-msg_t* msg_new(const char* name, size_t name_len, list_t* arguments, msg_t* next)
+msg_t* msg_new(const char* name, list_t* arguments, msg_t* next)
 {
     msg_t* msg = malloc(sizeof(*msg));
-    memcpy(msg->name, name, name_len);
+    memcpy(msg->name, name, strlen(name) + 1);
     msg->arguments = arguments;
     msg->next = next;
     return msg;
