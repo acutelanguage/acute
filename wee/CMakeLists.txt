@@ -3,6 +3,7 @@ set(SRCS
   "list.c"
   "hash.c"
   "message.c"
+  "object_space.c"
   "object.c"
   "slot.c"
 )
