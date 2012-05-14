@@ -70,6 +70,19 @@ void* list_at(list_t* list, size_t index)
     return NULL;
 }
 
+bool list_contains(list_t* list, void* item)
+{
+    __block bool b = false;
+    list_foreach(list, ^(size_t index, void* element) {
+        if(item == element)
+        {
+            b = true;
+            return;
+        }
+    });
+    return b;
+}
+
 size_t list_count(list_t* list)
 {
     return list->size;

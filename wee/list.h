@@ -24,6 +24,8 @@
 #ifndef __WEE__LIST_H__
 #define __WEE__LIST_H__
 
+#include <stdbool.h>
+
 typedef struct
 {
 	size_t capacity;
@@ -48,6 +50,9 @@ extern void list_put_at(list_t*, void*, size_t);
 
 // Retrieve an item at a given index
 extern void* list_at(list_t*, size_t);
+
+// Check if the list contains the supplied item (pointer equality test)
+extern bool list_contains(list_t*, void*);
 
 // Retrieve the count of items in the list
 extern size_t list_count(list_t*);
