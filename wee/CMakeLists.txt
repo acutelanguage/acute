@@ -3,6 +3,7 @@ set(SRCS
   "list.c"
   "message.c"
   "object.c"
+  "slot.c"
   "sparse_array.c"
 )
 

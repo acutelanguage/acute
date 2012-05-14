@@ -23,27 +23,20 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "sparse_array.h"
-#include "list.h"
-#include "object.h"
+#include <string.h>
+#include "slot.h"
 
-obj_t* obj_new(void)
+slot_t* slot_new(const char* name, void* value)
 {
-    obj_t* obj = malloc(sizeof(*obj));
-    obj->slots = sparse_array_new();
-    obj->traits = list_new();
-    return obj;
+    slot_t* slot = malloc(sizeof(*slot));
+    slot->name = strdup(name);
+    slot->value = value;
+    return slot;
 }
 
-void obj_destroy(obj_t* obj)
+void slot_destroy(slot_t* slot)
 {
-    sparse_array_destroy(obj->slots);
-    list_destroy(obj->traits);
-    free(obj);
-    obj = NULL;
-}
-
-obj_t* obj_lookup_local(obj_t* obj, const char* name)
-{
-    return NULL;
+    free(slot->name);
+    free(slot);
+    slot = NULL;
 }

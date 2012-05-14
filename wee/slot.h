@@ -21,29 +21,19 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "sparse_array.h"
-#include "list.h"
-#include "object.h"
+#ifndef __WEE__SLOT_H__
+#define __WEE__SLOT_H__
 
-obj_t* obj_new(void)
+typedef struct
 {
-    obj_t* obj = malloc(sizeof(*obj));
-    obj->slots = sparse_array_new();
-    obj->traits = list_new();
-    return obj;
-}
+	char* name;
+	void* value;
+} slot_t;
 
-void obj_destroy(obj_t* obj)
-{
-    sparse_array_destroy(obj->slots);
-    list_destroy(obj->traits);
-    free(obj);
-    obj = NULL;
-}
+// Create a new slot
+extern slot_t* slot_new(const char*, void*);
 
-obj_t* obj_lookup_local(obj_t* obj, const char* name)
-{
-    return NULL;
-}
+// Destroy a slot
+extern void slot_destroy(slot_t*);
+
+#endif /* !__WEE__SLOT_H__ */
