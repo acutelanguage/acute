@@ -21,32 +21,39 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef __WEE__SPARSE_ARRAY_H__
-#define __WEE__SPARSE_ARRAY_H__
+#ifndef __WEE__HASH_H__
+#define __WEE__HASH_H__
 
-#include <stdint.h>
+typedef struct hash_record
+{
+	char*               key;
+	void*               value;
+	struct hash_record* next;
+} hash_record_t;
 
-/* Sparse arrays are used for our dispatch tables. All the values are weakly
-   linked. */
 typedef struct
 {
-	uint32_t mask;
-	uint32_t shift;
-	void** data;
-} sparse_array_t;
+	size_t          capacity;
+	size_t          count;
+	hash_record_t** records;
+} hash_t;
 
-// Create a new empty sparse array
-extern sparse_array_t* sparse_array_new();
+// Create a new empty hash table with the given capacity
+extern hash_t* hash_new(size_t);
 
-// Delete the sparse array
-extern void sparse_array_destroy(sparse_array_t*);
+// Destroy the hash table
+extern void hash_destroy(hash_t*);
 
-// Puts a value at a given index.
-// Takes a pointer to the array, an index and the value.
-extern void sparse_array_put(sparse_array_t*, uint32_t, void*);
+// Insert an item into the hash table. Returns true if successful.
+extern bool hash_insert(hash_t*, char*, void*);
 
-// Takes a pointer to a sparse array and an index
-extern void* sparse_array_lookup(sparse_array_t*, uint32_t);
+// Retrieve an item from the hash table
+extern void* hash_get(hash_t*, char*);
 
+// Delete an item from the hash table. Returns true if successful.
+extern bool hash_delete(hash_t*, char*);
 
-#endif /* !__WEE__SPARSE_ARRAY_H__ */
+// Returns the number of items in the hash table
+extern size_t hash_count(hash_t*);
+
+#endif /* !__WEE__HASH_H__ */
