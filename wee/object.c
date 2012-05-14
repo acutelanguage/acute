@@ -23,41 +23,105 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "sparse_array.h"
+#include <stdint.h>
+#include <string.h>
 #include "list.h"
+#include "slot.h"
+#include "hash.h"
 #include "object.h"
-
-static inline uint32_t _hash_name(char* name)
-{
-    uint32_t hash = 6211;
-    uint32_t c = 0;
-
-    if(name != NULL)
-    {
-        while((c = (uint32_t)*name++))
-            hash *= 33 + c;
-    }
-
-    return hash;
-}
 
 obj_t* obj_new(void)
 {
     obj_t* obj = malloc(sizeof(*obj));
-    obj->slots = sparse_array_new();
+    obj->slots = hash_new(8);
     obj->traits = list_new();
     return obj;
 }
 
 void obj_destroy(obj_t* obj)
 {
-    sparse_array_destroy(obj->slots);
+    hash_destroy(obj->slots);
     list_destroy(obj->traits);
     free(obj);
     obj = NULL;
 }
 
-obj_t* obj_lookup_local(obj_t* obj, const char* name)
+bool obj_register_slot(obj_t* obj, char* name, void* value)
 {
+    return hash_insert(obj->slots, name, value);
+}
+
+obj_t* obj_lookup_local(obj_t* obj, char* name)
+{
+    // First, lets look up a "lookup" slot, and use that instead of this if we have it.
+    obj_t* lookup = hash_get(obj->slots, "lookup");
+
+    if(!lookup)
+        return hash_get(obj->slots, name);
+    else
+    {
+        //TODO: Implement blocks, call lookup -- a block, with the appropriate arguments
+        //      and return its value, whatever that may be.
+    }
+
     return NULL;
+}
+
+obj_t* obj_lookup(obj_t* obj, char* name)
+{
+    // First, lets look up a "lookup" slot, and use that instead of this if we have it.
+    obj_t* lookup = hash_get(obj->slots, "lookup");
+    // Maintain a list of objects we've scanned, to avoid lookup loops.
+    list_t* objects_scanned = list_new();
+
+    if(list_contains(objects_scanned, obj))
+        return NULL;
+
+    if(!lookup)
+    {
+        obj_t* value = hash_get(obj->slots, name);
+        if(value)
+            return value;
+        // Now mark the object 'dirty' for our purposes. We've already scanned it.
+        list_append(objects_scanned, obj);
+        
+        obj_t* parent = obj_lookup(obj, "parent");
+        value = NULL;
+        if(parent)
+            value = obj_lookup(parent, name);
+        //list_remove(objects_scanned, obj); // TODO: Implement
+        return value;
+    }
+    else
+    {
+        //TODO: Implement blocks, call lookup -- a block, with the appropriate arguments
+        //      and return its value, whatever that may be.
+    }
+
+    // Didn't find anything, oops! We don't raise an error here, since we only care about
+    // returning a value we found or an invalid value. Callers should implement their own
+    // error handling in cases they don't desire.
+    return NULL;
+}
+
+bool obj_use_trait(obj_t* obj, obj_t* trait, hash_t* resolutions)
+{
+    __block bool is_error = false;
+
+    hash_foreach(trait->slots, ^(char* key, void* value) {
+        if(obj_lookup_local(obj, key))
+        {
+            char* name = (char*)hash_get(resolutions, key);
+            if(!name)
+            {
+                is_error = true;
+                return; // Should raise an error here too. User hasn't handled conflicts
+            }
+            else
+                obj_register_slot(obj, name, value);
+        }
+        else
+            obj_register_slot(obj, key, value);
+    });
+    return false;
 }

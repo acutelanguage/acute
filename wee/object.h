@@ -24,10 +24,12 @@
 #ifndef __WEE__OBJECT_H__
 #define __WEE__OBJECT_H__
 
+#include "hash.h"
+
 typedef struct
 {
-	list_t*         traits;
-	sparse_array_t* slots;
+	list_t* traits;
+	hash_t* slots;
 } obj_t;
 
 // Create a new empty object
@@ -35,5 +37,20 @@ extern obj_t* obj_new(void);
 
 // Destroy an object
 extern void obj_destroy(obj_t*);
+
+// Add a key->value mapping to our slot table
+extern bool obj_register_slot(obj_t*, char*, void*);
+
+// Look up a slot without following the inheritance graph
+extern obj_t* obj_lookup_local(obj_t*, char*);
+
+// Look up a slot while following the parent inheritance graph
+extern obj_t* obj_lookup(obj_t*, char*);
+
+// Use another object as a trait. Returns true if successful.
+// The hash_t is used for name resolutions. If a name conflicts, you must
+// explicitly resolve it, and put an: old_name -> new_name mapping in the
+// hash table.
+extern bool obj_use_trait(obj_t*, obj_t*, hash_t*);
 
 #endif /* !__WEE__OBJECT_H__ */
