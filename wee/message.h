@@ -25,9 +25,11 @@
 #define __WEE__MESSAGE_H__
 
 #include "list.h"
+#include "object.h"
 
 typedef struct msg_s
 {
+	OBJECT_HEADER;
 	struct msg_s* next;
 	char*         name;
 	list_t*       arguments;

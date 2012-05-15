@@ -26,9 +26,11 @@
 
 #include "hash.h"
 
+#define OBJECT_HEADER hash_t* slots
+
 typedef struct
 {
-	hash_t* slots;
+	OBJECT_HEADER;
 } obj_t;
 
 // Create a new empty object
