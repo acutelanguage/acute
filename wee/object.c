@@ -30,10 +30,17 @@
 #include "hash.h"
 #include "object.h"
 
+#define DEFAULT_SLOTTABLE_SIZE 8
+
 obj_t* obj_new(void)
 {
-    obj_t* obj = malloc(sizeof(*obj));
-    obj->slots = hash_new(8);
+    return obj_new_with_size(sizeof(obj_t));
+}
+
+obj_t* obj_new_with_size(size_t size)
+{
+    obj_t* obj = malloc(size);
+    obj->slots = hash_new(DEFAULT_SLOTTABLE_SIZE);
     return obj;
 }
 

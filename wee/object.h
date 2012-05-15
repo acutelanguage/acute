@@ -36,6 +36,10 @@ typedef struct
 // Create a new empty object
 extern obj_t* obj_new(void);
 
+// Create a new empty object and allocate a given size. Use this when allocating
+// objects from custom C-level objects, like msg_t.
+extern obj_t* obj_new_with_size(size_t);
+
 // Destroy an object
 extern void obj_destroy(obj_t*);
 
