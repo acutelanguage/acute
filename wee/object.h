@@ -26,6 +26,8 @@
 
 #include "hash.h"
 
+struct msg_s;
+
 #define OBJECT_HEADER hash_t* slots
 
 typedef struct
@@ -57,5 +59,8 @@ extern obj_t* obj_lookup(obj_t*, char*);
 // explicitly resolve it, and put an: old_name -> new_name mapping in the
 // hash table.
 extern bool obj_use_trait(obj_t*, obj_t*, hash_t*);
+
+// Perform a message on an object
+extern obj_t* obj_perform(obj_t*, obj_t*, struct msg_s*);
 
 #endif /* !__WEE__OBJECT_H__ */

@@ -28,6 +28,7 @@
 #include "list.h"
 #include "slot.h"
 #include "hash.h"
+#include "message.h"
 #include "object.h"
 
 #define DEFAULT_SLOTTABLE_SIZE 8
@@ -129,4 +130,20 @@ bool obj_use_trait(obj_t* obj, obj_t* trait, hash_t* resolutions)
             obj_register_slot(obj, key, value);
     });
     return false;
+}
+
+obj_t* obj_perform(obj_t* target, obj_t* locals, msg_t* msg)
+{
+    obj_t* obj = obj_lookup(target, msg->name);
+    if(obj)
+    {
+        obj_t* activate = obj_lookup(obj, "activate");
+        // TODO: Implement blocks, call activate if it exists. Return the result.
+    }
+    obj = obj_lookup(target, "forward");
+    if(obj)
+    {
+        // TODO: Implement blocks, call obj if it exists. Return the result.
+    }
+    return NULL;
 }
