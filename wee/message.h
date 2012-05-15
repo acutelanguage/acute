@@ -41,4 +41,7 @@ extern msg_t* msg_new(const char*, list_t*, msg_t*);
 // Destroy a message
 extern void msg_destroy(msg_t*);
 
+// Perform a message
+extern obj_t* msg_perform_on(msg_t*, obj_t*, obj_t*);
+
 #endif /* !__WEE__MESSAGE_H__ */

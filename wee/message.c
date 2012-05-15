@@ -41,3 +41,17 @@ void msg_destroy(msg_t* msg)
     free(msg);
     msg = NULL;
 }
+
+obj_t* msg_perform_on(msg_t* msg, obj_t* target, obj_t* locals)
+{
+    obj_t* result = target;
+    msg_t* m = msg;
+
+    do
+    {
+        result = obj_perform(target, locals, m);
+        target = result;
+    } while((m = m->next));
+
+    return result;
+}
