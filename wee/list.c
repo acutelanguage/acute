@@ -63,6 +63,17 @@ void list_put_at(list_t* list, void* item, size_t index)
         list->data[index] = item;
 }
 
+void list_remove_at(list_t* list, size_t index)
+{
+    if(index < list->size)
+    {
+        if(index != list->size - 1)
+            memmove(&list->data[index], &list->data[index + 1], (list->size - 1 - index) * sizeof(void*));
+    }
+    list->size--;
+    // Should compact the list if possible.
+}
+
 void* list_at(list_t* list, size_t index)
 {
     if(index <= list->size)

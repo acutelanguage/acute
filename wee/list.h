@@ -48,6 +48,9 @@ extern void list_append(list_t*, void*);
 // Add an item at a specific index
 extern void list_put_at(list_t*, void*, size_t);
 
+// Remove an item at the specified index
+extern void list_remove_at(list_t*, size_t);
+
 // Retrieve an item at a given index
 extern void* list_at(list_t*, size_t);
 
