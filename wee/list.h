@@ -45,6 +45,9 @@ extern void list_destroy(list_t*);
 // Add an item to the end of the list
 extern void list_append(list_t*, void*);
 
+// Append a list to the list (flattens it)
+extern void list_append_list(list_t*, list_t*);
+
 // Add an item at a specific index
 extern void list_put_at(list_t*, void*, size_t);
 

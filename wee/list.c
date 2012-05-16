@@ -57,6 +57,13 @@ void list_append(list_t* list, void* item)
     list->data[list->size + 1] = item;
 }
 
+void list_append_list(list_t* list, list_t* other)
+{
+    list_foreach(other, ^(size_t index, void* element) {
+        list_append(list, element);
+    });
+}
+
 void list_put_at(list_t* list, void* item, size_t index)
 {
     if(index >= list->size || index >= list->capacity)
