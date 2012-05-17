@@ -28,13 +28,7 @@
 #include "message.h"
 #include "list.h"
 
-typedef struct
-{
-	OBJECT_HEADER;
-	msg_t* message;
-	list_t* argument_names;
-	obj_t* scope;
-} block_t;
+typedef obj_t block_t;
 
 // Creates a new block given a message, a list of argument names and a scope
 extern block_t* block_new(msg_t*, list_t*, obj_t*);
