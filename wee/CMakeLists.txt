@@ -6,6 +6,7 @@ set(SRCS
   "object_space.c"
   "object.c"
   "slot.c"
+  "block.c"
   "str.c"
   "num.c"
   "parser.c"
