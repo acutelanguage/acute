@@ -152,3 +152,20 @@ obj_t* obj_perform(obj_t* target, obj_t* locals, msg_t* msg)
         return block_call((block_t*)obj, locals, msg);
     return NULL;
 }
+
+uint32_t obj_shape(obj_t* obj)
+{
+    __block uint32_t hval = 0x811c9dc5;
+
+    hash_foreach(obj->slots, ^(char* key, void* unused) {
+        unsigned char* s = (unsigned char*)key;
+
+        while(*s)
+        {
+            hval ^= (uint32_t)*s++;
+            hval *= 0x01000193;
+        }
+    });
+
+    return hval;
+}

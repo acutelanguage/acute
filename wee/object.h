@@ -24,6 +24,7 @@
 #ifndef __WEE__OBJECT_H__
 #define __WEE__OBJECT_H__
 
+#include <stdint.h>
 #include "hash.h"
 
 struct msg_s;
@@ -65,5 +66,9 @@ extern bool obj_use_trait(obj_t*, obj_t*, hash_t*);
 
 // Perform a message on an object
 extern obj_t* obj_perform(obj_t*, obj_t*, struct msg_s*);
+
+// Returns the shape of an object. An object shape is a hash of all the keys
+// of the objects slot table.
+extern uint32_t obj_shape(obj_t*);
 
 #endif /* !__WEE__OBJECT_H__ */
