@@ -1,4 +1,4 @@
-set(CMAKE_C_FLAGS "-g -std=c99")
+set(CMAKE_C_FLAGS "-Wall -Wno-unused -g -std=c99")
 set(SRCS
   "list.c"
   "hash.c"
@@ -7,6 +7,7 @@ set(SRCS
   "object.c"
   "slot.c"
   "str.c"
+  "num.c"
   "parser.c"
 )
 set(PEG_GRAMMAR "${CMAKE_CURRENT_SOURCE_DIR}/acute.peg")
