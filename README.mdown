@@ -25,7 +25,7 @@ that was seen as less than ideal (dependent on another Io implementation is not 
 Acute is built in stages, the bootstrap lives at the bottom of the stack, for now. I'll discuss the different parts below. For now, look at this
 pretty picture of our stack:
 
-![Our stack](acute_stack.png)
+![Our stack](https://github.com/jeremytregunna/acute/blob/master/acute_stack.png)
 
 ### Code Generation
 
