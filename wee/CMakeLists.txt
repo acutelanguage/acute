@@ -6,6 +6,7 @@ set(SRCS
   "object_space.c"
   "object.c"
   "slot.c"
+  "str.c"
   "parser.c"
 )
 set(PEG_GRAMMAR "${CMAKE_CURRENT_SOURCE_DIR}/acute.peg")
