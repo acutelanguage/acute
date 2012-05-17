@@ -23,10 +23,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include "num.h"
 
-num_t* num_new_int(intptr_t i)
+num_t* num_new_int(long i)
 {
     num_t* num = (num_t*)obj_new_with_size(sizeof(*num));
     num->backing = kNumberBackingInteger;
@@ -55,12 +54,12 @@ num_t* num_convert_to(num_t* num, num_backing_t backing)
         case kNumberBackingInteger:
         {
             double d = num->numerals.d;
-            num->numerals.i = (intptr_t)d;
+            num->numerals.i = (long)d;
             break;
         }
         case kNumberBackingDouble:
         {
-            intptr_t i = num->numerals.i;
+            long i = num->numerals.i;
             num->numerals.d = (double)i;
             break;
         }

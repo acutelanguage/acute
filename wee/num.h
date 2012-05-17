@@ -24,7 +24,6 @@
 #ifndef __ACUTE__NUM_H__
 #define __ACUTE__NUM_H__
 
-#include <stdint.h>
 #include "object.h"
 
 typedef enum
@@ -39,13 +38,13 @@ typedef struct
 	num_backing_t backing;
 	union
 	{
-		intptr_t i;
+		long i;
 		double d;
 	} numerals;
 } num_t;
 
 // Create a new number with an integer backing
-extern num_t* num_new_int(intptr_t);
+extern num_t* num_new_int(long);
 
 // Create a new number with a double precision floating point backing
 extern num_t* num_new_double(double);
