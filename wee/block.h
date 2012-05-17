@@ -42,7 +42,10 @@ extern block_t* block_new(msg_t*, list_t*, obj_t*);
 // Destroy a block
 extern void block_destroy(block_t*);
 
+// Called when a block activates
+extern obj_t* block_activate(block_t*, obj_t*, obj_t*, msg_t*, obj_t*);
+
 // Call a block
-extern obj_t* block_call(block_t*);
+extern obj_t* block_call(block_t*, obj_t*, msg_t*);
 
 #endif /* !__WEE__BLOCK_H__ */

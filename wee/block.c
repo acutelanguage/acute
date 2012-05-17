@@ -87,7 +87,7 @@ obj_t* block_activate(block_t* blk, obj_t* target, obj_t* sender, msg_t* msg, ob
     return msg_perform_on(message, locals, locals);
 }
 
-obj_t* block_call(block_t* blk)
+obj_t* block_call(block_t* blk, obj_t* locals, msg_t* msg)
 {
-    return NULL;
+    return block_activate(blk, locals, locals, msg, locals);
 }
