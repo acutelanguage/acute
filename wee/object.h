@@ -53,8 +53,9 @@ extern bool obj_register_slot(obj_t*, char*, void*);
 // Look up a slot without following the inheritance graph
 extern obj_t* obj_lookup_local(obj_t*, char*);
 
-// Look up a slot while following the parent inheritance graph
-extern obj_t* obj_lookup(obj_t*, char*);
+// Look up a slot while following the parent inheritance graph. Returns the object
+// if found, NULL and outputs the context it was found in, in the last parameter.
+extern obj_t* obj_lookup(obj_t*, char*, obj_t**);
 
 // Use another object as a trait. Returns true if successful.
 // The hash_t is used for name resolutions. If a name conflicts, you must

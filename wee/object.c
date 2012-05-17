@@ -30,6 +30,7 @@
 #include "hash.h"
 #include "message.h"
 #include "object.h"
+#include "block.h"
 
 #define DEFAULT_SLOTTABLE_SIZE 8
 
@@ -74,7 +75,7 @@ obj_t* obj_lookup_local(obj_t* obj, char* name)
     return NULL;
 }
 
-obj_t* obj_lookup(obj_t* obj, char* name)
+obj_t* obj_lookup(obj_t* obj, char* name, obj_t** context)
 {
     // First, lets look up a "lookup" slot, and use that instead of this if we have it.
     obj_t* lookup = hash_get(obj->slots, "lookup");
@@ -92,11 +93,12 @@ obj_t* obj_lookup(obj_t* obj, char* name)
         // Now mark the object 'dirty' for our purposes. We've already scanned it.
         list_append(objects_scanned, obj);
         
-        obj_t* parent = obj_lookup(obj, "parent");
+        obj_t* parent = obj_lookup(obj, "parent", context);
         value = NULL;
         if(parent)
-            value = obj_lookup(parent, name);
+            value = obj_lookup(parent, name, NULL);
         //list_remove(objects_scanned, obj); // TODO: Implement
+        *context = obj;
         return value;
     }
     else
@@ -135,19 +137,18 @@ bool obj_use_trait(obj_t* obj, obj_t* trait, hash_t* resolutions)
 
 obj_t* obj_perform(obj_t* target, obj_t* locals, msg_t* msg)
 {
-    obj_t* obj = obj_lookup(target, msg->name);
+    obj_t* context = NULL;
+    obj_t* obj = obj_lookup(target, msg->name, &context);
     if(obj && obj->cached_result)
         return obj->cached_result;
 
     if(obj)
     {
-        obj_t* activate = obj_lookup(obj, "activate");
-        // TODO: Implement blocks, call activate if it exists. Return the result.
+        block_t* activate = (block_t*)obj_lookup(obj, "activate", &context);
+        return block_activate(activate, target, locals, msg, context);
     }
-    obj = obj_lookup(target, "forward");
+    obj = obj_lookup(target, "forward", &context);
     if(obj)
-    {
-        // TODO: Implement blocks, call obj if it exists. Return the result.
-    }
+        return block_call((block_t*)obj, locals, msg);
     return NULL;
 }
