@@ -29,7 +29,7 @@ typedef struct
 } object_space_t;
 
 // Create the object space.
-extern object_space_t* object_space_new(void);
+extern object_space_t* object_space_get(void);
 
 // Destroy the object space.
 extern void object_space_destroy(object_space_t*);

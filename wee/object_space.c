@@ -23,22 +23,29 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "hash.h"
 #include "object.h"
 #include "object_space.h"
 
-object_space_t* object_space_new(void)
-{
-    object_space_t* space = malloc(sizeof(*space));
+static object_space_t* global_object_space = NULL;
+static pthread_once_t once_control = PTHREAD_ONCE_INIT;
 
+static void object_space_init(void)
+{
+    global_object_space = malloc(sizeof(*global_object_space));
     // Chicken-egg problem commences below.
     obj_t* lobby = obj_new();
     obj_t* object = obj_new();
     obj_register_slot(lobby, "parent", object);
     obj_register_slot(object, "parent", lobby);
-    object_space_register_proto(space, "Object", object);
+    object_space_register_proto(global_object_space, "Object", object);
+}
 
-    return space;
+object_space_t* object_space_get(void)
+{
+    pthread_once(&once_control, object_space_init);
+    return global_object_space;
 }
 
 // Destroy the object space.
