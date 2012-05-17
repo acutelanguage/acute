@@ -55,3 +55,15 @@ obj_t* msg_perform_on(msg_t* msg, obj_t* target, obj_t* locals)
 
     return result;
 }
+
+obj_t* msg_eval_arg_at(msg_t* msg, obj_t* sender, size_t index)
+{
+    msg_t* arg = list_at(msg->arguments, index);
+    if(!arg)
+        return NULL;
+
+    if(arg->cached_result)
+        return arg->cached_result;
+
+    return msg_perform_on(arg, sender, sender);
+}

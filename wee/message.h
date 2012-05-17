@@ -44,4 +44,7 @@ extern void msg_destroy(msg_t*);
 // Perform a message
 extern obj_t* msg_perform_on(msg_t*, obj_t*, obj_t*);
 
+// Eval arg at a specific index
+extern obj_t* msg_eval_arg_at(msg_t*, obj_t*, size_t);
+
 #endif /* !__WEE__MESSAGE_H__ */
