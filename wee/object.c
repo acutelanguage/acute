@@ -44,6 +44,7 @@ obj_t* obj_new_with_size(size_t size)
     obj_t* obj = malloc(size);
     obj->slots = hash_new(DEFAULT_SLOTTABLE_SIZE);
     obj->cached_result = NULL;
+    obj->shape = obj_shape(obj);
     return obj;
 }
 
@@ -54,9 +55,16 @@ void obj_destroy(obj_t* obj)
     obj = NULL;
 }
 
-bool obj_register_slot(obj_t* obj, char* name, void* value)
+bool obj_register_slot_unsafe(obj_t* obj, char* name, void* value)
 {
     return hash_insert(obj->slots, name, value);
+}
+
+bool obj_register_slot(obj_t* obj, char* name, void* value)
+{
+    bool success = obj_register_slot_unsafe(obj, name, value);
+    obj->shape = obj_shape(obj);
+    return success;
 }
 
 obj_t* obj_lookup_local(obj_t* obj, char* name)
@@ -127,11 +135,14 @@ bool obj_use_trait(obj_t* obj, obj_t* trait, hash_t* resolutions)
                 return; // Should raise an error here too. User hasn't handled conflicts
             }
             else
-                obj_register_slot(obj, name, value);
+                obj_register_slot_unsafe(obj, name, value);
         }
         else
-            obj_register_slot(obj, key, value);
+            obj_register_slot_unsafe(obj, key, value);
     });
+
+    obj->shape = obj_shape(obj);
+
     return false;
 }
 

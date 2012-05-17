@@ -31,7 +31,8 @@ struct msg_s;
 
 #define OBJECT_HEADER \
 	hash_t*       slots; \
-	struct obj_s* cached_result;
+	struct obj_s* cached_result; \
+	uint32_t      shape;
 
 typedef struct obj_s
 {
@@ -48,7 +49,10 @@ extern obj_t* obj_new_with_size(size_t);
 // Destroy an object
 extern void obj_destroy(obj_t*);
 
-// Add a key->value mapping to our slot table
+// Add a key->value mapping to our slot table. DOES NOT RECOMPUTE THE SHAPE.
+extern bool obj_register_slot_unsafe(obj_t* obj, char* name, void* value);
+
+// Add a key->value mapping to our slot table. Recomputes the object shape.
 extern bool obj_register_slot(obj_t*, char*, void*);
 
 // Look up a slot without following the inheritance graph
