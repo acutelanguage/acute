@@ -10,8 +10,8 @@ msg_t* root;
 %}
 
 #expression
-start      = r:expression {root = r;} 
-expression = current:atom nxt:expression?                                           {
+start              = r:expression                                                  {root = r;}
+expression         = current:atom nxt:expression?                                  {
         if(current)
         {
             ((msg_t*)current)->next = nxt;
@@ -20,7 +20,7 @@ expression = current:atom nxt:expression?                                       
         else
             $$ = nxt;
     }
-atom       = literal | message | sugar-separator | insignificant-separator
+atom               = literal | message | sugar-separator | insignificant-separator
 
 #messages
 message            = multi-arg-message | single-arg-message | no-arg-message
@@ -41,7 +41,7 @@ arglist            = data:expression (comma next:arglist)?                      
 identifier         = < ([a-zA-Z0-9_+*|!@$%^&=.?<>~;\\/]|'-')+ >                    {$$ = strdup(yytext);}
 
 #syntactic sugar having a profound effect on other rules
-sugar-separator = terminating-separator !terminator                                {$$ = msg_new(";", NULL, NULL);}
+sugar-separator    = terminating-separator !terminator                             {$$ = msg_new(";", NULL, NULL);}
 insignificant-separator = separator                                                {$$ = NULL}
 
 #literals
