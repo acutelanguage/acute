@@ -3,6 +3,8 @@
 #define YY_DEBUG 
 
 #include "message.h"
+#include "num.h"
+#include "str.h"
 
 msg_t* root;
 %}
@@ -44,10 +46,19 @@ insignificant-separator = separator                                             
 
 #literals
 literal = number | string
-number  = < (('+' | '-')? [0-9]+) >                                                {$$ = (void*)atoi((char*)yytext);}
+number  = < (('+' | '-')? [0-9]+) >                                                {
+        long i = strtol((char*)yytext, NULL, 10);
+        num_t* num = num_new_int(i);
+        msg_t* msg = msg_new((char*)yytext, NULL, NULL);
+        msg->cached_result = (obj_t*)num;
+        $$ = msg;
+    }
 string  = ["] < (('\\' .)|(!["] .))* > ["]                                         {
         char* identifier = (char*)strdup(yytext);
-        $$ = msg_new(identifier, NULL, NULL);
+        str_t* str = str_new(identifier, strlen(identifier) + 1);
+        msg_t* msg = msg_new(identifier, NULL, NULL);
+        msg->cached_result = (obj_t*)str;
+        $$ = msg;
         free(identifier);
     } #TODO
 

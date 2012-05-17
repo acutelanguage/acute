@@ -42,6 +42,7 @@ obj_t* obj_new_with_size(size_t size)
 {
     obj_t* obj = malloc(size);
     obj->slots = hash_new(DEFAULT_SLOTTABLE_SIZE);
+    obj->cached_result = NULL;
     return obj;
 }
 
@@ -135,6 +136,9 @@ bool obj_use_trait(obj_t* obj, obj_t* trait, hash_t* resolutions)
 obj_t* obj_perform(obj_t* target, obj_t* locals, msg_t* msg)
 {
     obj_t* obj = obj_lookup(target, msg->name);
+    if(obj && obj->cached_result)
+        return obj->cached_result;
+
     if(obj)
     {
         obj_t* activate = obj_lookup(obj, "activate");

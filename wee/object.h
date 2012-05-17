@@ -28,9 +28,11 @@
 
 struct msg_s;
 
-#define OBJECT_HEADER hash_t* slots
+#define OBJECT_HEADER \
+	hash_t*       slots; \
+	struct obj_s* cached_result;
 
-typedef struct
+typedef struct obj_s
 {
 	OBJECT_HEADER;
 } obj_t;
