@@ -20,4 +20,7 @@ add_custom_command(
 )
 
 add_library(wee SHARED ${SRCS})
+add_executable(acute main.c)
 add_dependencies(wee leg)
+add_dependencies(acute wee)
+target_link_libraries(acute wee)

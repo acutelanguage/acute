@@ -1,6 +1,6 @@
 %{
 #define YYSTYPE void*
-#define YY_DEBUG 
+#define YY_DEBUG
 
 #include "message.h"
 #include "num.h"
@@ -75,8 +75,3 @@ terminating-separator     = non-terminating-separator? "\n" (non-terminating-sep
 non-terminating-separator = (' ' | "\t")+
 
 %%
-int main() {
-    yyparse();
-    msg_t* r = root;
-    return 0;
-}
