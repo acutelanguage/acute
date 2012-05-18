@@ -29,7 +29,9 @@
 msg_t* msg_new(const char* name, list_t* arguments, msg_t* next)
 {
     msg_t* msg = (msg_t*)obj_new_with_size(sizeof(*msg));
-    memcpy(msg->name, name, strlen(name) + 1);
+    size_t name_len = strlen(name) + 1;
+    msg->name = malloc(sizeof(name_len));
+    memcpy(msg->name, name, name_len);
     msg->arguments = arguments;
     msg->next = next;
     return msg;
