@@ -29,6 +29,7 @@
 str_t* str_new(char* string, size_t length)
 {
     str_t* str = (str_t*)obj_new_with_size(sizeof(*str));
+    str->data = malloc(length);
     memcpy(str->data, string, length);
     str->length = length;
     return str;
